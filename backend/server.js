@@ -8,20 +8,24 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  origin: 'http://localhost:5173', // ✅ only allow your frontend during dev
+  origin: 'http://localhost:5173', // your frontend URL during dev
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // ✅ handles preflight requests
-
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
+
+// ✅ Add this root route
+app.get("/", (req, res) => {
+  res.send("Sales CRM Backend Running ✅");
+});
 
 app.use("/api/employees", employeeRoutes);
 
