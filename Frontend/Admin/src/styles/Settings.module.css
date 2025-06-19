@@ -1,0 +1,72 @@
+/* White full-width box */
+.outerBox {
+  background-color: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow-x: hidden;
+}
+
+/* Title + line */
+.title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  border: none;
+  margin-bottom: 1.5rem;
+}
+
+/* Form spacing */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Input group for clean label + input alignment */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  max-width: 45px; /* 👈 Controls input width */
+  
+}
+
+.inputGroup label {
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 0.3rem;
+}
+
+.inputGroup input {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+
+/* Right-aligned Save button */
+.saveBtn {
+  align-self: flex-end;
+  margin-top: 1rem;
+  padding: 0.65rem 1.4rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.saveBtn:hover {
+  background-color: #0056b3;
+}

@@ -1,0 +1,39 @@
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #444;
+  padding: 0.75rem 1rem;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.breadcrumb a {
+  text-decoration: none;
+  color: #0077cc;
+  transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+  color: #005fa3;
+  text-decoration: underline;
+}
+
+.breadcrumb span {
+  color: #555;
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb span:last-child a {
+  font-weight: 600;
+  color: #333;
+  pointer-events: none;
+  cursor: default;
+  text-decoration: none;
+}
