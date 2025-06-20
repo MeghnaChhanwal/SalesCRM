@@ -1,35 +1,53 @@
+// server.js
+
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import fs from "fs";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import leadRoutes from "./routes/leadRoutes.js";
-import fs from "fs";
 
 dotenv.config();
+
 const app = express();
 
-// Create upload folder if it doesn't exist
-if (!fs.existsSync("upload")) {
-  fs.mkdirSync("upload");
+// ✅ Upload folder create if missing
+const uploadFolder = "upload";
+if (!fs.existsSync(uploadFolder)) {
+  fs.mkdirSync(uploadFolder);
 }
 
+// ✅ CORS configuration
 const corsOptions = {
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+// ✅ MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
+// ✅ API Routes
 app.use("/api/employees", employeeRoutes);
 app.use("/api/leads", leadRoutes);
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Server running on port ${process.env.PORT || 5000}`);
+// ✅ Optional: Root route
+app.get("/", (req, res) => {
+  res.send("🚀 SalesCRM Backend is running");
+});
+
+// ✅ Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
