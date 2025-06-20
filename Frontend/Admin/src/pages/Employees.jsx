@@ -1,17 +1,22 @@
-// src/pages/Employee.jsx
+// src/pages/employeePage/Employee.jsx
+
 import React, { useEffect, useState } from "react";
 import MainLayout from "../components/Layout";
 import styles from "../styles/Employees.module.css";
 import axios from "axios";
+import Pagination from "../components/Pagination";
+import { sortData } from "../utils/sort"; // sorting import
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 const Employee = () => {
   const [employees, setEmployees] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: "", direction: "" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const employeesPerPage = 8;
+
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState("add");
-  const [currentIndex, setCurrentIndex] = useState(null);
-
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -19,13 +24,31 @@ const Employee = () => {
     location: "",
     language: "",
   });
+  const [currentIndex, setCurrentIndex] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // 🔁 Fetch employees from backend
+  const indexOfLast = currentPage * employeesPerPage;
+  const indexOfFirst = indexOfLast - employeesPerPage;
+
   useEffect(() => {
-    axios.get(`${API_BASE}/api/employees`)
+    axios
+      .get(`${API_BASE}/api/employees`)
       .then((res) => setEmployees(res.data))
-      .catch((err) => console.error("Fetch error:", err));
+      .catch(() => setErrorMessage("Failed to fetch employees."));
   }, []);
+
+  // sorting handler
+  const handleSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedEmployees = sortData(employees, sortConfig);
+  const currentEmployees = sortedEmployees.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(employees.length / employeesPerPage);
 
   const handleAddClick = () => {
     setFormMode("add");
@@ -36,60 +59,85 @@ const Employee = () => {
       location: "",
       language: "",
     });
+    setErrorMessage("");
     setShowForm(true);
   };
 
   const handleEditClick = (index) => {
-    const emp = employees[index];
+    const emp = currentEmployees[index];
+    const globalIndex = indexOfFirst + index;
     setFormMode("edit");
-    setCurrentIndex(index);
+    setCurrentIndex(globalIndex);
     setFormData({ ...emp });
+    setErrorMessage("");
     setShowForm(true);
   };
 
   const handleDelete = (id) => {
-    axios.delete(`${API_BASE}/api/employees/${id}`)
+    axios
+      .delete(`${API_BASE}/api/employees/${id}`)
       .then(() => {
         setEmployees((prev) => prev.filter((emp) => emp._id !== id));
-      });
+      })
+      .catch(() => setErrorMessage("Failed to delete employee."));
   };
 
-  const handleClose = () => setShowForm(false);
-
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (name === "email") setErrorMessage(""); // clear error when email changes
+  };
+
+  const handleClose = () => {
+    setShowForm(false);
+    setErrorMessage("");
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setErrorMessage("");
 
-    if (formMode === "add") {
-      const newEmp = {
-        ...formData,
-        employeeId: `#EMP${Math.floor(100000 + Math.random() * 900000)}`,
-        status: "Active",
-        assignedLeads: 0,
-        closedLeads: 0,
-      };
+    const isDuplicateEmail = employees.some(
+      (emp) =>
+        emp.email.toLowerCase() === formData.email.toLowerCase() &&
+        (formMode === "add" || emp._id !== formData._id)
+    );
 
-      const res = await axios.post(`${API_BASE}/api/employees`, newEmp);
-      setEmployees([...employees, res.data]);
-
-    } else {
-      const res = await axios.put(`${API_BASE}/api/employees/${formData._id}`, formData);
-      const updatedList = [...employees];
-      updatedList[currentIndex] = res.data;
-      setEmployees(updatedList);
+    if (isDuplicateEmail) {
+      setErrorMessage("❌ This email ID is already registered.");
+      return;
     }
 
-    setShowForm(false);
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      location: "",
-      language: "",
-    });
+    try {
+      if (formMode === "add") {
+        const newEmp = {
+          ...formData,
+          employeeId: `#EMP${Math.floor(100000 + Math.random() * 900000)}`,
+          status: "Active",
+          assignedLeads: 0,
+          closedLeads: 0,
+        };
+        const res = await axios.post(`${API_BASE}/api/employees`, newEmp);
+        setEmployees([...employees, res.data]);
+      } else {
+        const res = await axios.put(`${API_BASE}/api/employees/${formData._id}`, formData);
+        const updatedList = [...employees];
+        updatedList[currentIndex] = res.data;
+        setEmployees(updatedList);
+      }
+
+      setShowForm(false);
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        location: "",
+        language: "",
+      });
+    } catch (err) {
+      const msg = err.response?.data?.error || "Something went wrong";
+      setErrorMessage(msg);
+    }
   };
 
   return (
@@ -101,46 +149,59 @@ const Employee = () => {
         </button>
       }
     >
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Employee ID</th>
-            <th>Status</th>
-            <th>Assigned Leads</th>
-            <th>Closed Leads</th>
-            <th>⋮</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.map((emp, idx) => (
-            <tr key={emp._id}>
-              <td>{emp.firstName} {emp.lastName}</td>
-              <td>{emp.email}</td>
-              <td>{emp.employeeId}</td>
-              <td>{emp.status}</td>
-              <td>{emp.assignedLeads}</td>
-              <td>{emp.closedLeads}</td>
-              <td>
-                <div className={styles.dropdown}>
-                  <button className={styles.menuBtn}>⋮</button>
-                  <div className={styles.menuContent}>
-                    <button onClick={() => handleEditClick(idx)}>Edit</button>
-                    <button onClick={() => handleDelete(emp._id)}>Delete</button>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {errorMessage && <p className={styles.error}>{errorMessage}</p>}
 
-      {/* Modal Form */}
+      <div className={styles.tableContainer}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th onClick={() => handleSort("firstName")} style={{ cursor: "pointer" }}>Name</th>
+              <th onClick={() => handleSort("email")} style={{ cursor: "pointer" }}>Email</th>
+              <th onClick={() => handleSort("employeeId")} style={{ cursor: "pointer" }}>Employee ID</th>
+              <th onClick={() => handleSort("status")} style={{ cursor: "pointer" }}>Status</th>
+              <th onClick={() => handleSort("assignedLeads")} style={{ cursor: "pointer" }}>Assigned Leads</th>
+              <th onClick={() => handleSort("closedLeads")} style={{ cursor: "pointer" }}>Closed Leads</th>
+              <th>⋮</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentEmployees.map((emp, idx) => (
+              <tr key={emp._id}>
+                <td>{emp.firstName} {emp.lastName}</td>
+                <td>{emp.email}</td>
+                <td>{emp.employeeId}</td>
+                <td>{emp.status}</td>
+                <td>{emp.assignedLeads}</td>
+                <td>{emp.closedLeads}</td>
+                <td>
+                  <div className={styles.dropdown}>
+                    <button className={styles.menuBtn}>⋮</button>
+                    <div className={styles.menuContent}>
+                      <button onClick={() => handleEditClick(idx)}>Edit</button>
+                      <button onClick={() => handleDelete(emp._id)}>Delete</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
+
       {showForm && (
         <div className={styles.modalOverlay}>
           <form className={styles.modalForm} onSubmit={handleSave}>
             <h3>{formMode === "edit" ? "Edit Employee" : "Add New Employee"}</h3>
+
+            {errorMessage && errorMessage.includes("email") && (
+              <p className={styles.error}>{errorMessage}</p>
+            )}
 
             <input
               name="firstName"

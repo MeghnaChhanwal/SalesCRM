@@ -12,32 +12,46 @@ const Lead = () => {
   const [file, setFile] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // Load leads on component mount
   useEffect(() => {
     fetchLeads();
   }, []);
 
+  // Fetch all leads from backend
   const fetchLeads = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/api/leads/batches`);
+      setLoading(true);
+      const res = await axios.get(`${API_BASE}/api/leads`);
+      console.log("Fetched leads:", res.data); // Debugging
       setLeads(res.data);
     } catch (err) {
       console.error('Error fetching leads:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Upload CSV to backend
   const handleFileUpload = async () => {
     if (!file) return;
+
     const formData = new FormData();
     formData.append('file', file);
 
     try {
       setUploading(true);
       await axios.post(`${API_BASE}/api/leads/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
         onUploadProgress: (e) => {
           setUploadProgress(Math.round((e.loaded * 100) / e.total));
-        },
+        }
       });
+
+      // Reset state and reload leads
       setUploading(false);
       setUploadProgress(0);
       setFile(null);
@@ -49,8 +63,9 @@ const Lead = () => {
     }
   };
 
+  // Filter leads based on search term
   const filteredLeads = leads.filter((lead) =>
-    lead.name.toLowerCase().includes(searchTerm.toLowerCase())
+    lead.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -62,7 +77,7 @@ const Lead = () => {
         </button>
       }
     >
-      {/* Modal */}
+      {/* Upload Modal */}
       {modalOpen && (
         <div className={styles.modalOverlay}>
           <form
@@ -73,6 +88,7 @@ const Lead = () => {
             }}
           >
             <h3>Upload Lead CSV</h3>
+
             <div
               className={styles.dropzone}
               onDragOver={(e) => e.preventDefault()}
@@ -82,6 +98,7 @@ const Lead = () => {
               }}
             >
               {file ? <p>{file.name}</p> : <p>Drag & drop or click to browse</p>}
+
               <input
                 type="file"
                 accept=".csv"
@@ -89,6 +106,7 @@ const Lead = () => {
                 id="fileInput"
                 onChange={(e) => setFile(e.target.files[0])}
               />
+
               <label htmlFor="fileInput" className={styles.browseButton}>
                 Browse File
               </label>
@@ -115,33 +133,51 @@ const Lead = () => {
         </div>
       )}
 
-      {/* Table */}
-      <table className={styles.leadTable}>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Name</th>
-            <th>Date</th>
-            <th>No. of Leads</th>
-            <th>Assigned</th>
-            <th>Unassigned</th>
-            <th>Closed</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredLeads.map((lead, index) => (
-            <tr key={index}>
-              <td>{index + 1}</td>
-              <td>{lead.name}</td>
-              <td>{new Date(lead.date).toLocaleDateString()}</td>
-              <td>{lead.total}</td>
-              <td>{lead.assigned}</td>
-              <td>{lead.unassigned}</td>
-              <td>{lead.closed}</td>
+      {/* Table Section */}
+      {loading ? (
+        <p className={styles.loadingText}>Loading leads...</p>
+      ) : (
+        <table className={styles.leadTable}>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Received Date</th>
+              <th>Status</th>
+              <th>Type</th>
+              <th>Language</th>
+              <th>Location</th>
+              <th>Assigned Employee</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredLeads.length === 0 ? (
+              <tr>
+                <td colSpan="10" style={{ textAlign: 'center' }}>
+                  No leads found.
+                </td>
+              </tr>
+            ) : (
+              filteredLeads.map((lead, index) => (
+                <tr key={lead._id || index}>
+                  <td>{index + 1}</td>
+                  <td>{lead.name}</td>
+                  <td>{lead.email || '-'}</td>
+                  <td>{lead.phone || '-'}</td>
+                  <td>{lead.receivedDate ? new Date(lead.receivedDate).toLocaleDateString() : '-'}</td>
+                  <td>{lead.status || 'Open'}</td>
+                  <td>{lead.type || 'Warm'}</td>
+                  <td>{lead.language || '-'}</td>
+                  <td>{lead.location || '-'}</td>
+                  <td>{lead.assignedEmployee || '-'}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      )}
     </MainLayout>
   );
 };

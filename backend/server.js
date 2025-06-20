@@ -3,32 +3,33 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import employeeRoutes from "./routes/employeeRoutes.js";
+import leadRoutes from "./routes/leadRoutes.js";
+import fs from "fs";
 
 dotenv.config();
 const app = express();
 
+// Create upload folder if it doesn't exist
+if (!fs.existsSync("upload")) {
+  fs.mkdirSync("upload");
+}
+
 const corsOptions = {
-  origin: 'http://localhost:5173', // your frontend URL during dev
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
 
-// ✅ Add this root route
-app.get("/", (req, res) => {
-  res.send("Sales CRM Backend Running ✅");
-});
-
 app.use("/api/employees", employeeRoutes);
+app.use("/api/leads", leadRoutes);
 
 app.listen(process.env.PORT || 5000, () => {
-  console.log("Server running...");
+  console.log(`Server running on port ${process.env.PORT || 5000}`);
 });
