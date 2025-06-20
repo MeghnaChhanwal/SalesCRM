@@ -1,5 +1,3 @@
-// server.js
-
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -28,12 +26,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// ✅ MongoDB Connection
+// ✅ MongoDB Connection (without deprecated options)
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -41,7 +36,7 @@ mongoose
 app.use("/api/employees", employeeRoutes);
 app.use("/api/leads", leadRoutes);
 
-// ✅ Optional: Root route
+// ✅ Root route for health check
 app.get("/", (req, res) => {
   res.send("🚀 SalesCRM Backend is running");
 });
