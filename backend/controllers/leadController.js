@@ -1,27 +1,32 @@
+// backend/controllers/leadController.js
 import fs from "fs";
 import csv from "csv-parser";
-import { Parser as Json2csvParser } from "json2csv";
 import Lead from "../models/lead.js";
+import { assignEmployeeByConditions } from "../utils/assign.js";
 
+// Get all leads
 export const getLeads = async (req, res) => {
   try {
-    const leads = await Lead.find().sort({ receivedDate: -1 });
+    const leads = await Lead.find()
+      .sort({ receivedDate: -1 })
+      .populate("assignedEmployee");
     res.json(leads);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch leads' });
+    res.status(500).json({ error: "Failed to fetch leads" });
   }
 };
 
+// Upload CSV
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
 
   fs.createReadStream(filePath)
     .pipe(csv())
-    .on("data", (row) => {
+    .on("data", async (row) => {
       if (!row.email && !row.phone) return;
 
-      leads.push({
+      const lead = {
         name: row.name,
         email: row.email || null,
         phone: row.phone || null,
@@ -30,8 +35,10 @@ export const uploadCSV = async (req, res) => {
         type: row.type || "Warm",
         language: row.language,
         location: row.location,
-        assignedEmployee: row.assignedEmployee || null
-      });
+        assignedEmployee: await assignEmployeeByConditions(row)
+      };
+
+      leads.push(lead);
     })
     .on("end", async () => {
       try {
@@ -42,19 +49,4 @@ export const uploadCSV = async (req, res) => {
         res.status(500).json({ error: "Error inserting leads" });
       }
     });
-};
-
-export const exportCSV = async (req, res) => {
-  try {
-    const leads = await Lead.find().lean();
-    const fields = ['name', 'email', 'phone', 'receivedDate', 'status', 'type', 'language', 'location', 'assignedEmployee'];
-    const parser = new Json2csvParser({ fields });
-    const csv = parser.parse(leads);
-
-    res.setHeader("Content-Type", "text/csv");
-    res.setHeader("Content-Disposition", "attachment; filename=leads.csv");
-    res.status(200).end(csv);
-  } catch (err) {
-    res.status(500).json({ error: "Export failed" });
-  }
 };

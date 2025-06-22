@@ -1,5 +1,4 @@
-// models/lead.js
-
+// backend/models/lead.js
 import mongoose from "mongoose";
 
 const leadSchema = new mongoose.Schema({
@@ -11,7 +10,10 @@ const leadSchema = new mongoose.Schema({
   type: String,
   language: String,
   location: String,
-  assignedEmployee: String,
+  assignedEmployee: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Employee"
+  }
 });
 
 export default mongoose.model("Lead", leadSchema);

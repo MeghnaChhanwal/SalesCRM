@@ -32,7 +32,7 @@ export const updateEmployee = async (req, res) => {
   try {
     const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true, // 🔒 ensure Mongoose validations apply
+      runValidators: true,
     });
 
     if (!updated) {
@@ -59,5 +59,26 @@ export const deleteEmployee = async (req, res) => {
     res.json({ message: "Deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete employee" });
+  }
+};
+
+// ✅ LOGIN employee (email + lastName as password)
+export const loginEmployee = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const employee = await Employee.findOne({ email });
+
+    if (!employee) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+
+    if (employee.lastName.toLowerCase() !== password.toLowerCase()) {
+      return res.status(401).json({ error: "Invalid password" });
+    }
+
+    res.json(employee);
+  } catch (err) {
+    res.status(500).json({ error: "Login failed" });
   }
 };
