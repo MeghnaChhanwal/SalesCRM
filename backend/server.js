@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import leadRoutes from "./routes/leadRoutes.js";
+import timeRoutes from "./routes/timeRoutes.js";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ mongoose
 // ✅ API Routes
 app.use("/api/employees", employeeRoutes);
 app.use("/api/leads", leadRoutes);
+app.use("/api/time", timeRoutes);
 
 // ✅ Root route for health check
 app.get("/", (req, res) => {
