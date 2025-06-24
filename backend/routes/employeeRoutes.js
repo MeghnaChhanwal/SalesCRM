@@ -1,4 +1,3 @@
-// routes/employeeRoutes.js
 import express from "express";
 import {
   getEmployees,
@@ -10,8 +9,10 @@ import {
 
 const router = express.Router();
 
-router.post("/login", loginEmployee); // 👈 Login route
+// 🔐 Login
+router.post("/login", loginEmployee);
 
+// 👥 CRUD for Employees
 router.get("/", getEmployees);
 router.post("/", createEmployee);
 router.put("/:id", updateEmployee);

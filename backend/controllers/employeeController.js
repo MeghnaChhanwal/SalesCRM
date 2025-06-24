@@ -1,4 +1,5 @@
 import Employee from "../models/employee.js";
+import Timing from "../models/timing.js";
 
 // ✅ GET all employees
 export const getEmployees = async (req, res) => {
@@ -62,7 +63,7 @@ export const deleteEmployee = async (req, res) => {
   }
 };
 
-// ✅ LOGIN employee (email + lastName as password)
+// ✅ LOGIN employee (email + lastName as password) + CHECK-IN
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
 
@@ -77,8 +78,31 @@ export const loginEmployee = async (req, res) => {
       return res.status(401).json({ error: "Invalid password" });
     }
 
+    // ✅ Check-In Timing Logic on Login
+    const now = new Date();
+    const today = now.toISOString().split("T")[0];
+    const timeStr = now.toLocaleTimeString();
+
+    let timing = await Timing.findOne({ employee: employee._id, date: today });
+
+    if (!timing) {
+      // Create new check-in
+      timing = new Timing({
+        employee: employee._id,
+        date: today,
+        checkIn: timeStr,
+        status: "Active",
+      });
+    } else if (!timing.checkIn) {
+      // Update existing with check-in if not already set
+      timing.checkIn = timeStr;
+      timing.status = "Active";
+    }
+
+    await timing.save();
+
     res.json(employee);
   } catch (err) {
-    res.status(500).json({ error: "Login failed" });
+    res.status(500).json({ error: "Login failed", details: err });
   }
 };
