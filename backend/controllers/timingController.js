@@ -1,4 +1,4 @@
-import Timing from '../models/Timing.js';
+import Timing from '../models/timing.js';
 
 // 🟢 Check-in
 export const checkIn = async (req, res) => {
