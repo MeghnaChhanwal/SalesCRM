@@ -1,23 +1,21 @@
-import express from "express";
+import express from 'express';
 import {
   checkIn,
+  startBreak,
+  endBreak,
   checkOut,
   finalCheckOut,
   getTodayTiming
-} from "../controllers/timingController.js";
+} from '../controllers/timingController.js';
 
 const router = express.Router();
 
-// Employee logs in / ends break
-router.post("/check-in/:employeeId", checkIn);
-
-// Employee logs out tab-close → starts break
-router.post("/check-out/:employeeId", checkOut);
-
-// Optional: final end-of-day logout
-router.post("/final-check-out/:employeeId", finalCheckOut);
-
-// Fetch today’s record
-router.get("/today/:employeeId", getTodayTiming);
+// ✅ Timing API Endpoints
+router.post('/check-in/:employeeId', checkIn);
+router.post('/start-break/:employeeId', startBreak);
+router.post('/end-break/:employeeId', endBreak);
+router.post('/check-out/:employeeId', checkOut);
+router.post('/final-check-out/:employeeId', finalCheckOut); // 👈 New route
+router.get('/today/:employeeId', getTodayTiming);
 
 export default router;
