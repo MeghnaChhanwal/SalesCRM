@@ -7,13 +7,9 @@ import {
 
 const router = express.Router();
 
-// ✅ Employee check-in (called after login)
+// ✅ Correct routes
 router.post("/check-in/:employeeId", checkIn);
-
-// ✅ Final check-out (called on tab/browser close)
 router.post("/final-check-out/:employeeId", finalCheckOut);
-
-// ✅ Get today’s timing details for the logged-in employee
-router.get("/:employeeId", getTodayTiming);
+router.get("/today/:employeeId", getTodayTiming); // ✅ this is the fix
 
 export default router;
