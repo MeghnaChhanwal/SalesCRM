@@ -7,8 +7,9 @@ import {
 
 const router = express.Router();
 
-router.put("/checkin/:employeeId", checkIn);        // /api/timing/checkin/:id
-router.put("/checkout/:employeeId", finalCheckOut); // /api/timing/checkout/:id
-router.get("/today/:employeeId", getTodayTiming);   // /api/timing/today/:id
+// Use POST for check-in and final-check-out to support sendBeacon
+router.post("/check-in/:employeeId", checkIn);          // POST /api/timing/check-in/:id
+router.post("/final-check-out/:employeeId", finalCheckOut); // POST /api/timing/final-check-out/:id
+router.get("/today/:employeeId", getTodayTiming);       // GET /api/timing/today/:id
 
 export default router;

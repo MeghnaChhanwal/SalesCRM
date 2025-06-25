@@ -1,96 +1,101 @@
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// 1️⃣ Check-In / Re-Login
+// ✅ 1. Check-In
 export const checkIn = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();
   const now = timeIST();
 
-  let timing = await Timing.findOne({ employee: employeeId, date: today });
+  try {
+    let timing = await Timing.findOne({ employee: employeeId, date: today });
 
-  if (!timing) {
-    // पहिलं login आजचा
-    timing = new Timing({
-      employee: employeeId,
-      date: today,
-      checkIn: now,
-      checkOut: null,
-      status: "Active",
-      breaks: [],
-    });
-  } else {
-    // जर open break असेल, तो आजच्या दिवशी treat करा
-    const openBreak = timing.breaks.find(b => !b.end);
-    if (openBreak) {
-      // BreakOff at relogin
-      openBreak.end = now;
-    } else if (timing.checkOut) {
-      // Break between last logout → relogin
-      timing.breaks.push({ start: timing.checkOut, end: now, date: today });
+    if (!timing) {
+      timing = new Timing({
+        employee: employeeId,
+        date: today,
+        checkIn: now,
+        status: "Active",
+        breaks: [],
+      });
+    } else {
+      const openBreak = timing.breaks.find(b => !b.end);
+      if (openBreak) openBreak.end = now;
+
+      else if (timing.checkOut) {
+        timing.breaks.push({
+          start: timing.checkOut,
+          end: now,
+          date: today,
+        });
+      }
+
+      timing.checkIn = now;
+      timing.checkOut = null;
+      timing.status = "Active";
     }
 
-    // Resume session
-    timing.checkIn = now;
-    timing.checkOut = null;
-    timing.status = "Active";
+    await timing.save();
+    res.status(200).json({ message: "Check-in successful", timing });
+  } catch (err) {
+    res.status(500).json({ error: "Check-in failed", details: err.message });
   }
-
-  await timing.save();
-  res.status(200).json({ timing });
 };
 
-// 2️⃣ Final Check-Out / Tab Close
+// ✅ 2. Final Check-Out (Tab Close)
 export const finalCheckOut = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();
   const now = timeIST();
 
-  const timing = await Timing.findOne({ employee: employeeId, date: today });
-  if (!timing) return res.status(404).json({ error: "No timing found" });
+  try {
+    const timing = await Timing.findOne({ employee: employeeId, date: today });
+    if (!timing) return res.status(404).json({ error: "No timing found" });
 
-  if (!timing.checkOut) {
-    // Logout → set checkOut & Inactive
-    timing.checkOut = now;
-    timing.status = "Inactive";
+    if (!timing.checkOut) {
+      timing.checkOut = now;
+      timing.status = "Inactive";
+      timing.breaks.push({ start: now, end: null, date: today });
+      await timing.save();
+    }
 
-    // Start open break
-    timing.breaks.push({ start: now, end: null, date: today });
-    await timing.save();
+    res.status(200).json({ message: "Final check-out completed", timing });
+  } catch (err) {
+    res.status(500).json({ error: "Final check-out failed", details: err.message });
   }
-
-  res.status(200).json({ timing });
 };
 
-// 3️⃣ Get Today’s Timing
+// ✅ 3. Get today's timing
 export const getTodayTiming = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();
 
-  const timing = await Timing.findOne({ employee: employeeId, date: today });
-  if (!timing) {
-    return res.json({
-      checkIn: null,
-      checkOut: null,
-      breakStart: null,
-      previousBreaks: [],
-      isActive: false,
-      isOnBreak: false,
+  try {
+    const timing = await Timing.findOne({ employee: employeeId, date: today });
+
+    if (!timing) {
+      return res.status(200).json({
+        checkIn: null,
+        checkOut: null,
+        breakStart: null,
+        previousBreaks: [],
+        isActive: false,
+        isOnBreak: false,
+      });
+    }
+
+    const ongoingBreak = timing.breaks.find(b => !b.end);
+    const previousBreaks = timing.breaks.filter(b => b.end);
+
+    res.status(200).json({
+      checkIn: timing.checkIn || null,
+      checkOut: ongoingBreak ? null : timing.checkOut || null,
+      breakStart: ongoingBreak?.start || null,
+      previousBreaks,
+      isActive: timing.status === "Active",
+      isOnBreak: !!ongoingBreak,
     });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch today's timing", details: err.message });
   }
-
-  // Ongoing break only if same-day open
-  const ongoingBreak = timing.breaks.find(b => !b.end && b.date === today);
-  const previousBreaks = timing.breaks
-    .filter(b => b.end && b.date === today)
-    .map(b => ({ start: b.start, end: b.end }));
-
-  res.json({
-    checkIn: timing.checkIn,
-    checkOut: timing.checkOut,
-    breakStart: ongoingBreak?.start || null,
-    previousBreaks,
-    isActive: timing.status === "Active",
-    isOnBreak: !!ongoingBreak,
-  });
 };

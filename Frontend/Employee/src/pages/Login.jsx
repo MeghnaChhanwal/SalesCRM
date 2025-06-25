@@ -20,28 +20,19 @@ const Login = () => {
 
     setLoading(true);
     try {
-      // Step 1: Login
-      const res = await axios.post(`${API_BASE}/api/employees/login`, {
+      // ✅ Step 1: Login API (check-in included in backend)
+      const res = await axios.post(`${API_BASE}/api/auth/login`, {
         email: email.trim(),
         password: password.trim(),
       });
 
-      const user = res.data;
+      const user = res.data.user;
 
-      // Step 2: Check if already active
-      const timingRes = await axios.get(`${API_BASE}/api/timing/today/${user._id}`);
-      if (timingRes.data?.isActive) {
-        return alert("This user is already logged in on another device.");
-      }
-
-      // Step 3: Check-in after successful login
-      await axios.post(`${API_BASE}/api/timing/check-in/${user._id}`);
-
-      // Step 4: Save to sessionStorage
+      // ✅ Step 2: Save session
       sessionStorage.setItem("employee", JSON.stringify(user));
       setEmployee(user);
 
-      // Step 5: Redirect
+      // ✅ Step 3: Navigate to dashboard
       navigate("/dashboard");
     } catch (err) {
       const msg = err.response?.data?.error || "Login failed";

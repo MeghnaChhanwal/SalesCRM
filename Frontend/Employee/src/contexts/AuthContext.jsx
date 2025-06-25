@@ -14,32 +14,30 @@ export const AuthProvider = ({ children }) => {
     if (saved) {
       const emp = JSON.parse(saved);
       setEmployee(emp);
-
-      // ✅ Check-in only if login is fresh (not reload)
-      const navEntry = performance.getEntriesByType("navigation")[0];
-      const isFreshLogin = navEntry?.type === "navigate";
-
-      if (isFreshLogin) {
-        axios
-          .post(`${API_BASE}/api/timing/check-in/${emp._id}`)
-          .catch((err) => console.error("❌ Check-in failed:", err.message));
-      }
+      // ⛔ No need to send check-in here; it's done on backend during login
     }
 
-    // ✅ Final check-out on browser/tab close
+    // ✅ Final checkout on tab close (not refresh)
     const handleUnload = () => {
-      const emp = sessionStorage.getItem("employee");
-      if (emp) {
-        const parsed = JSON.parse(emp);
-        navigator.sendBeacon(`${API_BASE}/api/timing/final-check-out/${parsed._id}`);
-        sessionStorage.removeItem("employee");
+      const navEntry = performance.getEntriesByType("navigation")[0];
+      const navType = navEntry?.type || "navigate";
+
+      if (navType !== "reload") {
+        const emp = sessionStorage.getItem("employee");
+        if (emp) {
+          const parsed = JSON.parse(emp);
+          navigator.sendBeacon(`${API_BASE}/api/timing/final-check-out/${parsed._id}`);
+          sessionStorage.removeItem("employee");
+        }
       }
     };
 
     window.addEventListener("unload", handleUnload);
     setLoading(false);
 
-    return () => window.removeEventListener("unload", handleUnload);
+    return () => {
+      window.removeEventListener("unload", handleUnload);
+    };
   }, []);
 
   return (
