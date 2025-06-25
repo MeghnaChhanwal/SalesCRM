@@ -36,7 +36,7 @@ mongoose
 // ✅ API Routes
 app.use("/api/employees", employeeRoutes);
 app.use("/api/leads", leadRoutes);
-app.use("/api/timings", timeRoutes);
+app.use("/api/timing", timeRoutes);
 
 // ✅ Root route for health check
 app.get("/", (req, res) => {
