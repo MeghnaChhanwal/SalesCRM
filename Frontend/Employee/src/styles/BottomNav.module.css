@@ -1,0 +1,40 @@
+/* src/styles/BottomNav.module.css */
+
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+  background-color: white;
+  border-top: 1px solid #ddd;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #888;
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.2s;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+  transition: filter 0.2s;
+}
+
+/* ✅ Blue highlight for active tab */
+.active {
+  color: #1854f1;
+}
+
+.active .icon {
+  filter: brightness(0) saturate(100%) invert(28%) sepia(95%) saturate(1785%) hue-rotate(218deg) brightness(99%) contrast(102%);
+}

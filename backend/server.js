@@ -40,7 +40,7 @@ mongoose
 app.use("/api/employees", employeeRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/timing", timeRoutes);
-app.use("/api/login", authRoutes); // login POST route
+app.use("/api/auth", authRoutes); // login POST route
 
 // ✅ Root route for health check
 app.get("/", (req, res) => {

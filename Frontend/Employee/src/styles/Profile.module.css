@@ -1,0 +1,44 @@
+/* src/styles/Profile.module.css */
+.card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+label {
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+}
+
+input:focus {
+  border-color: #1a4be1;
+}
+
+.saveButton {
+  background-color: #1a4be1;
+  color: white;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 10px;
+  align-self: flex-start; /* 👈 aligns button to left */
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.saveButton:hover {
+  background-color: #003ecb;
+}

@@ -1,0 +1,48 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #1854f1;
+  padding: 16px;
+  padding-top: 24px;
+  color: white;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.crm {
+  color: #ffd700;
+}
+
+.subHeader {
+  margin-top: 10px;
+}
+
+.greeting {
+  font-size: 14px;
+  margin: 0;
+}
+
+.name {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.pageTitle {
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 8px;
+}
