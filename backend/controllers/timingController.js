@@ -1,7 +1,7 @@
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ 1. Check-In API (used on login)
+// ✅ 1. Check-In API (on login)
 export const checkIn = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();
@@ -11,7 +11,7 @@ export const checkIn = async (req, res) => {
     let timing = await Timing.findOne({ employee: employeeId, date: today });
 
     if (!timing) {
-      // First login of the day
+      // 🆕 First login of the day
       timing = new Timing({
         employee: employeeId,
         date: today,
@@ -20,12 +20,13 @@ export const checkIn = async (req, res) => {
         breaks: [],
       });
     } else {
-      // Close last open break (if exists)
+      // ✅ If break ongoing, end it
       const openBreak = timing.breaks.find(b => !b.end);
       if (openBreak) {
         openBreak.end = now;
-      } else if (timing.checkOut) {
-        // Add break between checkOut and new checkIn
+      } 
+      // ✅ Else if logged out earlier, start break from checkOut to now
+      else if (timing.checkOut) {
         timing.breaks.push({
           start: timing.checkOut,
           end: now,
@@ -33,6 +34,7 @@ export const checkIn = async (req, res) => {
         });
       }
 
+      // ✅ Set new check-in and reset
       timing.checkIn = now;
       timing.checkOut = null;
       timing.status = "Active";
@@ -44,7 +46,8 @@ export const checkIn = async (req, res) => {
     res.status(500).json({ error: "Check-in failed", details: err.message });
   }
 };
-// ✅ 2. Final Checkout API (tab close)
+
+// ✅ 2. Final Checkout API (on tab close)
 export const finalCheckOut = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();
@@ -52,13 +55,15 @@ export const finalCheckOut = async (req, res) => {
 
   try {
     const timing = await Timing.findOne({ employee: employeeId, date: today });
+
     if (!timing) return res.status(404).json({ message: "No timing found" });
 
     if (!timing.checkOut) {
+      // ✅ Set checkout time and status
       timing.checkOut = now;
       timing.status = "Inactive";
 
-      // Add open break for next session
+      // ✅ Start open break (end null) for next session
       timing.breaks.push({
         start: now,
         end: null,
@@ -73,7 +78,8 @@ export const finalCheckOut = async (req, res) => {
     res.status(500).json({ error: "Final check-out failed", details: err.message });
   }
 };
-// ✅ 3. Get Today’s Timing Summary
+
+// ✅ 3. Get Today's Timing Summary
 export const getTodayTiming = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();
@@ -92,7 +98,10 @@ export const getTodayTiming = async (req, res) => {
       });
     }
 
+    // ✅ Check ongoing break
     const ongoingBreak = timing.breaks.find(b => !b.end);
+
+    // ✅ Completed breaks
     const previousBreaks = timing.breaks
       .filter(b => b.end)
       .map(b => ({
