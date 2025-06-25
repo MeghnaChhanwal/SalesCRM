@@ -56,7 +56,7 @@ export const finalCheckOut = async (req, res) => {
       timing.checkOut = now;
       timing.status = "Inactive";
       timing.breaks.push({ start: now, end: null, date: today });
-      await timing.save();
+      await timing.save(); // <--- THIS IS CORRECT
     }
 
     res.status(200).json({ message: "Final check-out completed", timing });
