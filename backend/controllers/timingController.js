@@ -1,28 +1,17 @@
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ CHECK-IN (only if not already active)
+// ✅ 1. Check-In API (used on login)
 export const checkIn = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();
   const now = timeIST();
 
   try {
-    // 🔐 Prevent multiple logins: allow only one active session
-    const alreadyActive = await Timing.findOne({
-      employee: employeeId,
-      date: today,
-      status: "Active",
-    });
-
-    if (alreadyActive) {
-      return res.status(400).json({ error: "User already logged in on another device/tab." });
-    }
-
-    // ✅ Create new check-in
     let timing = await Timing.findOne({ employee: employeeId, date: today });
 
     if (!timing) {
+      // First login of the day
       timing = new Timing({
         employee: employeeId,
         date: today,
@@ -31,19 +20,17 @@ export const checkIn = async (req, res) => {
         breaks: [],
       });
     } else {
-      // 🔄 If checkOut exists, add that gap as break
-      if (timing.checkOut) {
+      // Close last open break (if exists)
+      const openBreak = timing.breaks.find(b => !b.end);
+      if (openBreak) {
+        openBreak.end = now;
+      } else if (timing.checkOut) {
+        // Add break between checkOut and new checkIn
         timing.breaks.push({
           start: timing.checkOut,
           end: now,
           date: today,
         });
-      }
-
-      // ✅ Resume from break if previous break was open
-      const openBreak = timing.breaks.find(b => !b.end);
-      if (openBreak) {
-        openBreak.end = now;
       }
 
       timing.checkIn = now;
@@ -57,8 +44,7 @@ export const checkIn = async (req, res) => {
     res.status(500).json({ error: "Check-in failed", details: err.message });
   }
 };
-
-// ✅ FINAL CHECK-OUT (tab/browser close)
+// ✅ 2. Final Checkout API (tab close)
 export const finalCheckOut = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();
@@ -72,7 +58,7 @@ export const finalCheckOut = async (req, res) => {
       timing.checkOut = now;
       timing.status = "Inactive";
 
-      // ✅ Add break starting now (will be closed on re-login)
+      // Add open break for next session
       timing.breaks.push({
         start: now,
         end: null,
@@ -87,8 +73,7 @@ export const finalCheckOut = async (req, res) => {
     res.status(500).json({ error: "Final check-out failed", details: err.message });
   }
 };
-
-// ✅ GET TODAY’S TIMING DATA
+// ✅ 3. Get Today’s Timing Summary
 export const getTodayTiming = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();

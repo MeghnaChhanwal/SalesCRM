@@ -1,11 +1,11 @@
+// controllers/employeeController.js
 import Employee from "../models/employee.js";
-import Timing from "../models/timing.js";
 
 // ✅ GET all employees
 export const getEmployees = async (req, res) => {
   try {
     const employees = await Employee.find();
-    res.json(employees);
+    res.status(200).json(employees);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch employees" });
   }
@@ -40,7 +40,7 @@ export const updateEmployee = async (req, res) => {
       return res.status(404).json({ error: "Employee not found" });
     }
 
-    res.json(updated);
+    res.status(200).json(updated);
   } catch (err) {
     if (err.name === "ValidationError") {
       res.status(400).json({ error: err.message });
@@ -57,52 +57,8 @@ export const deleteEmployee = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ error: "Employee not found" });
     }
-    res.json({ message: "Deleted successfully" });
+    res.status(200).json({ message: "Employee deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete employee" });
-  }
-};
-
-// ✅ LOGIN employee (email + lastName as password) + CHECK-IN
-export const loginEmployee = async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const employee = await Employee.findOne({ email });
-
-    if (!employee) {
-      return res.status(404).json({ error: "Employee not found" });
-    }
-
-    if (employee.lastName.toLowerCase() !== password.toLowerCase()) {
-      return res.status(401).json({ error: "Invalid password" });
-    }
-
-    // ✅ Check-In Timing Logic on Login
-    const now = new Date();
-    const today = now.toISOString().split("T")[0];
-    const timeStr = now.toLocaleTimeString();
-
-    let timing = await Timing.findOne({ employee: employee._id, date: today });
-
-    if (!timing) {
-      // Create new check-in
-      timing = new Timing({
-        employee: employee._id,
-        date: today,
-        checkIn: timeStr,
-        status: "Active",
-      });
-    } else if (!timing.checkIn) {
-      // Update existing with check-in if not already set
-      timing.checkIn = timeStr;
-      timing.status = "Active";
-    }
-
-    await timing.save();
-
-    res.json(employee);
-  } catch (err) {
-    res.status(500).json({ error: "Login failed", details: err });
   }
 };
