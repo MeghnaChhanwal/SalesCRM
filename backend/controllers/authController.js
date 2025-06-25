@@ -29,38 +29,45 @@ export const loginEmployee = async (req, res) => {
       return res.status(400).json({ error: "User already active on another device." });
     }
 
-    // ✅ Perform check-in
+    // ✅ First login of the day
     if (!timing) {
       timing = new Timing({
         employee: employee._id,
         date: today,
         checkIn: now,
+        checkOut: null,
         status: "Active",
         breaks: [],
       });
     } else {
-      // Resume login after checkout
-      timing.checkIn = now;
-      timing.checkOut = null;
-      timing.status = "Active";
+      // ✅ Relogin after previous logout
 
-      // Handle ongoing break (if break started but not ended)
-      const openBreak = timing.breaks.find(b => !b.end);
-      if (openBreak) {
-        openBreak.end = now;
-      } else if (timing.checkOut) {
+      // 1. If previous checkout exists, treat it as break start
+      if (timing.checkOut) {
         timing.breaks.push({
           start: timing.checkOut,
           end: now,
           date: today,
         });
       }
+
+      // 2. If break started earlier but not ended, end it now
+      const openBreak = timing.breaks.find(b => !b.end);
+      if (openBreak) {
+        openBreak.end = now;
+      }
+
+      // 3. Resume session
+      timing.checkIn = now;
+      timing.checkOut = null;
+      timing.status = "Active";
     }
 
     await timing.save();
 
     res.status(200).json({ user: employee, timing });
   } catch (err) {
+    console.error("Login Error:", err);
     res.status(500).json({ error: "Login failed", details: err.message });
   }
 };
