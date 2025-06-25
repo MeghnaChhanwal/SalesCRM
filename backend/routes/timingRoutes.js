@@ -1,3 +1,4 @@
+// routes/timingRoutes.js
 import express from "express";
 import {
   checkIn,
@@ -7,9 +8,13 @@ import {
 
 const router = express.Router();
 
-// ✅ Correct routes
+// ✅ Employee check-in (only on login)
 router.post("/check-in/:employeeId", checkIn);
+
+// ✅ Final checkout (only on tab/browser close)
 router.post("/final-check-out/:employeeId", finalCheckOut);
-router.get("/today/:employeeId", getTodayTiming); // ✅ this is the fix
+
+// ✅ Get today’s timing status (used in dashboard)
+router.get("/today/:employeeId", getTodayTiming);
 
 export default router;
