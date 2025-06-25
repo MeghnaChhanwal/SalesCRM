@@ -41,29 +41,25 @@ export const checkIn = async (req, res) => {
     res.status(500).json({ error: "Check-in failed", details: err.message });
   }
 };
-
-// ✅ 2. Final Check-Out (Tab Close)
+//checkout
 export const finalCheckOut = async (req, res) => {
   const { employeeId } = req.params;
   const today = todayIST();
   const now = timeIST();
 
-  try {
-    const timing = await Timing.findOne({ employee: employeeId, date: today });
-    if (!timing) return res.status(404).json({ error: "No timing found" });
+  const timing = await Timing.findOne({ employee: employeeId, date: today });
+  if (!timing) return res.status(404).json({ error: "No timing found" });
 
-    if (!timing.checkOut) {
-      timing.checkOut = now;
-      timing.status = "Inactive";
-      timing.breaks.push({ start: now, end: null, date: today });
-      await timing.save(); // <--- THIS IS CORRECT
-    }
-
-    res.status(200).json({ message: "Final check-out completed", timing });
-  } catch (err) {
-    res.status(500).json({ error: "Final check-out failed", details: err.message });
+  if (!timing.checkOut) {
+    timing.checkOut = now;
+    timing.status = "Inactive";
+    timing.breaks.push({ start: now, end: null, date: today });
+    await timing.save(); // ✅ VERY IMPORTANT
   }
+
+  res.status(200).json({ timing });
 };
+
 
 // ✅ 3. Get today's timing
 export const getTodayTiming = async (req, res) => {
@@ -81,6 +77,7 @@ export const getTodayTiming = async (req, res) => {
         previousBreaks: [],
         isActive: false,
         isOnBreak: false,
+        status: "Offline",
       });
     }
 
@@ -89,11 +86,12 @@ export const getTodayTiming = async (req, res) => {
 
     res.status(200).json({
       checkIn: timing.checkIn || null,
-      checkOut: ongoingBreak ? null : timing.checkOut || null,
+      checkOut: timing.checkOut || null, // ✅ Always send saved checkout
       breakStart: ongoingBreak?.start || null,
       previousBreaks,
       isActive: timing.status === "Active",
       isOnBreak: !!ongoingBreak,
+      status: timing.status, // 🆕 Send status for frontend
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch today's timing", details: err.message });
