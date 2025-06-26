@@ -1,5 +1,6 @@
 // controllers/authController.js
 import Employee from "../models/employee.js";
+import Timing from "../models/timing.js"; // ✅ <-- Add this line
 import { handleCheckInOrBreakEnd } from "../services/timingService.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
