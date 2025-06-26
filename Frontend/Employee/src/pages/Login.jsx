@@ -1,3 +1,4 @@
+// src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -16,27 +17,32 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    if (!email || !password) return alert("Email and password are required!");
+    if (!email.trim() || !password.trim()) {
+      alert("Please enter both email and password");
+      return;
+    }
 
     setLoading(true);
     try {
-      // ✅ Step 1: Login API (check-in included in backend)
       const res = await axios.post(`${API_BASE}/api/auth/login`, {
         email: email.trim(),
         password: password.trim(),
       });
 
-      const user = res.data.user;
+      const employee = {
+        _id: res.data.employeeId,
+        name: res.data.name,
+        email,
+      };
 
-      // ✅ Step 2: Save session
-      sessionStorage.setItem("employee", JSON.stringify(user));
-      setEmployee(user);
+      sessionStorage.setItem("employee", JSON.stringify(employee));
+      setEmployee(employee);
 
-      // ✅ Step 3: Navigate to dashboard
-      navigate("/dashboard");
+      // ✅ No need to call /check-in → already done on backend
+      navigate("/home");
     } catch (err) {
-      const msg = err.response?.data?.error || "Login failed";
-      alert(msg);
+      const message = err.response?.data?.error || "Login failed. Please try again.";
+      alert(message);
     } finally {
       setLoading(false);
     }
@@ -47,13 +53,13 @@ const Login = () => {
   };
 
   return (
-    <PageLayout showBottomNav={false} showHeader={true}>
+    <PageLayout showBottomNav={false}>
       <div className={styles.card}>
-        <h2 className={styles.title}>Login</h2>
+        <h2 className={styles.title}>Employee Login</h2>
 
         <input
           type="email"
-          placeholder="Enter your email"
+          placeholder="Email"
           className={styles.input}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -63,7 +69,7 @@ const Login = () => {
         <div className={styles.passwordWrapper}>
           <input
             type={showPassword ? "text" : "password"}
-            placeholder="Enter your password"
+            placeholder="Password"
             className={styles.input}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -79,8 +85,8 @@ const Login = () => {
         </div>
 
         <button
-          onClick={handleLogin}
           className={styles.button}
+          onClick={handleLogin}
           disabled={loading}
         >
           {loading ? "Logging in..." : "Login"}

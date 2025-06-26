@@ -1,6 +1,6 @@
 // src/components/BottomNav.jsx
 import React from "react";
-import { NavLink } from "react-router-dom"; // ✅ Required import
+import { NavLink } from "react-router-dom";
 import styles from "../styles/BottomNav.module.css";
 
 import homeIcon from "../assets/home.png";
@@ -10,10 +10,10 @@ import profileIcon from "../assets/profile.png";
 
 const BottomNav = () => {
   const navItems = [
-    { path: "/home", label: "Home", icon: homeIcon },
-    { path: "/leads", label: "Leads", icon: leadsIcon },
-    { path: "/schedule", label: "Schedule", icon: scheduleIcon },
-    { path: "/profile", label: "Profile", icon: profileIcon },
+    { path: "/dashboard", label: "Home",     icon: homeIcon },
+    { path: "/leads",     label: "Leads",    icon: leadsIcon },
+    { path: "/schedule",  label: "Schedule", icon: scheduleIcon },
+    { path: "/profile",   label: "Profile",  icon: profileIcon },
   ];
 
   return (

@@ -1,5 +1,12 @@
+// src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
 import { useAuth } from "./contexts/AuthContext";
 
 import Login from "./pages/Login";
@@ -11,7 +18,7 @@ import Profile from "./pages/Profile";
 const App = () => {
   const { isLoggedIn, loading } = useAuth();
 
-  if (loading) return null; // or show a loader if preferred
+  if (loading) return null; // Show loader if needed
 
   return (
     <Router>
@@ -42,4 +49,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default App; // ✅ Must be default export
