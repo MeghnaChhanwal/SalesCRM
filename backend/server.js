@@ -9,7 +9,7 @@ import employeeRoutes from "./routes/employeeRoutes.js";
 import leadRoutes from "./routes/leadRoutes.js";
 import timeRoutes from "./routes/timingRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-
+import adminRoutes from "./routes/adminRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -40,7 +40,9 @@ mongoose
 app.use("/api/employees", employeeRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/timing", timeRoutes);
-app.use("/api/auth", authRoutes); // login POST route
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+ // login POST route
 
 // ✅ Root route for health check
 app.get("/", (req, res) => {
