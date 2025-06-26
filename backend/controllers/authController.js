@@ -1,4 +1,3 @@
-// controllers/authController.js
 import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
@@ -21,31 +20,26 @@ export const loginEmployee = async (req, res) => {
     if (employee.status === "Active")
       return res.status(403).json({ error: "Already logged in from another device or tab" });
 
-    // ✅ Set employee status to Active
     employee.status = "Active";
     await employee.save();
 
     const today = todayIST();
     const time = timeIST();
 
-    // ✅ Find today's timing
     let timing = await Timing.findOne({ employee: employee._id, date: today });
-
     let message = "";
 
     if (!timing) {
-      // First login of the day
       timing = await Timing.create({
         employee: employee._id,
         date: today,
-        checkin: time,
+        checkIn: time,
         status: "Active",
-        break: [],
+        breaks: [],
       });
       message = `Checked in at ${time}`;
     } else {
-      // Already checked in, check if last break is ongoing
-      const latestBreak = timing.break.at(-1);
+      const latestBreak = timing.breaks.at(-1);
       if (latestBreak && !latestBreak.end) {
         latestBreak.end = time;
         message = `Break ended at ${time}`;
@@ -61,9 +55,9 @@ export const loginEmployee = async (req, res) => {
       message: `Login successful - ${message}`,
       employeeId: employee._id,
       name: employee.firstName,
-      checkin: timing.checkin,
+      checkIn: timing.checkIn,
       status: timing.status,
-      break: timing.break,
+      breaks: timing.breaks,
     });
   } catch (error) {
     console.error("Login Error:", error);
@@ -84,14 +78,13 @@ export const logoutEmployee = async (req, res) => {
       return res.status(404).json({ message: "No check-in found today!" });
     }
 
-    if (timing.checkout) {
+    if (timing.checkOut) {
       return res.status(400).json({ message: "Already checked out" });
     }
 
-    // ✅ Set checkout time and push break (with only start)
-    timing.checkout = time;
+    timing.checkOut = time;
     timing.status = "Inactive";
-    timing.break.push({ start: time });
+    timing.breaks.push({ start: time });
     await timing.save();
 
     await Employee.findByIdAndUpdate(employeeId, { status: "Inactive" });
