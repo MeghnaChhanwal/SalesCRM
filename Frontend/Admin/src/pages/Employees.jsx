@@ -113,7 +113,7 @@ const Employee = () => {
         const newEmp = {
           ...formData,
           employeeId: `#EMP${Math.floor(100000 + Math.random() * 900000)}`,
-          status: "Active",
+          status: "Inactive",
           assignedLeads: 0,
           closedLeads: 0,
         };

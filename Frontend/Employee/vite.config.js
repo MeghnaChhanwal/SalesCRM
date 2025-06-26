@@ -9,7 +9,8 @@ export default defineConfig(({ mode }) => {
     server: {
       headers: isDev
         ? {
-            'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-eval';",
+            'Content-Security-Policy':
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src *",
           }
         : {},
     },
