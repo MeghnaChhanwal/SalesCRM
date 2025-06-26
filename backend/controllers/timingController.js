@@ -1,31 +1,36 @@
-import {
-  handleCheckInOrBreakEnd,
-  handleFinalCheckOut,
-  getTodayTimings
-} from "../services/timingService.js";
+// controllers/timingController.js
+import Timing from "../models/timing.js";
+import { todayIST, timeIST } from "../utils/time.js";
 
-// Final check-out on tab close or logout
+// ✅ Final checkout (called by sendBeacon on tab close)
 export const finalCheckOut = async (req, res) => {
   const { employeeId } = req.params;
+  const date = todayIST();
+  const time = timeIST();
 
   try {
-    const timing = await handleFinalCheckOut(employeeId);
-    res.status(200).json({ message: "Checked out and break started", timing });
+    const timing = await Timing.findOne({ employee: employeeId, date });
+    if (timing && !timing.checkOut) {
+      timing.checkOut = time;
+      await timing.save();
+    }
+
+    res.status(200).json({ message: "Checked out on tab close" });
   } catch (error) {
-    console.error("Final Check-out Error:", error);
-    res.status(500).json({ error: "Check-out failed" });
+    res.status(500).json({ error: "Final checkout failed" });
   }
 };
 
-// Fetch today's full timing logs
+// ✅ Get today’s timing
 export const getTodayTiming = async (req, res) => {
   const { employeeId } = req.params;
+  const date = todayIST();
 
   try {
-    const timings = await getTodayTimings(employeeId);
-    res.status(200).json(timings);
+    const timing = await Timing.find({ employee: employeeId, date });
+    res.status(200).json(timing);
   } catch (error) {
-    console.error("Fetch Timing Error:", error);
-    res.status(500).json({ error: "Failed to fetch timings" });
+    console.error("Get Today Timing Error:", error);
+    res.status(500).json({ error: "Failed to fetch today's timing" });
   }
 };

@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 
+// ✅ Break sub-schema
 const breakSchema = new mongoose.Schema({
-  start: { type: String }, // "HH:mm:ss" format
-  end: { type: String }    // "HH:mm:ss" format
+  start: { type: String }, // Format: "HH:mm:ss"
+  end:   { type: String }  // Format: "HH:mm:ss"
 }, { _id: false });
 
+// ✅ Main Timing schema
 const timingSchema = new mongoose.Schema({
   employee: {
     type: mongoose.Schema.Types.ObjectId,
@@ -12,14 +14,14 @@ const timingSchema = new mongoose.Schema({
     required: true
   },
   date: {
-    type: String, // Format: YYYY-MM-DD
+    type: String, // Format: "YYYY-MM-DD"
     required: true
   },
   checkIn: {
-    type: String // Format: HH:mm:ss
+    type: String // Format: "HH:mm:ss"
   },
   checkOut: {
-    type: String // Format: HH:mm:ss
+    type: String // Format: "HH:mm:ss"
   },
   status: {
     type: String,
@@ -32,6 +34,10 @@ const timingSchema = new mongoose.Schema({
     default: "OffBreak"
   },
   breaks: [breakSchema]
-}, { timestamps: true });
+}, {
+  timestamps: true // Adds createdAt and updatedAt
+});
 
-export default mongoose.model("Timing", timingSchema);
+// ✅ Export model using ES Modules
+const Timing = mongoose.model("Timing", timingSchema);
+export default Timing;
