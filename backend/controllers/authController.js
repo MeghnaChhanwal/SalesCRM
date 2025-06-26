@@ -1,5 +1,5 @@
 import Employee from "../models/employee.js";
-import Timing from "../models/timing.js";
+import Timing from "../models/timing.js"
 import { todayIST, timeIST } from "../utils/time.js";
 
 export const loginEmployee = async (req, res) => {
