@@ -1,10 +1,10 @@
-// ✅ controllers/leadController.js
 import fs from "fs";
 import csv from "csv-parser";
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 import { assignEmployeeByConditions } from "../utils/assign.js";
 
+// ✅ Get Leads with search, sort, pagination
 export const getLeads = async (req, res) => {
   try {
     const { search = "", page = 1, limit = 8, sortBy = "receivedDate", order = "desc" } = req.query;
@@ -15,8 +15,10 @@ export const getLeads = async (req, res) => {
       $or: [
         { name: { $regex: regex } },
         { email: { $regex: regex } },
-        { phone: { $regex: regex } }
-      ]
+        { phone: { $regex: regex } },
+        { status: { $regex: regex } },
+        { location: { $regex: regex } },
+      ],
     };
 
     const total = await Lead.countDocuments(query);
@@ -24,12 +26,12 @@ export const getLeads = async (req, res) => {
       .sort({ [sortBy]: order === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(Number(limit))
-      .populate("assignedEmployee", "firstName lastName email");
+      .populate("assignedEmployee", "firstName lastName"); // No email
 
     res.status(200).json({
       leads,
       totalPages: Math.ceil(total / limit),
-      currentPage: page,
+      currentPage: Number(page),
       totalLeads: total,
     });
   } catch (err) {
@@ -38,87 +40,50 @@ export const getLeads = async (req, res) => {
   }
 };
 
+// ✅ Upload CSV with validation, assignment & skip invalid
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
-  const requiredFields = ["name", "email", "phone", "language", "location"];
   const leads = [];
-
+  const requiredFields = ["name", "email", "phone", "language", "location"];
   let invalidRows = 0;
-  const seenEmails = new Set();
-  const seenPhones = new Set();
 
-  try {
-    const rows = [];
+  fs.createReadStream(filePath)
+    .pipe(csv())
+    .on("data", async (row) => {
+      const isValid = requiredFields.every(field => row[field] && row[field].trim() !== "");
+      if (!isValid) return invalidRows++;
 
-    await new Promise((resolve, reject) => {
-      fs.createReadStream(filePath)
-        .pipe(csv())
-        .on("data", (row) => rows.push(row))
-        .on("end", resolve)
-        .on("error", reject);
-    });
-
-    for (const row of rows) {
-      const hasAllFields = requiredFields.every((field) => row[field] && row[field].trim() !== "");
-      if (!hasAllFields) {
-        invalidRows++;
-        continue;
-      }
-
-      // Prevent duplicates (within same CSV)
-      const email = row.email.trim().toLowerCase();
-      const phone = row.phone.trim();
-
-      if (seenEmails.has(email) || seenPhones.has(phone)) {
-        invalidRows++;
-        continue;
-      }
-
-      // Check if already exists in DB
-      const exists = await Lead.findOne({
-        $or: [{ email }, { phone }],
-      });
-
-      if (exists) {
-        invalidRows++;
-        continue;
-      }
-
-      seenEmails.add(email);
-      seenPhones.add(phone);
-
-      // Assign employee
       const assignedEmployee = await assignEmployeeByConditions(row);
       if (assignedEmployee) {
-        await Employee.findByIdAndUpdate(assignedEmployee, { $inc: { assignedLeads: 1 } });
+        await Employee.findByIdAndUpdate(assignedEmployee, {
+          $inc: { assignedLeads: 1 },
+        });
       }
-
-      // Parse date or fallback to current
-      const receivedDate = row.receivedDate ? new Date(row.receivedDate) : new Date();
 
       leads.push({
         name: row.name,
-        email,
-        phone,
-        receivedDate,
+        email: row.email || null,
+        phone: row.phone || null,
+        receivedDate: row.receivedDate ? new Date(row.receivedDate) : new Date(),
         status: row.status || "Open",
         type: row.type || "Warm",
         language: row.language,
         location: row.location,
         assignedEmployee,
       });
-    }
-
-    await Lead.insertMany(leads);
-    fs.unlinkSync(filePath);
-
-    res.status(200).json({
-      message: "Leads uploaded successfully",
-      uploaded: leads.length,
-      skipped: invalidRows,
+    })
+    .on("end", async () => {
+      try {
+        await Lead.insertMany(leads);
+        fs.unlinkSync(filePath);
+        res.status(200).json({
+          message: "Leads uploaded successfully",
+          uploaded: leads.length,
+          invalidRows,
+        });
+      } catch (error) {
+        console.error("Error inserting leads:", error);
+        res.status(500).json({ error: "Error inserting leads" });
+      }
     });
-  } catch (err) {
-    console.error("Error uploading CSV:", err);
-    res.status(500).json({ error: "Failed to upload CSV" });
-  }
 };
