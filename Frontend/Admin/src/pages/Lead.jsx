@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import MainLayout from '../components/Layout';
 import styles from '../styles/Lead.module.css';
 import Pagination from '../components/Pagination';
-import { sortData } from '../utils/sort';
-
-const API_BASE = import.meta.env.VITE_API_BASE;
+import API from '../utils/axios';
+import Papa from 'papaparse';
 
 const Lead = () => {
   const [leads, setLeads] = useState([]);
@@ -13,25 +11,31 @@ const Lead = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [file, setFile] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState(null); // 'upload' | 'manual'
   const [loading, setLoading] = useState(false);
-  const [sortConfig, setSortConfig] = useState({ key: '', direction: '' });
+  const [sortConfig, setSortConfig] = useState({ key: 'receivedDate', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const leadsPerPage = 8;
 
   useEffect(() => {
     fetchLeads();
-  }, []);
-
-  useEffect(() => {
-    setCurrentPage(1); // reset to first page on search or sort change
-  }, [searchTerm, sortConfig]);
+  }, [searchTerm, sortConfig, currentPage]);
 
   const fetchLeads = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE}/api/leads`);
-      setLeads(res.data);
+      const res = await API.get('/api/leads', {
+        params: {
+          search: searchTerm,
+          page: currentPage,
+          limit: leadsPerPage,
+          sortBy: sortConfig.key,
+          order: sortConfig.direction,
+        },
+      });
+      setLeads(res.data.leads || []);
+      setTotalPages(res.data.totalPages || 1);
     } catch (err) {
       console.error('Error fetching leads:', err);
     } finally {
@@ -39,35 +43,52 @@ const Lead = () => {
     }
   };
 
+  const verifyCSV = (file, callback) => {
+    Papa.parse(file, {
+      header: true,
+      complete: (results) => {
+        const required = ["name", "email", "phone", "language", "location"];
+        const invalidRows = results.data.filter(row =>
+          required.some(field => !row[field] || row[field].trim() === "")
+        );
+        callback(invalidRows.length === 0, invalidRows.length);
+      }
+    });
+  };
+
   const handleFileUpload = async () => {
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
+    verifyCSV(file, async (isValid, count) => {
+      if (!isValid) {
+        alert(`${count} invalid rows found. Fix the file and try again.`);
+        return;
+      }
 
-    try {
-      setUploading(true);
-      const response = await axios.post(`${API_BASE}/api/leads/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        onUploadProgress: (e) => {
-          setUploadProgress(Math.round((e.loaded * 100) / e.total));
-        }
-      });
+      const formData = new FormData();
+      formData.append('file', file);
 
-      alert(response.data.message || 'File uploaded successfully');
+      try {
+        setUploading(true);
+        const response = await API.post('/api/leads/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          onUploadProgress: (e) => {
+            setUploadProgress(Math.round((e.loaded * 100) / e.total));
+          },
+        });
 
-      setUploading(false);
-      setUploadProgress(0);
-      setFile(null);
-      setModalOpen(false);
-      fetchLeads();
-    } catch (err) {
-      console.error('Upload error:', err);
-      alert('❌ Upload failed. Please try again.');
-      setUploading(false);
-    }
+        alert(response.data.message || 'File uploaded successfully');
+        setUploading(false);
+        setUploadProgress(0);
+        setFile(null);
+        setModalType(null);
+        fetchLeads();
+      } catch (err) {
+        console.error('Upload error:', err);
+        alert('Upload failed. Please try again.');
+        setUploading(false);
+      }
+    });
   };
 
   const handleSort = (key) => {
@@ -78,30 +99,24 @@ const Lead = () => {
     setSortConfig({ key, direction });
   };
 
-  const indexOfLast = currentPage * leadsPerPage;
-  const indexOfFirst = indexOfLast - leadsPerPage;
-
-  const filteredLeads = leads.filter((lead) =>
-    lead.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const sortedLeads = sortData(filteredLeads, sortConfig);
-  const currentLeads = sortedLeads.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredLeads.length / leadsPerPage);
-
   return (
     <MainLayout
-      onSearch={(val) => setSearchTerm(val)}
+      onSearch={(val) => {
+        setSearchTerm(val);
+        setCurrentPage(1);
+      }}
       rightElement={
-        <button className={styles.addLeadButton} onClick={() => setModalOpen(true)}>
-          ➕ Add Lead
-        </button>
+        <div className={styles.actionButtons}>
+          <button className={styles.addManual} onClick={() => setModalType('manual')}>Add Manually</button>
+          <button className={styles.addLeadButton} onClick={() => setModalType('upload')}>Upload CSV</button>
+        </div>
       }
     >
-      {modalOpen && (
-        <div className={styles.modalOverlay}>
+      {modalType === 'upload' && (
+        <div className={styles.modalOverlay} onClick={() => setModalType(null)}>
           <form
             className={styles.modalForm}
+            onClick={(e) => e.stopPropagation()}
             onSubmit={(e) => {
               e.preventDefault();
               handleFileUpload();
@@ -126,10 +141,24 @@ const Lead = () => {
               />
               <label htmlFor="fileInput" className={styles.browseButton}>Browse File</label>
             </div>
-            {uploading && <progress value={uploadProgress} max="100" />}
+
+            {uploading && (
+              <div className={styles.circularWrapper}>
+                <svg className={styles.circularProgress} viewBox="0 0 36 36">
+                  <path className={styles.bg} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path
+                    className={styles.progress}
+                    strokeDasharray={`${uploadProgress}, 100`}
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <text x="18" y="20.35" className={styles.percentage}>{uploadProgress}%</text>
+                </svg>
+              </div>
+            )}
+
             <div className={styles.formActions}>
               <button type="submit" disabled={uploading || !file}>Upload</button>
-              <button type="button" onClick={() => { setFile(null); setModalOpen(false); }} disabled={uploading}>Cancel</button>
+              <button type="button" onClick={() => { setFile(null); setModalType(null); }} disabled={uploading}>Cancel</button>
             </div>
           </form>
         </div>
@@ -142,34 +171,30 @@ const Lead = () => {
           <table className={styles.leadTable}>
             <thead>
               <tr>
-                <th onClick={() => handleSort('name')} style={{ cursor: 'pointer' }}>Name</th>
-                <th onClick={() => handleSort('email')} style={{ cursor: 'pointer' }}>Email</th>
-                <th onClick={() => handleSort('phone')} style={{ cursor: 'pointer' }}>Phone</th>
-                <th onClick={() => handleSort('receivedDate')} style={{ cursor: 'pointer' }}>Received Date</th>
-                <th onClick={() => handleSort('status')} style={{ cursor: 'pointer' }}>Status</th>
-                <th onClick={() => handleSort('type')} style={{ cursor: 'pointer' }}>Type</th>
-                <th onClick={() => handleSort('language')} style={{ cursor: 'pointer' }}>Language</th>
-                <th onClick={() => handleSort('location')} style={{ cursor: 'pointer' }}>Location</th>
-                <th onClick={() => handleSort('assignedEmployee')} style={{ cursor: 'pointer' }}>Assigned Employee</th>
+                <th onClick={() => handleSort('name')}>Name</th>
+                <th onClick={() => handleSort('email')}>Email</th>
+                <th onClick={() => handleSort('phone')}>Phone</th>
+                <th onClick={() => handleSort('receivedDate')}>Received Date</th>
+                <th onClick={() => handleSort('assignedEmployee')}>Assigned To</th>
               </tr>
             </thead>
             <tbody>
-              {currentLeads.length === 0 ? (
+              {leads.length === 0 ? (
                 <tr>
-                  <td colSpan="10" style={{ textAlign: 'center' }}>No leads found.</td>
+                  <td colSpan="5" style={{ textAlign: 'center' }}>No leads found.</td>
                 </tr>
               ) : (
-                currentLeads.map((lead, index) => (
+                leads.map((lead, index) => (
                   <tr key={lead._id || index}>
                     <td>{lead.name}</td>
                     <td>{lead.email || '-'}</td>
                     <td>{lead.phone || '-'}</td>
                     <td>{lead.receivedDate ? new Date(lead.receivedDate).toLocaleDateString() : '-'}</td>
-                    <td>{lead.status || 'Open'}</td>
-                    <td>{lead.type || 'Warm'}</td>
-                    <td>{lead.language || '-'}</td>
-                    <td>{lead.location || '-'}</td>
-                    <td>{lead.assignedEmployee || '-'}</td>
+                    <td>
+                      {lead.assignedEmployee
+                        ? `${lead.assignedEmployee.firstName} ${lead.assignedEmployee.lastName}`
+                        : '-'}
+                    </td>
                   </tr>
                 ))
               )}

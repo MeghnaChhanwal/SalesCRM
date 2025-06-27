@@ -1,72 +1,88 @@
-/* White full-width box */
-.outerBox {
-  background-color: white;
+/* Outer container - centers box */
+.container {
+  max-width: 1100px;
+  margin: 10px auto; /* same top, right, bottom, left margin */
+  padding: 10px;
+  background-color: #ffffff;
   border-radius: 16px;
-  padding: 2rem;
-  width: 100%;
-  box-sizing: border-box;
-  margin-top: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  overflow-x: hidden;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-/* Title + line */
+/* Title */
 .title {
-  font-size: 1.4rem;
+  font-size: 24px;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 0.5rem;
+  margin-bottom: 10px;
+  color: #222;
 }
 
+/* Divider line */
 .divider {
-  height: 1px;
-  background-color: #e0e0e0;
   border: none;
-  margin-bottom: 1.5rem;
+  height: 1px;
+  background: #ddd;
+  margin-bottom: 30px;
+  width: 100%;
 }
 
-/* Form spacing */
+/* Form layout */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  width: 100%;
+  gap: 5px;
 }
 
-/* Input group for clean label + input alignment */
-.inputGroup {
+/* Field block */
+.field {
   display: flex;
   flex-direction: column;
-  max-width: 45px; /* 👈 Controls input width */
-  
 }
 
-.inputGroup label {
-  font-size: 0.9rem;
+.field label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
   color: #444;
-  margin-bottom: 0.3rem;
 }
 
-.inputGroup input {
-  padding: 0.6rem;
+/* Input box - compact & clean */
+.field input {
+  height: 34px;
+  padding: 6px 10px;
+  font-size: 14px;
+  width: 100%;
+  max-width: 320px;
   border: 1px solid #ccc;
   border-radius: 12px;
-  font-size: 0.95rem;
+  transition: border 0.2s ease;
 }
 
-/* Right-aligned Save button */
+.field input:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+/* Save button */
+/* Save button */
 .saveBtn {
-  align-self: flex-end;
-  margin-top: 1rem;
-  padding: 0.65rem 1.4rem;
-  background-color: #007bff;
+  background-color: #535456;
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 0.95rem;
+  padding: 10px 50px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 15px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background 0.3s;
+  margin-top: 20px;
+  align-self: flex-end; /* ✅ aligns it to the right */
 }
 
 .saveBtn:hover {
-  background-color: #0056b3;
+  background-color: #545557;
 }

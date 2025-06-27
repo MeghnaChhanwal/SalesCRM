@@ -1,5 +1,5 @@
 .dashboardContainerFull {
-  padding: .0.5em;
+  padding: 0.5em;
   background-color: #f5f7fa;
   display: flex;
   flex-direction: column;
@@ -15,10 +15,15 @@
 
 .card {
   background: #ffffff;
-  padding: 0.2rem;
+  padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
 }
 
 .card h3 {
@@ -43,7 +48,7 @@
 /* Smaller Chart Box */
 .analyticsSmall {
   background-color: #ffffff;
-  padding: 0.4rem;
+  padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   display: flex;
@@ -51,14 +56,14 @@
 }
 
 .chartContainer {
-  height: 150px;
+  height: 240px;
   width: 100%;
 }
 
 /* Sales Activity */
 .activityBox {
   background-color: #ffffff;
-  padding: 0.4rem;
+  padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
@@ -66,7 +71,7 @@
 .activityBox h3,
 .analyticsSmall h3 {
   font-size: 1.2rem;
-  margin-bottom: O.4rem;
+  margin-bottom: 0.4rem;
   color: #333;
 }
 
@@ -86,25 +91,35 @@
 /* Employee Table */
 .employeeTableSection {
   background-color: #ffffff;
-  padding: 0.2rem;
+  padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-top: 1rem;
 }
 
 .employeeTableSection h3 {
-  font-size: 0.7rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
   color: #333;
+}
+
+/* Scrollable Table Wrapper */
+.tableWrapper {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  border-radius: 8px;
 }
 
 .employeeTable {
   width: 100%;
   border-collapse: collapse;
+  min-width: 700px;
 }
 
 .employeeTable th,
 .employeeTable td {
-  padding: 0.3rem;
+  padding: 0.6rem 1rem;
   text-align: left;
   border-bottom: 1px solid #eee;
   font-size: 0.95rem;
@@ -116,6 +131,10 @@
   color: #444;
 }
 
+.employeeTable tr:hover {
+  background-color: #f6f6f6;
+}
+
 /* Responsive */
 @media screen and (max-width: 768px) {
   .cardRow {
@@ -124,5 +143,17 @@
 
   .bottomSection {
     grid-template-columns: 1fr;
+  }
+
+  .employeeTableSection h3 {
+    font-size: 1rem;
+  }
+
+  .card p {
+    font-size: 1.4rem;
+  }
+
+  .chartContainer {
+    height: 200px;
   }
 }

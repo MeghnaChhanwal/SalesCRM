@@ -1,25 +1,27 @@
-import React, { useState } from 'react';
-import styles from '../styles/Search.module.css';
+// src/components/SearchBar.jsx
+import React, { useState } from "react";
+import styles from "../styles/Search.module.css";
 
 const SearchBar = ({ onSearch }) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setQuery(value);
-    if (onSearch) onSearch(value);
+  const handleChange = (e) => {
+    const val = e.target.value;
+    setQuery(val);
+    if (onSearch) onSearch(val);
   };
 
   return (
     <div className={styles.searchWrapper}>
       <div className={styles.searchBar}>
-        <img src="/Search.png" alt="Search" className={styles.iconImg} />  
+        <img src="/Search.png" alt="Search" className={styles.iconImg} />
         <input
-          type="text"
-          placeholder="Search here..."
+          type="search"
+          placeholder="Search..."
           value={query}
-          onChange={handleInputChange}
+          onChange={handleChange}
           className={styles.input}
+          autoComplete="off"
         />
       </div>
       <div className={styles.bottomBorder}></div>

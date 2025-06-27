@@ -10,14 +10,15 @@ const MainLayout = ({
   onSearch,
   showSearch = true,
   showBreadcrumb = true,
-  rightElement = null,  // 👈 new prop for right side (e.g. Add Button)
+  rightElement = null,
 }) => {
   return (
     <div className={styles.container}>
       <Sidebar />
+
       <div className={styles.mainContent}>
         {showSearch && <SearchBar onSearch={onSearch} />}
-        
+
         {showBreadcrumb && (
           <div className={styles.headerRow}>
             <div className={styles.breadcrumbContainer}>
@@ -28,8 +29,10 @@ const MainLayout = ({
             </div>
           </div>
         )}
-        
-        {children}
+
+        <div className={styles.childrenContainer}>
+          {children}
+        </div>
       </div>
     </div>
   );

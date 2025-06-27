@@ -40,7 +40,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           ) : (
             <button
               key={page}
-              className={`${styles.pageBtn} ${currentPage === page ? styles.active : ""}`}
+              className={`${styles.pageBtn} ${
+                currentPage === page ? styles.active : ""
+              }`}
               onClick={() => onPageChange(page)}
             >
               {page}

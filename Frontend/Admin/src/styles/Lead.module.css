@@ -130,6 +130,43 @@ progress {
   margin-top: 0.5rem;
 }
 
+/* Circular Upload Progress */
+.circularWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.circularProgress {
+  width: 80px;
+  height: 80px;
+  transform: rotate(-90deg);
+}
+
+.circularProgress .bg {
+  fill: none;
+  stroke: #e5e7eb;
+  stroke-width: 4;
+}
+
+.circularProgress .progress {
+  fill: none;
+  stroke: #3b82f6;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.3s ease-in-out;
+}
+
+.circularProgress .percentage {
+  fill: #111827;
+  font-size: 0.45rem;
+  font-weight: bold;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
 /* Loading text */
 .loadingText {
   text-align: center;
