@@ -1,5 +1,5 @@
 import Employee from "../models/employee.js";
-import { buildQueryOptions } from "../utils/queryHelper.js";
+import { buildQueryOptions } from "../utils/query.js";
 
 // GET employees with search, pagination, sorting (backend handles all)
 export const getEmployees = async (req, res) => {
