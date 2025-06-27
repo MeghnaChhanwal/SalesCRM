@@ -1,92 +1,80 @@
-// controllers/leadController.js
+// ✅ controllers/leadController.js
 import fs from "fs";
 import csv from "csv-parser";
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 import { assignEmployeeByConditions } from "../utils/assign.js";
 
-// ✅ GET leads with search, sort, pagination
-export const getLeads = async (req, res) => {
-  try {
-    const search = req.query.search || "";
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 8;
-    const sortBy = req.query.sortBy || "receivedDate";
-    const order = req.query.order === "asc" ? 1 : -1;
-
-    const skip = (page - 1) * limit;
-    const regex = new RegExp(search, "i");
-
-    // Search query on multiple fields
-    const query = {
-      $or: [
-        { name: { $regex: regex } },
-        { email: { $regex: regex } },
-        { phone: { $regex: regex } },
-        { status: { $regex: regex } },
-        { type: { $regex: regex } },
-        { language: { $regex: regex } },
-        { location: { $regex: regex } },
-      ],
-    };
-
-    const total = await Lead.countDocuments(query);
-    const leads = await Lead.find(query)
-      .sort({ [sortBy]: order })
-      .skip(skip)
-      .limit(limit)
-      .populate("assignedEmployee", "firstName lastName email");
-
-    res.status(200).json({
-      leads,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
-      totalLeads: total,
-    });
-  } catch (err) {
-    console.error("Failed to fetch leads:", err);
-    res.status(500).json({ error: "Failed to fetch leads" });
-  }
-};
-
-// ✅ UPLOAD leads from CSV with assignment
 export const uploadCSV = async (req, res) => {
-  const filePath = req.file.path;
+  const filePath = req.file?.path;
+  if (!filePath) return res.status(400).json({ error: "No file uploaded" });
+
   const leads = [];
+  const requiredFields = ["name", "email", "phone", "language", "location"];
+  let invalidRows = 0;
+  let duplicateRows = 0;
+  let totalRows = 0;
 
-  fs.createReadStream(filePath)
-    .pipe(csv())
-    .on("data", async (row) => {
-      if (!row.email && !row.phone) return;
+  try {
+    const existingLeads = await Lead.find({}, "email name");
+    const existingSet = new Set(
+      existingLeads.map((lead) => `${lead.name}-${lead.email}`)
+    );
 
-      const assignedEmployee = await assignEmployeeByConditions(row);
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on("data", async (row) => {
+        totalRows++;
 
-      if (assignedEmployee) {
-        await Employee.findByIdAndUpdate(assignedEmployee, {
-          $inc: { assignedLeads: 1 },
+        // Validate required fields
+        const isValid = requiredFields.every(
+          (field) => row[field] && row[field].trim() !== ""
+        );
+        if (!isValid) return invalidRows++;
+
+        const key = `${row.name}-${row.email}`;
+        if (existingSet.has(key)) return duplicateRows++;
+
+        const assignedEmployee = await assignEmployeeByConditions(row);
+        if (assignedEmployee) {
+          await Employee.findByIdAndUpdate(assignedEmployee, {
+            $inc: { assignedLeads: 1 },
+          });
+        }
+
+        leads.push({
+          name: row.name.trim(),
+          email: row.email.trim(),
+          phone: row.phone.trim(),
+          receivedDate: row.receivedDate
+            ? new Date(row.receivedDate)
+            : new Date(),
+          status: row.status || "Open",
+          type: row.type || "Warm",
+          language: row.language.trim(),
+          location: row.location.trim(),
+          assignedEmployee,
         });
-      }
+      })
+      .on("end", async () => {
+        try {
+          await Lead.insertMany(leads);
+          fs.unlinkSync(filePath);
 
-      leads.push({
-        name: row.name,
-        email: row.email || null,
-        phone: row.phone || null,
-        receivedDate: row.receivedDate ? new Date(row.receivedDate) : new Date(),
-        status: row.status || "Open",
-        type: row.type || "Warm",
-        language: row.language,
-        location: row.location,
-        assignedEmployee,
+          res.status(200).json({
+            message: "✅ Lead CSV processed",
+            total: totalRows,
+            uploaded: leads.length,
+            duplicates: duplicateRows,
+            invalid: invalidRows,
+          });
+        } catch (error) {
+          console.error("Insert error:", error);
+          res.status(500).json({ error: "Failed to save valid leads" });
+        }
       });
-    })
-    .on("end", async () => {
-      try {
-        await Lead.insertMany(leads);
-        fs.unlinkSync(filePath);
-        res.status(200).json({ message: "Leads uploaded successfully", count: leads.length });
-      } catch (error) {
-        console.error("Error inserting leads:", error);
-        res.status(500).json({ error: "Error inserting leads" });
-      }
-    });
+  } catch (err) {
+    console.error("Upload Error:", err);
+    res.status(500).json({ error: "Something went wrong" });
+  }
 };
