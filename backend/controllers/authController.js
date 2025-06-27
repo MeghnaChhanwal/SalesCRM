@@ -4,84 +4,69 @@ import { todayIST, timeIST } from "../utils/time.js";
 
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: "Email and password are required" });
 
   try {
     const employee = await Employee.findOne({ email });
-    if (!employee)
-      return res.status(404).json({ error: "Employee not found" });
-
-    if (employee.lastName.toLowerCase() !== password.toLowerCase())
-      return res.status(401).json({ error: "Invalid credentials" });
-
-    if (employee.status === "Active")
-      return res.status(403).json({ error: "Already logged in from another device or tab" });
+    if (!employee || employee.lastName.toLowerCase() !== password.toLowerCase()) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     employee.status = "Active";
     await employee.save();
 
     const today = todayIST();
-    const time = timeIST();
     let timing = await Timing.findOne({ employee: employee._id, date: today });
-    let message = "";
 
-    if (!timing) {
-      timing = await Timing.create({
+    if (!timing || timing.status === "Inactive") {
+      // Create new timing entry for today
+      timing = new Timing({
         employee: employee._id,
         date: today,
-        checkin: time,
+        checkIn: timeIST(),
         status: "Active",
-        break: [],
+        breaks: [],
       });
-      message = `Checked in at ${time}`;
     } else {
-      const latestBreak = timing.break.at(-1);
-      if (latestBreak && !latestBreak.end) {
-        latestBreak.end = time;
-        message = `Break ended at ${time}`;
-      } else {
-        message = "Already checked in";
+      // Resume after break
+      const lastBreak = timing.breaks[timing.breaks.length - 1];
+      if (lastBreak && !lastBreak.end) {
+        lastBreak.end = timeIST();
       }
-
       timing.status = "Active";
-      await timing.save();
     }
 
-    return res.status(200).json({
-      message: `Login successful - ${message}`,
-      employeeId: employee._id,
-      name: employee.firstName,
-    });
-  } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({ error: "Login failed" });
+    await timing.save();
+    res.status(200).json(employee);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Login failed" });
   }
 };
 
 export const logoutEmployee = async (req, res) => {
-  const { employeeId } = req.params;
-  const today = todayIST();
-  const time = timeIST();
+  const employeeId = req.params.id;
 
   try {
-    const timing = await Timing.findOne({ employee: employeeId, date: today });
+    const employee = await Employee.findById(employeeId);
+    if (!employee) return res.status(404).json({ message: "Employee not found" });
 
-    if (!timing || timing.checkout) {
-      await Employee.findByIdAndUpdate(employeeId, { status: "Inactive" });
-      return res.status(200).json({ message: "Already inactive" });
+    employee.status = "Inactive";
+    await employee.save();
+
+    const today = todayIST();
+    const timing = await Timing.findOne({ employee: employeeId, date: today, status: "Active" });
+
+    if (timing) {
+      const checkoutTime = timeIST();
+      timing.checkOut = checkoutTime;
+      timing.status = "Inactive";
+      timing.breaks.push({ start: checkoutTime, end: "" });
+      await timing.save();
     }
 
-    timing.checkout = time;
-    timing.status = "Inactive";
-    timing.break.push({ start: time });
-    await timing.save();
-
-    await Employee.findByIdAndUpdate(employeeId, { status: "Inactive" });
-
     res.status(200).json({ message: "Logged out successfully" });
-  } catch (error) {
-    console.error("Logout Error:", error);
-    res.status(500).json({ error: "Logout failed" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Logout failed" });
   }
 };

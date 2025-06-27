@@ -1,49 +1,35 @@
-// controllers/timingController.js
 import Timing from "../models/timing.js";
-import Employee from "../models/employee.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ GET EMPLOYEE TIMINGS (for break history)
-export const getEmployeeTiming = async (req, res) => {
-  const { employeeId } = req.params;
+export const resumeFromBreak = async (req, res) => {
+  const { employeeId } = req.body;
 
   try {
-    const timings = await Timing.find({ employee: employeeId })
-      .sort({ date: -1 }) // latest first
-      .limit(7); // last 7 days
-    res.status(200).json(timings);
+    const timing = await Timing.findOne({ employee: employeeId, date: todayIST() });
+    if (!timing) return res.status(404).json({ message: "No timing record found" });
+
+    const lastBreak = timing.breaks[timing.breaks.length - 1];
+    if (lastBreak && !lastBreak.end) {
+      lastBreak.end = timeIST();
+    }
+
+    timing.status = "Active";
+    await timing.save();
+    res.status(200).json({ message: "Resumed from break" });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching timings", err });
+    console.error(err);
+    res.status(500).json({ message: "Failed to resume from break" });
   }
 };
 
-// ✅ CHECKOUT API (alternative logout, called from frontend on unload/beacon)
-export const checkOut = async (req, res) => {
+export const getTimings = async (req, res) => {
   const { employeeId } = req.params;
-  const today = todayIST();
-  const now = timeIST();
 
   try {
-    const timing = await Timing.findOne({ employee: employeeId, date: today });
-
-    if (!timing) {
-      return res.status(404).json({ message: "No check-in found today!" });
-    }
-
-    if (timing.checkout) {
-      return res.status(400).json({ message: "Already checked out" });
-    }
-
-    // ✅ Perform checkout + start break
-    timing.checkout = now;
-    timing.status = "Inactive";
-    timing.break.push({ start: now }); // break started, no end yet
-    await timing.save();
-
-    await Employee.findByIdAndUpdate(employeeId, { status: "Inactive" });
-
-    res.status(200).json({ message: "Checked out successfully", timing });
+    const timings = await Timing.find({ employee: employeeId }).sort({ date: -1 });
+    res.status(200).json(timings);
   } catch (err) {
-    res.status(500).json({ message: "Error during checkout", err });
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch timings" });
   }
 };
