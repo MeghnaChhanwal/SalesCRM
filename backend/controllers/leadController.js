@@ -1,22 +1,23 @@
-// backend/controllers/leadController.js
+// controllers/leadController.js
 import fs from "fs";
 import csv from "csv-parser";
 import Lead from "../models/lead.js";
+import Employee from "../models/employee.js";
 import { assignEmployeeByConditions } from "../utils/assign.js";
 
-// Get all leads
+// ✅ GET all leads
 export const getLeads = async (req, res) => {
   try {
     const leads = await Lead.find()
       .sort({ receivedDate: -1 })
       .populate("assignedEmployee");
-    res.json(leads);
+    res.status(200).json(leads);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch leads" });
   }
 };
 
-// Upload CSV
+// ✅ UPLOAD leads from CSV
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
@@ -26,7 +27,15 @@ export const uploadCSV = async (req, res) => {
     .on("data", async (row) => {
       if (!row.email && !row.phone) return;
 
-      const lead = {
+      const assignedEmployee = await assignEmployeeByConditions(row);
+
+      if (assignedEmployee) {
+        await Employee.findByIdAndUpdate(assignedEmployee, {
+          $inc: { assignedLeads: 1 },
+        });
+      }
+
+      leads.push({
         name: row.name,
         email: row.email || null,
         phone: row.phone || null,
@@ -35,10 +44,8 @@ export const uploadCSV = async (req, res) => {
         type: row.type || "Warm",
         language: row.language,
         location: row.location,
-        assignedEmployee: await assignEmployeeByConditions(row)
-      };
-
-      leads.push(lead);
+        assignedEmployee,
+      });
     })
     .on("end", async () => {
       try {
