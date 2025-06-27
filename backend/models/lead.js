@@ -2,18 +2,50 @@
 import mongoose from "mongoose";
 
 const leadSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  phone: String,
-  receivedDate: Date,
-  status: String,
-  type: String,
-  language: String,
-  location: String,
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    default: null,
+    trim: true,
+  },
+  phone: {
+    type: String,
+    default: null,
+    trim: true,
+  },
+  receivedDate: {
+    type: Date,
+    default: Date.now,
+  },
+  status: {
+    type: String,
+    enum: ["Open", "In Progress", "Closed"],
+    default: "Open",
+  },
+  type: {
+    type: String,
+    enum: ["Cold", "Warm", "Hot"],
+    default: "Warm",
+  },
+  language: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  location: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   assignedEmployee: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Employee"
-  }
+    ref: "Employee",
+    default: null,
+  },
 });
 
 export default mongoose.model("Lead", leadSchema);
