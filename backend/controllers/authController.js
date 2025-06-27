@@ -1,8 +1,9 @@
+// backend/controllers/authController.js
 import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ Login Controller (Check-in or Resume)
+// ✅ LOGIN - check credentials, mark Active, handle check-in
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
@@ -23,13 +24,14 @@ export const loginEmployee = async (req, res) => {
     employee.status = "Active";
     await employee.save();
 
+    // ✅ Check-in or resume for today
     const date = todayIST();
     const time = timeIST();
 
     let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
-      // 🟢 First login
+      // First login today
       timing = new Timing({
         employee: employee._id,
         date,
@@ -39,14 +41,11 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      // 🔁 Relogin (Resume after logout)
-      timing.status = "Active";
+      // Re-login same day: update status, close open break if any
       timing.checkIn = time;
+      timing.status = "Active";
 
-      const lastBreak = timing.breaks.length > 0
-        ? timing.breaks[timing.breaks.length - 1]
-        : null;
-
+      const lastBreak = timing.breaks?.[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = time;
         timing.breakStatus = "OffBreak";
@@ -57,10 +56,10 @@ export const loginEmployee = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
-      _id: employee._id,
+      employeeId: employee._id,
+      email: employee.email,
       firstName: employee.firstName,
       lastName: employee.lastName,
-      email: employee.email,
       status: employee.status,
     });
   } catch (error) {
@@ -69,7 +68,7 @@ export const loginEmployee = async (req, res) => {
   }
 };
 
-// ✅ Logout Controller (on tab close or manual logout)
+// ✅ LOGOUT - triggered on tab close
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -82,10 +81,10 @@ export const logoutEmployee = async (req, res) => {
     employee.status = "Inactive";
     await employee.save();
 
+    // ✅ Final check-out + start break
     const date = todayIST();
     const time = timeIST();
 
-    // ✅ Final checkout and start new break
     const timing = await Timing.findOneAndUpdate(
       { employee: employeeId, date, checkOut: { $exists: false } },
       {
