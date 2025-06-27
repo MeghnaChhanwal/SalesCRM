@@ -1,17 +1,41 @@
-// controllers/employeeController.js
 import Employee from "../models/employee.js";
+import { buildQueryOptions } from "../utils/queryHelper.js";
 
-// ✅ GET all employees
+// GET employees with search, pagination, sorting (backend handles all)
 export const getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find();
-    res.status(200).json(employees);
+    const { search, sortBy, order, page, limit, skip, regex } = buildQueryOptions(req);
+
+    const query = {
+      $or: [
+        { firstName: { $regex: regex } },
+        { lastName: { $regex: regex } },
+        { email: { $regex: regex } },
+        { employeeId: { $regex: regex } },
+      ],
+    };
+
+    const total = await Employee.countDocuments(query);
+
+    const employees = await Employee.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: order });
+
+    res.status(200).json({
+      employees,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      totalEmployees: total,
+    });
   } catch (err) {
+    console.error("Error fetching employees:", err);
     res.status(500).json({ error: "Failed to fetch employees" });
   }
 };
 
-// ✅ CREATE new employee
+// The rest of CRUD operations...
+
 export const createEmployee = async (req, res) => {
   try {
     const newEmp = new Employee(req.body);
@@ -28,7 +52,6 @@ export const createEmployee = async (req, res) => {
   }
 };
 
-// ✅ UPDATE employee
 export const updateEmployee = async (req, res) => {
   try {
     const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, {
@@ -50,7 +73,6 @@ export const updateEmployee = async (req, res) => {
   }
 };
 
-// ✅ DELETE employee
 export const deleteEmployee = async (req, res) => {
   try {
     const deleted = await Employee.findByIdAndDelete(req.params.id);
