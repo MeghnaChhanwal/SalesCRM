@@ -1,7 +1,7 @@
 import Employee from "../models/employee.js";
 import { buildQueryOptions } from "../utils/query.js";
 
-// GET employees with search, pagination, sorting (backend handles all)
+// GET employees with search, pagination, sorting
 export const getEmployees = async (req, res) => {
   try {
     const { search, sortBy, order, page, limit, skip, regex } = buildQueryOptions(req);
@@ -34,8 +34,17 @@ export const getEmployees = async (req, res) => {
   }
 };
 
-// The rest of CRUD operations...
+// ✅ Get all employees without pagination — for dashboard
+export const getAllEmployees = async (req, res) => {
+  try {
+    const employees = await Employee.find().sort({ createdAt: -1 });
+    res.status(200).json(employees);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch all employees" });
+  }
+};
 
+// ✅ Create new employee
 export const createEmployee = async (req, res) => {
   try {
     const newEmp = new Employee(req.body);
@@ -52,6 +61,7 @@ export const createEmployee = async (req, res) => {
   }
 };
 
+// ✅ Update employee
 export const updateEmployee = async (req, res) => {
   try {
     const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, {
@@ -73,6 +83,7 @@ export const updateEmployee = async (req, res) => {
   }
 };
 
+// ✅ Delete employee
 export const deleteEmployee = async (req, res) => {
   try {
     const deleted = await Employee.findByIdAndDelete(req.params.id);

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getEmployees,
+  getAllEmployees,
   createEmployee,
   updateEmployee,
   deleteEmployee,
@@ -8,7 +9,8 @@ import {
 
 const router = express.Router();
 
-router.get("/", getEmployees);
+router.get("/", getEmployees);         // with pagination/search/sort
+router.get("/all", getAllEmployees);   // all employees - dashboard use
 router.post("/", createEmployee);
 router.put("/:id", updateEmployee);
 router.delete("/:id", deleteEmployee);
