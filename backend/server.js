@@ -1,4 +1,3 @@
-// server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -27,10 +26,10 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps, curl, postman)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log("❌ Blocked by CORS:", origin); // ✅ Debug
       callback(new Error("Not allowed by CORS"));
     }
   },
@@ -39,10 +38,11 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
+// ✅ Apply CORS before routes
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// ✅ MongoDB connection
+// ✅ MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
@@ -55,7 +55,7 @@ app.use("/api/timing", timeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 
-// ✅ Root route for health check
+// ✅ Root route
 app.get("/", (req, res) => {
   res.send("🚀 SalesCRM Backend is running");
 });

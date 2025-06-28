@@ -5,6 +5,22 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
   { ignores: ['dist'] },
+
+  // ✅ Special config for Node-based files like vite.config.js
+  {
+    files: ['vite.config.*', 'eslint.config.*', '*.cjs'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: {
+        ...globals.node,
+      },
+      parserOptions: {
+        sourceType: 'module',
+      },
+    },
+  },
+
+  // ✅ Regular frontend files (React/Browser)
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
