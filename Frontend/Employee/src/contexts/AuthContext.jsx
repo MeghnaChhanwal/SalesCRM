@@ -5,22 +5,23 @@ const AuthContext = createContext();
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 export const AuthProvider = ({ children }) => {
-  const [employee, setEmployeeState] = useState(() => {
-    const saved = sessionStorage.getItem("employee");
-    return saved ? JSON.parse(saved) : null;
-  });
-
+  const [employee, setEmployeeState] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔁 Load from sessionStorage
   useEffect(() => {
+    const saved = sessionStorage.getItem("employee");
+    if (saved) {
+      setEmployeeState(JSON.parse(saved));
+    }
     setLoading(false);
   }, []);
 
-  // ✅ Tab close = logout (not refresh)
+  // ✅ Auto logout on tab close (but not on refresh)
   useEffect(() => {
     const handleTabClose = () => {
       const nav = performance.getEntriesByType("navigation")[0];
-      if (nav?.type === "reload") return; // skip logout on reload
+      if (nav?.type === "reload") return;
 
       const emp = sessionStorage.getItem("employee");
       if (emp && navigator.sendBeacon) {

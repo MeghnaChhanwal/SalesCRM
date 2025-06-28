@@ -1,3 +1,4 @@
+// src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -21,23 +22,20 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/login`, {
-        email,
-        password,
-      });
+      const res = await axios.post(`${API_BASE}/api/auth/login`, { email, password });
 
       const employee = {
-        _id: res.data._id,
+        _id: res.data.employeeId,
         firstName: res.data.firstName,
         lastName: res.data.lastName,
         email: res.data.email,
         status: res.data.status,
       };
 
-      setEmployee(employee); // saves in sessionStorage
+      setEmployee(employee); // Saves to sessionStorage + context
       navigate("/dashboard");
     } catch (err) {
-      setError(err?.response?.data?.message || "Login failed. Try again.");
+      setError(err?.response?.data?.error || "Login failed. Try again.");
     } finally {
       setLoading(false);
     }
@@ -48,22 +46,21 @@ const Login = () => {
       <div className={styles.container}>
         <h2 className={styles.heading}>Employee Login</h2>
         {error && <p className={styles.error}>{error}</p>}
-
         <form onSubmit={handleSubmit} className={styles.form}>
           <input
             type="email"
-            placeholder="Enter your email"
-            className={styles.input}
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className={styles.input}
             required
           />
           <input
             type="password"
-            placeholder="Enter your last name"
-            className={styles.input}
+            placeholder="Last Name"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className={styles.input}
             required
           />
           <button type="submit" className={styles.button} disabled={loading}>

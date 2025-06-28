@@ -1,15 +1,13 @@
+// src/components/ProtectedRoute.jsx
 import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
-  const location = useLocation();
 
-  if (loading) return null; // Wait till session is restored
-  if (!isLoggedIn) return <Navigate to="/login" state={{ from: location }} replace />;
-
-  return children;
+  if (loading) return null;
+  return isLoggedIn ? children : <Navigate to="/" replace />;
 };
 
 export default ProtectedRoute;
