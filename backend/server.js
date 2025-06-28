@@ -21,15 +21,23 @@ if (!fs.existsSync(uploadFolder)) {
   fs.mkdirSync(uploadFolder);
 }
 
-// ✅ Dynamic CORS configuration
+// ✅ Read allowed origins from .env
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
 
+// ✅ Regex for Vercel preview domains (admin/employee)
+const vercelRegex = /^https:\/\/(admin|employee)-frontend-[a-z0-9]+-meghnachhanwals-projects\.vercel\.app$/;
+
+// ✅ Dynamic CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (
+      !origin || // Allow mobile apps or curl
+      allowedOrigins.includes(origin) || // Match static allowed origins
+      vercelRegex.test(origin) // Allow dynamic Vercel preview domains
+    ) {
       callback(null, true);
     } else {
-      console.log("❌ Blocked by CORS:", origin); // ✅ Debug
+      console.log("❌ Blocked by CORS:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
