@@ -8,18 +8,20 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
+
+      // ✅ Inject CSP <meta> tag dynamically
       {
         name: "inject-csp-meta",
         transformIndexHtml(html) {
           return html.replace(
             "</head>",
             `
-<meta http-equiv="Content-Security-Policy" content="
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
-  style-src 'self' 'unsafe-inline';
-  connect-src ${connectSrc};
-">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval';
+    style-src 'self' 'unsafe-inline';
+    connect-src ${connectSrc};
+  ">
 </head>`
           );
         },
