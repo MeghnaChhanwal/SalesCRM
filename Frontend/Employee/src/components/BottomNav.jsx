@@ -1,36 +1,30 @@
-// src/components/BottomNav.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styles from "../styles/BottomNav.module.css";
 
-import homeIcon from "../assets/home.png";
-import leadsIcon from "../assets/lead.png";
-import scheduleIcon from "../assets/schedule.png";
-import profileIcon from "../assets/profile.png";
+const navItems = [
+  { path: "/dashboard", label: "Home", icon: "/images/home.png" },
+  { path: "/leads", label: "Leads", icon: "/images/lead.png" },
+  { path: "/schedule", label: "Schedule", icon: "/images/schedule.png" },
+  { path: "/profile", label: "Profile", icon: "/images/profile.png" },
+];
 
 const BottomNav = () => {
-  const navItems = [
-    { path: "/dashboard", label: "Home",     icon: homeIcon },
-    { path: "/leads",     label: "Leads",    icon: leadsIcon },
-    { path: "/schedule",  label: "Schedule", icon: scheduleIcon },
-    { path: "/profile",   label: "Profile",  icon: profileIcon },
-  ];
-
   return (
-    <div className={styles.navbar}>
-      {navItems.map((item) => (
+    <nav className={styles.navbar}>
+      {navItems.map(({ path, label, icon }) => (
         <NavLink
-          key={item.path}
-          to={item.path}
+          key={path}
+          to={path}
           className={({ isActive }) =>
             `${styles.navItem} ${isActive ? styles.active : ""}`
           }
         >
-          <img src={item.icon} alt={item.label} className={styles.icon} />
-          <span>{item.label}</span>
+          <img src={icon} alt={`${label} icon`} className={styles.icon} />
+          <span className={styles.label}>{label}</span>
         </NavLink>
       ))}
-    </div>
+    </nav>
   );
 };
 
