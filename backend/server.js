@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -10,6 +11,7 @@ import leadRoutes from "./routes/leadRoutes.js";
 import timeRoutes from "./routes/timingRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+
 dotenv.config();
 
 const app = express();
@@ -20,9 +22,19 @@ if (!fs.existsSync(uploadFolder)) {
   fs.mkdirSync(uploadFolder);
 }
 
-// ✅ CORS configuration
+// ✅ Dynamic CORS configuration
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
+
 const corsOptions = {
-  origin: "*", // 🔁 In production, replace with frontend domain
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
@@ -42,7 +54,6 @@ app.use("/api/leads", leadRoutes);
 app.use("/api/timing", timeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
- // login POST route
 
 // ✅ Root route for health check
 app.get("/", (req, res) => {
