@@ -21,33 +21,17 @@ if (!fs.existsSync(uploadFolder)) {
   fs.mkdirSync(uploadFolder);
 }
 
-// ✅ Read allowed origins from .env
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [];
+// ✅ Allow All Origins - CORS Configuration
+app.use(
+  cors({
+    origin: true, // Reflect request origin
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-// ✅ Regex for Vercel preview domains (admin/employee)
-const vercelRegex = /^https:\/\/(admin|employee)-frontend-[a-z0-9]+-meghnachhanwals-projects\.vercel\.app$/;
-
-// ✅ Dynamic CORS configuration
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (
-      !origin || // Allow mobile apps or curl
-      allowedOrigins.includes(origin) || // Match static allowed origins
-      vercelRegex.test(origin) // Allow dynamic Vercel preview domains
-    ) {
-      callback(null, true);
-    } else {
-      console.log("❌ Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
-
-// ✅ Apply CORS before routes
-app.use(cors(corsOptions));
+// ✅ Middleware
 app.use(express.json());
 
 // ✅ MongoDB Connection
