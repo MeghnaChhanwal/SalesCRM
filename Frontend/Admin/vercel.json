@@ -1,10 +1,15 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
-  ],
-  "git": {
+  "github": {
+    "enabled": true,
     "deployments": {
-      "preview": false
+      "preview": {
+        "enabled": false
+      }
+    }
+  },
+  "build": {
+    "env": {
+      "VITE_API_BASE": "https://salescrmapp.onrender.com"
     }
   }
 }
