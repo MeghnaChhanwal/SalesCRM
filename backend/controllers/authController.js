@@ -1,11 +1,11 @@
-// backend/controllers/authController.js
 import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ LOGIN - check credentials, mark Active, handle check-in
+// ✅ LOGIN
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
+
   if (!email || !password)
     return res.status(400).json({ error: "Email and password are required" });
 
@@ -18,20 +18,17 @@ export const loginEmployee = async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
 
     if (employee.status === "Active")
-      return res.status(403).json({ error: "Already logged in from another device or tab" });
+      return res.status(403).json({ error: "Already logged in from another tab/device" });
 
-    // ✅ Mark employee as Active
     employee.status = "Active";
     await employee.save();
 
-    // ✅ Check-in or resume for today
     const date = todayIST();
     const time = timeIST();
 
     let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
-      // First login today
       timing = new Timing({
         employee: employee._id,
         date,
@@ -41,7 +38,6 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      // Re-login same day: update status, close open break if any
       timing.checkIn = time;
       timing.status = "Active";
 
@@ -68,20 +64,17 @@ export const loginEmployee = async (req, res) => {
   }
 };
 
-// ✅ LOGOUT - triggered on tab close
+// ✅ LOGOUT
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
   try {
     const employee = await Employee.findById(employeeId);
-    if (!employee)
-      return res.status(404).json({ error: "Employee not found" });
+    if (!employee) return res.status(404).json({ error: "Employee not found" });
 
-    // ✅ Mark employee as Inactive
     employee.status = "Inactive";
     await employee.save();
 
-    // ✅ Final check-out + start break
     const date = todayIST();
     const time = timeIST();
 
