@@ -1,5 +1,4 @@
 {
-  "version": 2,
   "github": {
     "enabled": true,
     "deployments": {
@@ -11,11 +10,9 @@
       }
     }
   },
- 
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+  "build": {
+    "env": {
+      "VITE_API_BASE": "https://salescrmapp.onrender.com"
     }
-  ]
+  }
 }
