@@ -21,11 +21,13 @@ if (!fs.existsSync(uploadFolder)) {
   fs.mkdirSync(uploadFolder);
 }
 
-// ✅ Allow All Origins - CORS Configuration
+// ✅ Allow All Origins - CORS Configuration (with credentials support)
 app.use(
   cors({
-    origin: true, // Reflect request origin
-    credentials: true,
+    origin: function (origin, callback) {
+      callback(null, true); // ✅ Allow all origins
+    },
+    credentials: true, // ✅ If using cookies/auth headers
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
