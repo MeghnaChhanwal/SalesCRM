@@ -4,6 +4,9 @@
     "deployments": {
       "preview": {
         "enabled": false
+      },
+      "production": {
+        "enabled": true
       }
     }
   },
