@@ -3,13 +3,12 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
-  const connectSrc = env.VITE_CSP_CONNECT_SRC || "'self'";
+  const connectSrc = env.VITE_CSP_CONNECT_SRC || "*"; // allow all origins
 
   return {
     plugins: [
       react(),
 
-      // ✅ Inject CSP <meta> tag dynamically
       {
         name: "inject-csp-meta",
         transformIndexHtml(html) {
