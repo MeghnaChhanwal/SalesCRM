@@ -1,22 +1,17 @@
-// src/pages/Login.jsx
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { useAuth } from "../contexts/AuthContext";
 import Layout from "../components/Layout";
+import { useAuth } from "../contexts/AuthContext";
 import styles from "../styles/Login.module.css";
-
-const API_BASE = import.meta.env.VITE_API_BASE;
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // lastName
-  const { setEmployee } = useAuth(); // From context
-  const navigate = useNavigate();
-
+  const [password, setPassword] = useState(""); // lastName as password
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,23 +19,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/login`, {
-        email,
-        password,
-      });
-
-      const employee = {
-        _id: res.data.employeeId,
-        firstName: res.data.firstName,
-        lastName: res.data.lastName,
-        email: res.data.email,
-        status: res.data.status,
-      };
-
-      setEmployee(employee); // ⬅️ context + sessionStorage
+      await login(email, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err?.response?.data?.error || "Login failed. Please try again.");
+      setError("Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -54,17 +36,30 @@ const Login = () => {
         {error && <p className={styles.error}>{error}</p>}
 
         <form onSubmit={handleSubmit} className={styles.form}>
+          <label htmlFor="email" className={styles.label}>
+            Email
+          </label>
           <input
             type="email"
-            placeholder="Email"
+            id="email"
+            name="email"
+            autoComplete="email"
+            placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={styles.input}
             required
           />
+
+          <label htmlFor="password" className={styles.label}>
+            Last Name
+          </label>
           <input
             type="password"
-            placeholder="Last Name"
+            id="password"
+            name="password"
+            autoComplete="current-password"
+            placeholder="Enter your last name"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={styles.input}
