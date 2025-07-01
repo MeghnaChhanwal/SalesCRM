@@ -13,6 +13,8 @@ export default defineConfig(({ mode }) => {
               "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src *",
           }
         : {},
+      // ✅ Add this fallback config
+      historyApiFallback: true,
     },
   };
 });
