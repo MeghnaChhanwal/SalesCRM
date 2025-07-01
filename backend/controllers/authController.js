@@ -1,10 +1,8 @@
-// controllers/authController.js
-
 import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ LOGIN
+// ✅ LOGIN CONTROLLER
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
 
@@ -20,20 +18,22 @@ export const loginEmployee = async (req, res) => {
     if (employee.lastName.toLowerCase() !== password.toLowerCase())
       return res.status(401).json({ error: "Invalid credentials" });
 
-    if (employee.status === "Active")
-      return res.status(403).json({ error: "Already logged in from another tab/device" });
-
-    // ✅ Update employee status to active
+    // ✅ Mark employee as Active
     employee.status = "Active";
     await employee.save();
 
-    // ✅ Timing log
     const date = todayIST();
     const time = timeIST();
 
-    let timing = await Timing.findOne({ employee: employee._id, date });
+    // ✅ Check if today's timing exists and not checked out
+    let timing = await Timing.findOne({
+      employee: employee._id,
+      date,
+      checkOut: { $exists: false },
+    });
 
     if (!timing) {
+      // ✅ First login of the day or after checkout – create new entry
       timing = new Timing({
         employee: employee._id,
         date,
@@ -43,9 +43,10 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      timing.checkIn = timing.checkIn || time;
+      // ✅ Already has active session – update status only
       timing.status = "Active";
 
+      // ✅ Close any ongoing break
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = time;
@@ -64,12 +65,12 @@ export const loginEmployee = async (req, res) => {
       status: employee.status,
     });
   } catch (error) {
-    console.error("Login Error:", error);
+    console.error("❌ Login Error:", error);
     res.status(500).json({ error: "Login failed" });
   }
 };
 
-// ✅ LOGOUT (tab close or logout button)
+// ✅ LOGOUT CONTROLLER
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -78,11 +79,9 @@ export const logoutEmployee = async (req, res) => {
     if (!employee)
       return res.status(404).json({ error: "Employee not found" });
 
-    // ✅ Update status to inactive
     employee.status = "Inactive";
     await employee.save();
 
-    // ✅ Update timing
     const date = todayIST();
     const time = timeIST();
 
@@ -102,7 +101,7 @@ export const logoutEmployee = async (req, res) => {
       timing,
     });
   } catch (error) {
-    console.error("Logout Error:", error);
+    console.error("❌ Logout Error:", error);
     res.status(500).json({ error: "Logout failed" });
   }
 };
