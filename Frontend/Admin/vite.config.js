@@ -12,9 +12,12 @@ export default defineConfig(({ mode }) => {
             'Content-Security-Policy':
               "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src *",
           }
-        : {},
-      // ✅ Add this fallback config
-      historyApiFallback: true,
+        : {}
     },
+    // ✅ This is the correct way to enable fallback for SPA routing in Vite
+    build: {
+      outDir: 'dist'
+    },
+    base: './'
   };
 });
