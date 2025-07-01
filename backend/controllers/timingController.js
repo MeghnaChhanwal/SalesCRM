@@ -1,3 +1,5 @@
+// controllers/timingController.js
+
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 import moment from "moment-timezone";
@@ -8,7 +10,12 @@ export const getTodayTiming = async (req, res) => {
 
   try {
     const date = todayIST();
-    const timings = await Timing.find({ employee: employeeId, date }).sort({ createdAt: -1 });
+
+    const timings = await Timing.find({
+      employee: employeeId,
+      date,
+    }).sort({ createdAt: -1 });
+
     res.status(200).json(timings);
   } catch (error) {
     console.error("Fetch Today Timing Error:", error);
@@ -38,7 +45,7 @@ export const getPast7DaysTiming = async (req, res) => {
 // 📘 3. Get total work & break summary for week/month
 export const getSummaryTiming = async (req, res) => {
   const { employeeId } = req.params;
-  const { range = "week" } = req.query;
+  const { range = "week" } = req.query; // "week" or "month"
 
   try {
     const daysBack = range === "month" ? 29 : 6;

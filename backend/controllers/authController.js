@@ -1,3 +1,5 @@
+// controllers/authController.js
+
 import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
@@ -11,6 +13,7 @@ export const loginEmployee = async (req, res) => {
 
   try {
     const employee = await Employee.findOne({ email });
+
     if (!employee)
       return res.status(404).json({ error: "Employee not found" });
 
@@ -20,12 +23,14 @@ export const loginEmployee = async (req, res) => {
     if (employee.status === "Active")
       return res.status(403).json({ error: "Already logged in from another tab/device" });
 
+    // Mark employee active
     employee.status = "Active";
     await employee.save();
 
     const date = todayIST();
     const time = timeIST();
 
+    // Log timing
     let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
@@ -38,9 +43,10 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      timing.checkIn = time;
+      timing.checkIn = timing.checkIn || time; // keep original if already checked in
       timing.status = "Active";
 
+      // End any open break
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = time;
@@ -70,7 +76,8 @@ export const logoutEmployee = async (req, res) => {
 
   try {
     const employee = await Employee.findById(employeeId);
-    if (!employee) return res.status(404).json({ error: "Employee not found" });
+    if (!employee)
+      return res.status(404).json({ error: "Employee not found" });
 
     employee.status = "Inactive";
     await employee.save();
@@ -83,13 +90,16 @@ export const logoutEmployee = async (req, res) => {
       {
         checkOut: time,
         status: "Inactive",
-        breakStatus: "OnBreak",
+        breakStatus: "OnBreak", // Optional: treat logout as break start
         $push: { breaks: { start: time } },
       },
       { new: true }
     );
 
-    res.status(200).json({ message: "Logged out successfully", timing });
+    res.status(200).json({
+      message: "Logged out successfully",
+      timing,
+    });
   } catch (error) {
     console.error("Logout Error:", error);
     res.status(500).json({ error: "Logout failed" });

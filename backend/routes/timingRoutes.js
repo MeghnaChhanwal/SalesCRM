@@ -1,3 +1,5 @@
+// routes/timingRoutes.js
+
 import express from "express";
 import {
   getTodayTiming,
@@ -7,8 +9,13 @@ import {
 
 const router = express.Router();
 
-router.get("/:employeeId", getTodayTiming); // today
-router.get("/history/:employeeId", getPast7DaysTiming); // last 7 days
-router.get("/summary/:employeeId", getSummaryTiming); // ?range=week | month
+// 📅 Get today's timing
+router.get("/:employeeId", getTodayTiming);
+
+// 📊 Get last 7 days timing history
+router.get("/history/:employeeId", getPast7DaysTiming);
+
+// 📈 Get summary (week or month)
+router.get("/summary/:employeeId", getSummaryTiming); // query: ?range=week|month
 
 export default router;

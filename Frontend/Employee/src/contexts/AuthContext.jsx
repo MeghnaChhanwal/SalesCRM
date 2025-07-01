@@ -8,24 +8,27 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem("employee");
+    const saved = localStorage.getItem("employee");
     if (saved) {
       setEmployeeState(JSON.parse(saved));
     }
     setLoading(false);
   }, []);
 
-  // ✅ Tab Close (not refresh) → logout using sendBeacon
+  // Logout on tab close
   useEffect(() => {
-    const handleTabClose = (event) => {
-      const emp = sessionStorage.getItem("employee");
+    let unloaded = false;
+    const handleTabClose = () => {
+      if (unloaded) return;
+      unloaded = true;
+
+      const emp = localStorage.getItem("employee");
       if (!emp) return;
 
       const { _id } = JSON.parse(emp);
       const logoutUrl = `${API_BASE}/api/auth/logout/${_id}`;
 
       try {
-        // Use Beacon
         navigator.sendBeacon(logoutUrl);
       } catch (err) {
         fetch(logoutUrl, {
@@ -34,20 +37,20 @@ export const AuthProvider = ({ children }) => {
         });
       }
 
-      sessionStorage.removeItem("employee");
+      localStorage.removeItem("employee");
     };
 
-    window.addEventListener("beforeunload", handleTabClose); // Better than pagehide
+    window.addEventListener("beforeunload", handleTabClose);
     return () => window.removeEventListener("beforeunload", handleTabClose);
   }, []);
 
   const login = (emp) => {
-    sessionStorage.setItem("employee", JSON.stringify(emp));
+    localStorage.setItem("employee", JSON.stringify(emp));
     setEmployeeState(emp);
   };
 
   const logout = () => {
-    sessionStorage.removeItem("employee");
+    localStorage.removeItem("employee");
     setEmployeeState(null);
   };
 
