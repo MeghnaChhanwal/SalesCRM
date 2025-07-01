@@ -4,7 +4,9 @@ import { useAuth } from "../contexts/AuthContext";
 
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn, loading } = useAuth();
-  if (loading) return null;
+
+  if (loading) return null; // Show nothing while checking auth status
+
   return isLoggedIn ? children : <Navigate to="/" replace />;
 };
 

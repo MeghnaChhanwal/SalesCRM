@@ -23,14 +23,14 @@ export const loginEmployee = async (req, res) => {
     if (employee.status === "Active")
       return res.status(403).json({ error: "Already logged in from another tab/device" });
 
-    // Mark employee active
+    // ✅ Update employee status to active
     employee.status = "Active";
     await employee.save();
 
+    // ✅ Timing log
     const date = todayIST();
     const time = timeIST();
 
-    // Log timing
     let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
@@ -43,10 +43,9 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      timing.checkIn = timing.checkIn || time; // keep original if already checked in
+      timing.checkIn = timing.checkIn || time;
       timing.status = "Active";
 
-      // End any open break
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = time;
@@ -70,7 +69,7 @@ export const loginEmployee = async (req, res) => {
   }
 };
 
-// ✅ LOGOUT
+// ✅ LOGOUT (tab close or logout button)
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -79,9 +78,11 @@ export const logoutEmployee = async (req, res) => {
     if (!employee)
       return res.status(404).json({ error: "Employee not found" });
 
+    // ✅ Update status to inactive
     employee.status = "Inactive";
     await employee.save();
 
+    // ✅ Update timing
     const date = todayIST();
     const time = timeIST();
 
@@ -90,7 +91,7 @@ export const logoutEmployee = async (req, res) => {
       {
         checkOut: time,
         status: "Inactive",
-        breakStatus: "OnBreak", // Optional: treat logout as break start
+        breakStatus: "OnBreak",
         $push: { breaks: { start: time } },
       },
       { new: true }

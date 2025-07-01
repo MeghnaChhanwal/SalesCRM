@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,7 +9,7 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(""); // lastName
   const { setEmployee } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
@@ -22,17 +21,17 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/login`, { email, password });
+      const { data } = await axios.post(`${API_BASE}/api/auth/login`, { email, password });
 
       const employee = {
-        _id: res.data.employeeId,
-        firstName: res.data.firstName,
-        lastName: res.data.lastName,
-        email: res.data.email,
-        status: res.data.status,
+        _id: data.employeeId,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        status: data.status,
       };
 
-      setEmployee(employee); // Saves to sessionStorage + context
+      setEmployee(employee);
       navigate("/dashboard");
     } catch (err) {
       setError(err?.response?.data?.error || "Login failed. Try again.");
@@ -45,7 +44,9 @@ const Login = () => {
     <Layout showBottomNav={false}>
       <div className={styles.container}>
         <h2 className={styles.heading}>Employee Login</h2>
+
         {error && <p className={styles.error}>{error}</p>}
+
         <form onSubmit={handleSubmit} className={styles.form}>
           <input
             type="email"
@@ -53,16 +54,22 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={styles.input}
+            name="email"
             required
+            autoComplete="email"
           />
+
           <input
             type="password"
             placeholder="Last Name"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={styles.input}
+            name="password"
             required
+            autoComplete="current-password"
           />
+
           <button type="submit" className={styles.button} disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </button>
