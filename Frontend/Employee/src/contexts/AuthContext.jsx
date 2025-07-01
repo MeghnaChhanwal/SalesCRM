@@ -4,9 +4,9 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
-  const [loading, setLoading] = useState(true); // ⏳ Wait before routing
+  const [loading, setLoading] = useState(true);
 
-  // 🔁 Restore session on app load
+  // 🔁 Restore session on first load
   useEffect(() => {
     const storedEmployee = sessionStorage.getItem("employee");
     if (storedEmployee) {
@@ -15,20 +15,23 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // 🚪 Auto-logout on tab close
+  // 🚪 Auto-logout on tab close or switch
   useEffect(() => {
-    const handleTabClose = () => {
-      const emp = sessionStorage.getItem("employee");
-      if (emp) {
-        navigator.sendBeacon(
-          `${import.meta.env.VITE_API_BASE}/api/auth/logout`
-        );
-        sessionStorage.clear();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        const emp = sessionStorage.getItem("employee");
+        if (emp) {
+          navigator.sendBeacon(
+            `${import.meta.env.VITE_API_BASE}/api/auth/logout`
+          );
+          sessionStorage.clear();
+        }
       }
     };
 
-    window.addEventListener("unload", handleTabClose);
-    return () => window.removeEventListener("unload", handleTabClose);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   // 🔐 Login function
@@ -41,14 +44,14 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (!response.ok) throw new Error("Login failed");
-    const data = await response.json();
 
+    const data = await response.json();
     setEmployee(data.employee);
     sessionStorage.setItem("employee", JSON.stringify(data.employee));
     return data.employee;
   };
 
-  // 🚪 Logout function
+  // 🚪 Logout manually
   const logout = async () => {
     await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/logout`, {
       method: "POST",
@@ -65,5 +68,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// 🌐 use this in any component to access auth
+// 🧠 Access context via this hook
 export const useAuth = () => useContext(AuthContext);
