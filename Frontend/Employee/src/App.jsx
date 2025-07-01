@@ -11,18 +11,23 @@ import Schedule from "./pages/Schedule";
 import Profile from "./pages/Profile";
 
 const App = () => {
-  const { isLoggedIn, loading } = useAuth();
+  const { employee, loading } = useAuth(); // ✅ user → employee
 
-  if (loading) return null;
+  if (loading) return null; // Wait for session restore before routing
 
   return (
     <Router>
       <Routes>
-        <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />} />
+        {/* ✅ Root path: if logged in go to dashboard, else login */}
+        <Route path="/" element={employee ? <Navigate to="/dashboard" /> : <Login />} />
+
+        {/* ✅ Protected Routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
         <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
+        {/* Fallback: unknown route → home */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

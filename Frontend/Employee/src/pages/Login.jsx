@@ -1,3 +1,5 @@
+// src/pages/Login.jsx
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,8 +12,9 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); // lastName
-  const { setEmployee } = useAuth();
+  const { setEmployee } = useAuth(); // From context
   const navigate = useNavigate();
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +24,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/login`, { email, password });
+      const res = await axios.post(`${API_BASE}/api/auth/login`, {
+        email,
+        password,
+      });
 
       const employee = {
         _id: res.data.employeeId,
@@ -31,7 +37,7 @@ const Login = () => {
         status: res.data.status,
       };
 
-      setEmployee(employee); // ✅ Save to context + localStorage
+      setEmployee(employee); // ⬅️ context + sessionStorage
       navigate("/dashboard");
     } catch (err) {
       setError(err?.response?.data?.error || "Login failed. Please try again.");
@@ -44,6 +50,7 @@ const Login = () => {
     <Layout showBottomNav={false}>
       <div className={styles.container}>
         <h2 className={styles.heading}>Employee Login</h2>
+
         {error && <p className={styles.error}>{error}</p>}
 
         <form onSubmit={handleSubmit} className={styles.form}>

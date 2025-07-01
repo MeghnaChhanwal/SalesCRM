@@ -1,78 +1,69 @@
-// src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
-const API_BASE = import.meta.env.VITE_API_BASE;
 
 export const AuthProvider = ({ children }) => {
-  const [employee, setEmployeeState] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [employee, setEmployee] = useState(null);
+  const [loading, setLoading] = useState(true); // ⏳ Wait before routing
 
-  // ✅ On mount: Check for existing session in localStorage
+  // 🔁 Restore session on app load
   useEffect(() => {
-    const saved = localStorage.getItem("employee");
-    if (saved) {
-      setEmployeeState(JSON.parse(saved));
+    const storedEmployee = sessionStorage.getItem("employee");
+    if (storedEmployee) {
+      setEmployee(JSON.parse(storedEmployee));
     }
     setLoading(false);
   }, []);
 
-  // ✅ Auto logout ONLY on tab close (NOT on refresh)
+  // 🚪 Auto-logout on tab close
   useEffect(() => {
-    let unloaded = false;
-
-    const handleTabClose = (e) => {
-      // ⛔ Ignore page refresh
-      if (performance.getEntriesByType("navigation")[0]?.type === "reload") return;
-
-      if (unloaded) return;
-      unloaded = true;
-
-      const emp = localStorage.getItem("employee");
-      if (!emp) return;
-
-      const { _id } = JSON.parse(emp);
-      const logoutUrl = `${API_BASE}/api/auth/logout/${_id}`;
-
-      try {
-        navigator.sendBeacon(logoutUrl);
-      } catch {
-        fetch(logoutUrl, {
-          method: "POST",
-          keepalive: true,
-        });
+    const handleTabClose = () => {
+      const emp = sessionStorage.getItem("employee");
+      if (emp) {
+        navigator.sendBeacon(
+          `${import.meta.env.VITE_API_BASE}/api/auth/logout`
+        );
+        sessionStorage.clear();
       }
-
-      localStorage.removeItem("employee");
     };
 
-    window.addEventListener("beforeunload", handleTabClose);
-    return () => window.removeEventListener("beforeunload", handleTabClose);
+    window.addEventListener("unload", handleTabClose);
+    return () => window.removeEventListener("unload", handleTabClose);
   }, []);
 
-  const login = (emp) => {
-    localStorage.setItem("employee", JSON.stringify(emp));
-    setEmployeeState(emp);
+  // 🔐 Login function
+  const login = async (email, password) => {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) throw new Error("Login failed");
+    const data = await response.json();
+
+    setEmployee(data.employee);
+    sessionStorage.setItem("employee", JSON.stringify(data.employee));
+    return data.employee;
   };
 
-  const logout = () => {
-    localStorage.removeItem("employee");
-    setEmployeeState(null);
+  // 🚪 Logout function
+  const logout = async () => {
+    await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+    sessionStorage.clear();
+    setEmployee(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        employee,
-        setEmployee: login,
-        logout,
-        isLoggedIn: !!employee,
-        loading,
-      }}
-    >
+    <AuthContext.Provider value={{ employee, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
+// 🌐 use this in any component to access auth
 export const useAuth = () => useContext(AuthContext);
