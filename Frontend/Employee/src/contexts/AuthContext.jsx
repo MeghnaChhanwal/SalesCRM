@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployeeState] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Load session from localStorage on app start
+  // ✅ On mount: Check for existing session in localStorage
   useEffect(() => {
     const saved = localStorage.getItem("employee");
     if (saved) {
@@ -17,9 +17,17 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // ✅ Handle logout on tab close
+  // ✅ Auto logout ONLY on tab close (NOT on refresh)
   useEffect(() => {
-    const handleTabClose = () => {
+    let unloaded = false;
+
+    const handleTabClose = (e) => {
+      // ⛔ Ignore page refresh
+      if (performance.getEntriesByType("navigation")[0]?.type === "reload") return;
+
+      if (unloaded) return;
+      unloaded = true;
+
       const emp = localStorage.getItem("employee");
       if (!emp) return;
 
@@ -28,7 +36,7 @@ export const AuthProvider = ({ children }) => {
 
       try {
         navigator.sendBeacon(logoutUrl);
-      } catch (_err) {
+      } catch {
         fetch(logoutUrl, {
           method: "POST",
           keepalive: true,
@@ -42,13 +50,11 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", handleTabClose);
   }, []);
 
-  // ✅ Login Function
   const login = (emp) => {
     localStorage.setItem("employee", JSON.stringify(emp));
     setEmployeeState(emp);
   };
 
-  // ✅ Logout Function
   const logout = () => {
     localStorage.removeItem("employee");
     setEmployeeState(null);
@@ -69,5 +75,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ✅ Custom hook to use auth
 export const useAuth = () => useContext(AuthContext);

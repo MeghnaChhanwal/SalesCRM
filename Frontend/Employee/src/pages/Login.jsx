@@ -21,20 +21,20 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post(`${API_BASE}/api/auth/login`, { email, password });
+      const res = await axios.post(`${API_BASE}/api/auth/login`, { email, password });
 
       const employee = {
-        _id: data.employeeId,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        status: data.status,
+        _id: res.data.employeeId,
+        firstName: res.data.firstName,
+        lastName: res.data.lastName,
+        email: res.data.email,
+        status: res.data.status,
       };
 
-      setEmployee(employee);
+      setEmployee(employee); // ✅ Save to context + localStorage
       navigate("/dashboard");
     } catch (err) {
-      setError(err?.response?.data?.error || "Login failed. Try again.");
+      setError(err?.response?.data?.error || "Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,6 @@ const Login = () => {
     <Layout showBottomNav={false}>
       <div className={styles.container}>
         <h2 className={styles.heading}>Employee Login</h2>
-
         {error && <p className={styles.error}>{error}</p>}
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -54,20 +53,15 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={styles.input}
-            name="email"
             required
-            autoComplete="email"
           />
-
           <input
             type="password"
             placeholder="Last Name"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={styles.input}
-            name="password"
             required
-            autoComplete="current-password"
           />
 
           <button type="submit" className={styles.button} disabled={loading}>
