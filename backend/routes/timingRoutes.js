@@ -9,13 +9,13 @@ import {
 
 const router = express.Router();
 
-// 📅 Get today's timing
-router.get("/:employeeId", getTodayTiming);
-
 // 📊 Get last 7 days timing history
 router.get("/history/:employeeId", getPast7DaysTiming);
 
 // 📈 Get summary (week or month)
 router.get("/summary/:employeeId", getSummaryTiming); // query: ?range=week|month
+
+// 📅 Get today's timing (⚠️ keep last)
+router.get("/:employeeId", getTodayTiming);
 
 export default router;

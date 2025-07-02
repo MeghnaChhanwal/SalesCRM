@@ -4,12 +4,12 @@ import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 import moment from "moment-timezone";
 
-// 📘 1. Get today's timings for a given employee
+// ✅ 1. Get today's timings for a given employee
 export const getTodayTiming = async (req, res) => {
   const { employeeId } = req.params;
 
   try {
-    const date = todayIST();
+    const date = todayIST(); // format: YYYY-MM-DD
 
     const timings = await Timing.find({
       employee: employeeId,
@@ -23,7 +23,7 @@ export const getTodayTiming = async (req, res) => {
   }
 };
 
-// 📘 2. Get last 7 days of timing logs
+// ✅ 2. Get last 7 days of timing logs (checkIn, checkOut, breaks)
 export const getPast7DaysTiming = async (req, res) => {
   const { employeeId } = req.params;
 
@@ -42,7 +42,7 @@ export const getPast7DaysTiming = async (req, res) => {
   }
 };
 
-// 📘 3. Get total work & break summary for week/month
+// ✅ 3. Get total work & break summary for week/month
 export const getSummaryTiming = async (req, res) => {
   const { employeeId } = req.params;
   const { range = "week" } = req.query; // "week" or "month"

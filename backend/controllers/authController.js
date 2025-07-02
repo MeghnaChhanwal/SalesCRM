@@ -1,6 +1,6 @@
 import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
-import { todayIST, timeIST } from "../utils/time.js";
+import { todayIST } from "../utils/time.js"; // Keep only todayIST, remove timeIST if not needed
 
 // ✅ LOGIN CONTROLLER
 export const loginEmployee = async (req, res) => {
@@ -22,8 +22,8 @@ export const loginEmployee = async (req, res) => {
     employee.status = "Active";
     await employee.save();
 
-    const date = todayIST();
-    const time = timeIST();
+    const date = todayIST();       // YYYY-MM-DD
+    const time = new Date();       // ✅ Correct full timestamp
 
     // ✅ Check if today's timing exists and not checked out
     let timing = await Timing.findOne({
@@ -37,7 +37,7 @@ export const loginEmployee = async (req, res) => {
       timing = new Timing({
         employee: employee._id,
         date,
-        checkIn: time,
+        checkIn: time, // ✅ Correct type
         status: "Active",
         breakStatus: "OffBreak",
         breaks: [],
@@ -56,7 +56,6 @@ export const loginEmployee = async (req, res) => {
 
     await timing.save();
 
-    // ✅ Return session data
     res.status(200).json({
       message: "Login successful",
       employee: {
@@ -77,7 +76,6 @@ export const loginEmployee = async (req, res) => {
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
-  // 🔐 Extra check to prevent CastError
   if (!employeeId || employeeId === "undefined") {
     return res.status(400).json({ error: "Invalid or missing employee ID" });
   }
@@ -91,12 +89,12 @@ export const logoutEmployee = async (req, res) => {
     await employee.save();
 
     const date = todayIST();
-    const time = timeIST();
+    const time = new Date(); // ✅ Proper Date for checkOut
 
     const timing = await Timing.findOneAndUpdate(
       { employee: employeeId, date, checkOut: { $exists: false } },
       {
-        checkOut: time,
+        checkOut: time, // ✅ Save Date object
         status: "Inactive",
         breakStatus: "OnBreak",
         $push: { breaks: { start: time } },
