@@ -1,5 +1,5 @@
 // src/pages/Login.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { useAuth } from "../contexts/AuthContext";
@@ -11,15 +11,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { login, employee } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
-
-  // 🔁 Redirect if already logged in (refresh scenario)
-  useEffect(() => {
-    if (employee) {
-      navigate("/dashboard");
-    }
-  }, [employee, navigate]);
 
   // 🔐 Handle login form submit
   const handleSubmit = async (e) => {
@@ -29,7 +22,7 @@ const Login = () => {
 
     try {
       await login(email, password); // ✅ From AuthContext
-      navigate("/dashboard");
+      navigate("/dashboard");       // Redirect only on successful login
     } catch (err) {
       setError("Login failed. Please check your credentials.");
     } finally {
