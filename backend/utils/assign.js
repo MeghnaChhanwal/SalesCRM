@@ -1,75 +1,90 @@
-// backend/utils/assign.js
 import Employee from "../models/employee.js";
 import Lead from "../models/lead.js";
 
-// Global index tracker for each group
-const groupIndexes = {
-  group1: 0,
-  group2: 0,
-  group3: 0
-};
+// Temporary in-memory lead tracker for upload session
+let tempLeadMap = {};
 
-export const assignEmployeeByConditions = async (lead) => {
-  const employees = await Employee.find(); // all employees
-  const leadCount = await Lead.aggregate([
-    {
-      $group: {
-        _id: "$assignedEmployee",
-        count: { $sum: 1 }
-      }
-    }
+export const prepareLeadDistribution = async (newLeadCount) => {
+  const employees = await Employee.find();
+
+  // 🛑 If no employee exists
+  if (employees.length === 0) {
+    return {
+      employees: [],
+      maxPerEmployee: 0,
+    };
+  }
+
+  const existingCounts = await Lead.aggregate([
+    { $group: { _id: "$assignedEmployee", count: { $sum: 1 } } },
   ]);
 
-  const leadMap = {};
-  leadCount.forEach((item) => {
-    if (item._id) {
-      leadMap[item._id.toString()] = item.count;
+  const totalExisting = existingCounts.reduce((sum, item) => sum + item.count, 0);
+  const totalLeads = totalExisting + newLeadCount;
+  const maxPerEmployee = Math.ceil(totalLeads / employees.length);
+
+  const employeeMap = {};
+  employees.forEach((emp) => {
+    employeeMap[emp._id.toString()] = {
+      employee: emp,
+      assigned: 0,
+    };
+  });
+
+  existingCounts.forEach((item) => {
+    if (item._id && employeeMap[item._id.toString()]) {
+      employeeMap[item._id.toString()].assigned = item.count;
     }
   });
 
-  // Group 1: Exact match
-  const group1 = employees.filter(
-    (emp) => emp.language === lead.language && emp.location === lead.location
-  );
+  // Initialize temp map for current session
+  tempLeadMap = {};
+  Object.entries(employeeMap).forEach(([id, data]) => {
+    tempLeadMap[id] = data.assigned;
+  });
 
-  // Group 2: Partial match
-  const group2 = employees.filter(
-    (emp) =>
-      (emp.language === lead.language || emp.location === lead.location) &&
-      !(emp.language === lead.language && emp.location === lead.location)
-  );
+  return {
+    employees,
+    maxPerEmployee,
+  };
+};
 
-  // Group 3: No match
-  const group3 = employees.filter(
-    (emp) => emp.language !== lead.language && emp.location !== lead.location
-  );
+export const assignEmployeeByConditions = async (lead, maxPerEmployee) => {
+  const employees = await Employee.find();
 
-  // Sorting each group by current lead count
-  const sortByLeadCount = (group) =>
-    group.sort((a, b) => {
-      const aCount = leadMap[a._id.toString()] || 0;
-      const bCount = leadMap[b._id.toString()] || 0;
+  // 🛑 No employees case
+  if (employees.length === 0) return null;
+
+  const sortedEmployees = employees
+    .filter((emp) => (tempLeadMap[emp._id.toString()] || 0) < maxPerEmployee)
+    .sort((a, b) => {
+      const aCount = tempLeadMap[a._id.toString()] || 0;
+      const bCount = tempLeadMap[b._id.toString()] || 0;
       return aCount - bCount;
     });
 
-  const sortedGroup1 = sortByLeadCount(group1);
-  const sortedGroup2 = sortByLeadCount(group2);
-  const sortedGroup3 = sortByLeadCount(group3);
-
-  // Round robin index tracking + assign
-  if (sortedGroup1.length > 0) {
-    const idx = groupIndexes.group1 % sortedGroup1.length;
-    groupIndexes.group1++;
-    return sortedGroup1[idx]._id;
-  } else if (sortedGroup2.length > 0) {
-    const idx = groupIndexes.group2 % sortedGroup2.length;
-    groupIndexes.group2++;
-    return sortedGroup2[idx]._id;
-  } else if (sortedGroup3.length > 0) {
-    const idx = groupIndexes.group3 % sortedGroup3.length;
-    groupIndexes.group3++;
-    return sortedGroup3[idx]._id;
+  // 1️⃣ Exact match
+  for (let emp of sortedEmployees) {
+    if (emp.language === lead.language && emp.location === lead.location) {
+      tempLeadMap[emp._id.toString()]++;
+      return emp._id;
+    }
   }
 
-  return null;
+  // 2️⃣ Partial match
+  for (let emp of sortedEmployees) {
+    if (emp.language === lead.language || emp.location === lead.location) {
+      tempLeadMap[emp._id.toString()]++;
+      return emp._id;
+    }
+  }
+
+  // 3️⃣ Fallback
+  if (sortedEmployees.length > 0) {
+    const chosen = sortedEmployees[0];
+    tempLeadMap[chosen._id.toString()]++;
+    return chosen._id;
+  }
+
+  return null; // still unassigned if over capacity
 };

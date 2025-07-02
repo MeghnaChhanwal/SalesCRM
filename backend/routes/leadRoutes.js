@@ -1,11 +1,16 @@
-// routes/leadRoutes.js
 import express from "express";
-import { getLeads, uploadCSV } from "../controllers/leadController.js";
-import { upload } from "../middleware/upload.js";
+import multer from "multer";
+import {
+  getLeads,
+  uploadCSV,
+  addLeadManually
+} from "../controllers/leadController.js";
 
 const router = express.Router();
+const upload = multer({ dest: "uploads/" });
 
-router.get("/", getLeads); // Fetch leads with search/sort/pagination
-router.post("/upload", upload.single("file"), uploadCSV); // Upload CSV and assign leads
+router.get("/", getLeads);
+router.post("/", addLeadManually); // ✅ Manual
+router.post("/upload", upload.single("file"), uploadCSV); // ✅ CSV
 
 export default router;

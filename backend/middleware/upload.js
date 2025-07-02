@@ -1,4 +1,3 @@
-// middleware/upload.js
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -9,6 +8,7 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
+// Storage config
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
@@ -19,8 +19,8 @@ const storage = multer.diskStorage({
   },
 });
 
+// File type filter - allow only CSV
 const fileFilter = (req, file, cb) => {
-  // Allow only .csv files
   const ext = path.extname(file.originalname).toLowerCase();
   if (ext === ".csv") {
     cb(null, true);
@@ -29,4 +29,13 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-export const upload = multer({ storage, fileFilter });
+// File size limit: 2MB
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+
+export const upload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: MAX_FILE_SIZE,
+  },
+});
