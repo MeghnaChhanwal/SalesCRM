@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// src/pages/Login.jsx
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { useAuth } from "../contexts/AuthContext";
@@ -6,20 +7,28 @@ import styles from "../styles/Login.module.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // lastName as password
+  const [password, setPassword] = useState(""); // Last name as password
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { login, employee } = useAuth();
   const navigate = useNavigate();
 
+  // 🔁 Redirect if already logged in (refresh scenario)
+  useEffect(() => {
+    if (employee) {
+      navigate("/dashboard");
+    }
+  }, [employee, navigate]);
+
+  // 🔐 Handle login form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(email, password); // ✅ From AuthContext
       navigate("/dashboard");
     } catch (err) {
       setError("Login failed. Please check your credentials.");
@@ -49,6 +58,7 @@ const Login = () => {
             onChange={(e) => setEmail(e.target.value)}
             className={styles.input}
             required
+            autoFocus
           />
 
           <label htmlFor="password" className={styles.label}>
@@ -66,7 +76,11 @@ const Login = () => {
             required
           />
 
-          <button type="submit" className={styles.button} disabled={loading}>
+          <button
+            type="submit"
+            className={styles.button}
+            disabled={loading || !email || !password}
+          >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>

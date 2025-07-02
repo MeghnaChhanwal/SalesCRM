@@ -4,9 +4,9 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
-  const [loading, setLoading] = useState(true); // ⏳ Wait before routing
+  const [loading, setLoading] = useState(true);
 
-  // 🔁 Restore session on app load
+  // 🔁 Restore session from sessionStorage
   useEffect(() => {
     const storedEmployee = sessionStorage.getItem("employee");
     if (storedEmployee) {
@@ -15,27 +15,26 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // 🚪 Auto-logout on tab close or visibility change (modern + no warnings)
+  // 🚪 Auto-logout on tab close (NOT visibility change)
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") {
-        const emp = sessionStorage.getItem("employee");
-        if (emp) {
-          navigator.sendBeacon(
-            `${import.meta.env.VITE_API_BASE}/api/auth/logout`
-          );
-          sessionStorage.clear();
-        }
+    const handleBeforeUnload = () => {
+      const emp = sessionStorage.getItem("employee");
+      if (emp) {
+        const { _id } = JSON.parse(emp);
+        navigator.sendBeacon(
+          `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`
+        );
+        sessionStorage.clear();
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
-  // 🔐 Login function
+  // 🔐 Login logic
   const login = async (email, password) => {
     const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
       method: "POST",
@@ -45,19 +44,22 @@ export const AuthProvider = ({ children }) => {
     });
 
     if (!response.ok) throw new Error("Login failed");
-    const data = await response.json();
 
-    setEmployee(data.employee);
-    sessionStorage.setItem("employee", JSON.stringify(data.employee));
-    return data.employee;
+    const employee = await response.json();
+    setEmployee(employee);
+    sessionStorage.setItem("employee", JSON.stringify(employee));
+    return employee;
   };
 
-  // 🚪 Logout function
+  // 🚪 Logout logic
   const logout = async () => {
-    await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
+    if (employee?._id) {
+      await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/logout/${employee._id}`, {
+        method: "POST",
+        credentials: "include",
+      });
+    }
+
     sessionStorage.clear();
     setEmployee(null);
   };
@@ -69,5 +71,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// 🌐 Hook to use in any component
 export const useAuth = () => useContext(AuthContext);
