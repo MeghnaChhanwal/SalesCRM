@@ -15,15 +15,17 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // 🚪 Auto-logout on tab close (NOT visibility change)
+  // 🚪 Auto-logout only on tab close
   useEffect(() => {
     const handleBeforeUnload = () => {
-      const emp = sessionStorage.getItem("employee");
-      if (emp) {
-        const { _id } = JSON.parse(emp);
-        navigator.sendBeacon(
-          `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`
-        );
+      const stored = sessionStorage.getItem("employee");
+      if (stored) {
+        const { _id } = JSON.parse(stored);
+        if (_id) {
+          navigator.sendBeacon(
+            `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`
+          );
+        }
         sessionStorage.clear();
       }
     };
@@ -34,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  // 🔐 Login logic
+  // 🔐 Login function
   const login = async (email, password) => {
     const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
       method: "POST",
@@ -45,13 +47,13 @@ export const AuthProvider = ({ children }) => {
 
     if (!response.ok) throw new Error("Login failed");
 
-    const employee = await response.json();
+    const { employee } = await response.json(); // 🧠 cleaner destructuring
     setEmployee(employee);
     sessionStorage.setItem("employee", JSON.stringify(employee));
     return employee;
   };
 
-  // 🚪 Logout logic
+  // 🚪 Logout function (manual)
   const logout = async () => {
     if (employee?._id) {
       await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/logout/${employee._id}`, {
@@ -59,7 +61,6 @@ export const AuthProvider = ({ children }) => {
         credentials: "include",
       });
     }
-
     sessionStorage.clear();
     setEmployee(null);
   };

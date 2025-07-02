@@ -56,13 +56,16 @@ export const loginEmployee = async (req, res) => {
 
     await timing.save();
 
+    // ✅ Return session data
     res.status(200).json({
       message: "Login successful",
-      employeeId: employee._id,
-      email: employee.email,
-      firstName: employee.firstName,
-      lastName: employee.lastName,
-      status: employee.status,
+      employee: {
+        _id: employee._id,
+        email: employee.email,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        status: employee.status,
+      },
     });
   } catch (error) {
     console.error("❌ Login Error:", error);
@@ -73,6 +76,11 @@ export const loginEmployee = async (req, res) => {
 // ✅ LOGOUT CONTROLLER
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
+
+  // 🔐 Extra check to prevent CastError
+  if (!employeeId || employeeId === "undefined") {
+    return res.status(400).json({ error: "Invalid or missing employee ID" });
+  }
 
   try {
     const employee = await Employee.findById(employeeId);
