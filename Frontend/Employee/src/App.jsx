@@ -3,6 +3,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
 
+// Pages & Components
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
@@ -13,31 +14,41 @@ import Profile from "./pages/Profile";
 const App = () => {
   const { employee, loading } = useAuth();
 
-  if (loading) return null; // ⏳ Wait for session restore
+  // ⏳ Wait for session restore before rendering anything
+  if (loading) return null;
 
   return (
     <Router>
       <Routes>
-        {/* 🛠 Root path fix */}
+        {/* 👤 Public Route */}
+        <Route path="/login" element={<Login />} />
+
+        {/* 🔁 Root Redirect to Dashboard or Login */}
         <Route
           path="/"
-          element={
-            loading
-              ? null
-              : employee
-              ? <Navigate to="/dashboard" />
-              : <Login />
-          }
+          element={<Navigate to={employee ? "/dashboard" : "/login"} replace />}
         />
 
-        {/* ✅ Protected Routes */}
-        <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
-        <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        {/* 🔐 Protected Routes */}
+        <Route
+          path="/dashboard"
+          element={<ProtectedRoute><Home /></ProtectedRoute>}
+        />
+        <Route
+          path="/leads"
+          element={<ProtectedRoute><Leads /></ProtectedRoute>}
+        />
+        <Route
+          path="/schedule"
+          element={<ProtectedRoute><Schedule /></ProtectedRoute>}
+        />
+        <Route
+          path="/profile"
+          element={<ProtectedRoute><Profile /></ProtectedRoute>}
+        />
 
-        {/* Fallback: unknown path → dashboard */}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        {/* 🛑 Catch-All Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

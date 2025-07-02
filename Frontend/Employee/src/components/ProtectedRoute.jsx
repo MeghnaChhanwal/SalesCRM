@@ -1,13 +1,13 @@
+import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 const ProtectedRoute = ({ children }) => {
   const { employee, loading } = useAuth();
 
-  if (loading) return null; // ⏳ wait until session restored
+  if (loading) return null; // ⏳ Wait until session restored
 
-  // ❌ Not logged in
-  if (!employee) return <Navigate to="/login" />;
+  if (!employee) return <Navigate to="/login" replace />;
 
   return children;
 };
