@@ -5,10 +5,11 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   margin: 12px 0;
-  overflow: hidden;
+  overflow: visible; /* ✅ allow dropdowns to overflow */
   position: relative;
   background-color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  z-index: 1;
 }
 
 .leftIndicator {
@@ -70,17 +71,20 @@
   transform: scale(1.1);
 }
 
+/* Dropdowns and modals */
 .dropdown, .datetimeBox, .statusBox {
   position: absolute;
   top: 32px;
+  right: 0;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   border-radius: 4px;
   padding: 8px;
-  z-index: 10;
+  z-index: 999; /* ✅ higher priority */
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 120px;
 }
 
 .dropdown div, .statusBox button {

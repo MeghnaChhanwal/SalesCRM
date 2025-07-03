@@ -43,8 +43,14 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
         <p>Date: {new Date(lead.receivedDate).toLocaleDateString()}</p>
 
         <div className={styles.actions}>
-          <div className={styles.actionIcon} onClick={() => setShowTypeDropdown(!showTypeDropdown)}>
-            <img src="/images/type-icon.png" alt="Type" />
+          {/* Type Icon */}
+          <div className={styles.actionIcon} onClick={(e) => {
+            e.stopPropagation();
+            setShowTypeDropdown(!showTypeDropdown);
+            setShowDateTime(false);
+            setShowStatus(false);
+          }}>
+            <img src="/images/type.png" alt="Type" />
             {showTypeDropdown && (
               <div className={styles.dropdown}>
                 <div onClick={() => onTypeChange(lead._id, "Hot")}>Hot</div>
@@ -54,8 +60,14 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
             )}
           </div>
 
-          <div className={styles.actionIcon} onClick={() => setShowDateTime(!showDateTime)}>
-            <img src="/images/schedule-icon.png" alt="Schedule" />
+          {/* Calendar Icon */}
+          <div className={styles.actionIcon} onClick={(e) => {
+            e.stopPropagation();
+            setShowDateTime(!showDateTime);
+            setShowTypeDropdown(false);
+            setShowStatus(false);
+          }}>
+            <img src="/images/calender.png" alt="Calendar" />
             {showDateTime && (
               <div className={styles.datetimeBox}>
                 <input
@@ -73,15 +85,18 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
             )}
           </div>
 
-          <div className={styles.actionIcon} onClick={() => setShowStatus(!showStatus)}>
-            <img src="/images/status-icon.png" alt="Status" />
+          {/* Status Icon */}
+          <div className={styles.actionIcon} onClick={(e) => {
+            e.stopPropagation();
+            setShowStatus(!showStatus);
+            setShowTypeDropdown(false);
+            setShowDateTime(false);
+          }}>
+            <img src="/images/status.png" alt="Status" />
             {showStatus && (
               <div className={styles.statusBox}>
                 <button disabled={lead.hasFutureCall}>Ongoing</button>
-                <button
-                  onClick={handleClose}
-                  disabled={lead.hasFutureCall}
-                >
+                <button onClick={handleClose} disabled={lead.hasFutureCall}>
                   Close
                 </button>
                 {lead.hasFutureCall && <p>Lead cannot be closed</p>}
