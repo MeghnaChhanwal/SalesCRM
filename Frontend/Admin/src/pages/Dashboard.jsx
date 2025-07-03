@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import MainLayout from "../components/Layout";
 import styles from "../styles/Dashboard.module.css";
@@ -10,11 +9,14 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
+  PointElement,
+  LineElement,
   Tooltip,
   Legend,
+  Title,
 } from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Legend, Title);
 
 const Dashboard = () => {
   const [employees, setEmployees] = useState([]);
@@ -44,13 +46,16 @@ const Dashboard = () => {
   }, []);
 
   const chartData = {
-    labels: (stats.graphData || []).map((d) => d.date),
+    labels: stats.graphData?.map((d) => d.date) || [],
     datasets: [
       {
-        label: "Sales %",
-        data: (stats.graphData || []).map((d) => d.conversion),
-        backgroundColor: "#007bff",
-        borderRadius: 6,
+        label: "Conversion Rate (%)",
+        data: stats.graphData?.map((d) => d.conversion) || [],
+        backgroundColor: "rgba(0, 123, 255, 0.7)",
+        borderColor: "#007bff",
+        borderWidth: 1,
+        borderRadius: 8,
+        maxBarThickness: 40,
       },
     ],
   };
@@ -59,9 +64,12 @@ const Dashboard = () => {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
+      legend: {
+        display: false,
+      },
       tooltip: {
         callbacks: {
-          label: (context) => `Sales: ${context.raw}%`,
+          label: (context) => `Conversion: ${context.raw}%`,
         },
       },
     },
@@ -69,7 +77,16 @@ const Dashboard = () => {
       y: {
         beginAtZero: true,
         max: 100,
-        ticks: { stepSize: 20 },
+        ticks: {
+          stepSize: 20,
+          callback: (val) => `${val}%`,
+        },
+      },
+      x: {
+        ticks: {
+          maxRotation: 45,
+          minRotation: 30,
+        },
       },
     },
   };
@@ -87,7 +104,7 @@ const Dashboard = () => {
   return (
     <MainLayout showSearch={false}>
       <div className={styles.dashboardContainer}>
-        {/* Top Cards */}
+        {/* Top Summary Cards */}
         <div className={styles.cardGrid}>
           <div className={styles.card}>
             <h4>Unassigned Leads</h4>
@@ -107,7 +124,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Chart + Activity */}
+        {/* Chart + Recent Activities */}
         <div className={styles.analyticsRow}>
           <div className={styles.chartBox}>
             <h4>Sales Analytics</h4>
@@ -118,15 +135,19 @@ const Dashboard = () => {
 
           <div className={styles.activityBox}>
             <h4>Recent Activity</h4>
-            <ul>
-              {(stats.recentActivities || []).map((a, i) => (
-                <li key={i}>• {a}</li>
-              ))}
+            <ul className={styles.activityList}>
+              {stats.recentActivities.length === 0 ? (
+                <li>No recent activities.</li>
+              ) : (
+                stats.recentActivities.map((activity, i) => (
+                  <li key={i}>• {activity}</li>
+                ))
+              )}
             </ul>
           </div>
         </div>
 
-        {/* Employee Table */}
+        {/* Employee Performance Table */}
         <div className={styles.tableWrapper}>
           <h4>Employee Overview</h4>
           <div className={styles.tableScroll}>
@@ -147,12 +168,15 @@ const Dashboard = () => {
                     <td colSpan="6" style={{ textAlign: "center" }}>No employees found</td>
                   </tr>
                 ) : (
-                  employees.map(emp => (
+                  employees.map((emp) => (
                     <tr key={emp._id}>
                       <td>{emp.firstName} {emp.lastName}</td>
                       <td>{emp.email}</td>
                       <td>{emp.employeeId}</td>
-                      <td style={{ color: emp.status === "Active" ? "green" : "red", fontWeight: "600" }}>
+                      <td style={{
+                        color: emp.status === "Active" ? "#2ecc71" : "#e74c3c",
+                        fontWeight: "bold",
+                      }}>
                         {emp.status}
                       </td>
                       <td>{emp.assignedLeads}</td>

@@ -12,7 +12,7 @@ const Lead = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [file, setFile] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [modalType, setModalType] = useState(null); // 'upload' | 'manual'
+  const [modalType, setModalType] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -158,13 +158,7 @@ const Lead = () => {
               }}
             >
               {file ? <p>{file.name}</p> : <p>Drag & drop or click to browse</p>}
-              <input
-                type="file"
-                accept=".csv"
-                hidden
-                id="fileInput"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
+              <input type="file" accept=".csv" hidden id="fileInput" onChange={(e) => setFile(e.target.files[0])} />
               <label htmlFor="fileInput" className={styles.browseButton}>
                 Browse File
               </label>
@@ -173,10 +167,7 @@ const Lead = () => {
             {uploading && (
               <div className={styles.circularWrapper}>
                 <svg className={styles.circularProgress} viewBox="0 0 36 36">
-                  <path
-                    className={styles.bg}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  />
+                  <path className={styles.bg} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                   <path
                     className={styles.progress}
                     strokeDasharray={`${uploadProgress}, 100`}
@@ -214,12 +205,18 @@ const Lead = () => {
               <option value="Pune">Pune</option>
               <option value="Mumbai">Mumbai</option>
               <option value="Bangalore">Bangalore</option>
+              <option value="Hyderabad">Hyderabad</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Chennai">Chennai</option>
             </select>
             <select name="language" value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })} required>
               <option value="">Select Language</option>
               <option value="Hindi">Hindi</option>
               <option value="English">English</option>
+              <option value="Telugu">Telugu</option>
               <option value="Marathi">Marathi</option>
+              <option value="Kannada">Kannada</option>
+              <option value="Tamil">Tamil</option>
             </select>
             <div className={styles.formActions}>
               <button type="submit">Save</button>
@@ -247,18 +244,14 @@ const Lead = () => {
             <tbody>
               {leads.length === 0 ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center" }}>
-                    No leads found.
-                  </td>
+                  <td colSpan="5" style={{ textAlign: "center" }}>No leads found.</td>
                 </tr>
               ) : (
-                leads.map((lead, index) => {
+                leads.map((lead) => {
                   const [firstName = "", lastName = ""] = lead.name?.split(" ") || [];
                   return (
-                    <tr key={lead._id || index}>
-                      <td>
-                        <ProfileLogo firstName={firstName} lastName={lastName} showEmail={false} />
-                      </td>
+                    <tr key={lead._id}>
+                      <td><ProfileLogo firstName={firstName} lastName={lastName} showEmail={false} /></td>
                       <td>{lead.email || "-"}</td>
                       <td>{lead.phone || "-"}</td>
                       <td>{lead.receivedDate ? new Date(lead.receivedDate).toLocaleDateString() : "-"}</td>
@@ -273,8 +266,7 @@ const Lead = () => {
               )}
             </tbody>
           </table>
-
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => setCurrentPage(page)} />
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </>
       )}
     </MainLayout>
