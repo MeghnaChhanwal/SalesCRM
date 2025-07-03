@@ -21,8 +21,8 @@ const leadSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Open", "Closed", "In Progress", "Follow Up"],
-    default: "Open",
+    enum: ["Ongoing", "Closed"],  // match your UI
+    default: "Ongoing",
   },
   type: {
     type: String,
@@ -42,6 +42,19 @@ const leadSchema = new mongoose.Schema({
     ref: "Employee",
     default: null,
   },
+  scheduledCalls: [
+    {
+      callDate: {
+        type: Date,
+        required: true,
+      },
+      callType: {
+        type: String,
+        enum: ["Referral", "Cold Call", "Follow Up"],
+        required: true,
+      },
+    }
+  ]
 }, {
   timestamps: true
 });
