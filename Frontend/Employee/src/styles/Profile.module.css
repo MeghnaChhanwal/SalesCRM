@@ -42,3 +42,14 @@ input:focus {
 .saveButton:hover {
   background-color: #003ecb;
 }
+@media (max-width: 400px) {
+  input {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .saveButton {
+    font-size: 13px;
+    padding: 8px 20px;
+  }
+}

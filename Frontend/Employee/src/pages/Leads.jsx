@@ -10,7 +10,7 @@ import { useAuth } from "../contexts/AuthContext";
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 const Leads = () => {
-  const { Employee } = useAuth();
+  const { employee } = useAuth(); // Ensure lowercase variable
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState(""); // "Open" or "Closed"
@@ -26,12 +26,16 @@ const Leads = () => {
       const res = await axios.get(`${API_BASE}/api/leads`, {
         params: {
           search: searchTerm,
+          filter: statusFilter,
         },
       });
+
+      // If employee-specific view is required
       let data = res.data.leads;
-      if (statusFilter) {
-        data = data.filter((lead) => lead.status === statusFilter);
+      if (employee?._id) {
+        data = data.filter((lead) => lead.assignedEmployee?._id === employee._id);
       }
+
       setLeads(data);
     } catch (err) {
       console.error("Failed to fetch leads:", err);
@@ -42,14 +46,10 @@ const Leads = () => {
 
   const handleStatusChange = async (leadId, newStatus) => {
     try {
-      const hasFutureCall = false; // Add logic if needed
-      if (newStatus === "Closed" && hasFutureCall) {
-        alert("Cannot close lead with upcoming call");
-        return;
-      }
       await axios.put(`${API_BASE}/api/leads/${leadId}`, { status: newStatus });
       fetchLeads();
     } catch (err) {
+      alert(err?.response?.data?.error || "Failed to update status.");
       console.error("Status update failed:", err);
     }
   };
@@ -71,6 +71,7 @@ const Leads = () => {
           onSearch={setSearchTerm}
           statusFilter={statusFilter}
           onStatusFilter={setStatusFilter}
+          options={["", "Open", "Closed"]}
         />
 
         {loading ? (

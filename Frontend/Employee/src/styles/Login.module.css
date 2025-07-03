@@ -8,6 +8,7 @@
   text-align: center;
 }
 
+/* Card title */
 .title {
   font-size: 1.8rem;
   font-weight: bold;
@@ -15,6 +16,7 @@
   color: #333;
 }
 
+/* Input field */
 .input {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -23,6 +25,7 @@
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
+  background-color: #fff;
 }
 
 .input:focus {
@@ -30,10 +33,12 @@
   outline: none;
 }
 
+/* Wrapper to position the show/hide password toggle */
 .passwordWrapper {
   position: relative;
 }
 
+/* Toggle button for password visibility */
 .togglePassword {
   position: absolute;
   top: 50%;
@@ -43,9 +48,12 @@
   border: none;
   color: #007bff;
   font-weight: 500;
+  font-size: 0.9rem;
   cursor: pointer;
+  padding: 0;
 }
 
+/* Submit button */
 .button {
   width: 100%;
   margin-top: 1rem;
@@ -68,8 +76,29 @@
   background-color: #0056b3;
 }
 
+/* Error message text */
 .error {
   color: red;
   font-size: 0.9rem;
   margin-top: 0.5rem;
+}
+
+/* ✅ Mobile responsiveness */
+@media (max-width: 480px) {
+  .card {
+    margin: 60px 16px;
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .input {
+    font-size: 0.95rem;
+  }
+
+  .button {
+    font-size: 0.95rem;
+  }
 }

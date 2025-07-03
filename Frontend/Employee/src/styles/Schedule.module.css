@@ -1,3 +1,5 @@
+/* src/styles/Schedule.module.css */
+
 .container {
   padding: 16px;
 }
@@ -19,4 +21,15 @@
 .scheduleList li {
   border-bottom: 1px solid #eee;
   padding: 10px 0;
+}
+
+@media (max-width: 400px) {
+  .card {
+    padding: 14px;
+  }
+
+  .scheduleList li {
+    padding: 8px 0;
+    font-size: 14px;
+  }
 }

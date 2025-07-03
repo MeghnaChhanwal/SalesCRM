@@ -1,32 +1,35 @@
+/* src/styles/Leads.module.css */
+
 .container {
   padding: 16px;
+  min-height: 100vh;
+  background-color: #f9f9f9;
 }
 
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
 }
 
-.uploadBox {
-  border: 1px dashed #ccc;
-  padding: 16px;
+.message {
   text-align: center;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  color: #666;
+  margin-top: 32px;
+  font-size: 16px;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
+@media (max-width: 400px) {
+  .container {
+    padding: 12px;
+  }
 
-.table th,
-.table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
+  .cardList {
+    gap: 12px;
+  }
+
+  .message {
+    font-size: 14px;
+  }
 }

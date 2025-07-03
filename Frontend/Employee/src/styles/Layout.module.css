@@ -3,12 +3,31 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: #f5f5f5;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .content {
   flex: 1;
   padding: 16px;
-  margin-top: 110px;        /* 👈 Header cha height */
-  padding-bottom: 80px;     /* 👈 BottomNav cha height */
+  padding-top: 110px;      /* Fixed Header height */
+  padding-bottom: 80px;    /* Fixed BottomNav height */
   box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* ✅ Safe area support for iPhone Notch and PWA swipe bar */
+@supports (padding: max(0px)) {
+  .content {
+    padding-top: max(110px, env(safe-area-inset-top));
+    padding-bottom: max(80px, env(safe-area-inset-bottom));
+  }
+}
+
+/* ✅ Optional: smaller device handling */
+@media (max-width: 400px) {
+  .content {
+    padding: 12px;
+    padding-top: 90px;
+    padding-bottom: 70px;
+  }
 }

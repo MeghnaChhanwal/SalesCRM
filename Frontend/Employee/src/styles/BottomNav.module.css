@@ -1,40 +1,64 @@
-/* src/styles/BottomNav.module.css */
-
+/* Main bottom navigation bar */
 .navbar {
   display: flex;
   justify-content: space-around;
   align-items: center;
   padding: 10px 0;
-  background-color: white;
+  background-color: #ffffff;
   border-top: 1px solid #ddd;
   position: fixed;
   bottom: 0;
+  left: 0;
   width: 100%;
   z-index: 100;
+  box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.05);
 }
 
+/* Each nav item */
 .navItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #888;
   text-decoration: none;
   font-size: 12px;
-  transition: color 0.2s;
+  color: #888888;
+  transition: color 0.2s ease-in-out;
+  flex: 1;
+  padding: 4px 0;
 }
 
+/* Icon styling */
 .icon {
   width: 24px;
   height: 24px;
   margin-bottom: 4px;
-  transition: filter 0.2s;
+  transition: filter 0.2s ease-in-out;
 }
 
-/* ✅ Blue highlight for active tab */
+/* Active state styling */
 .active {
   color: #1854f1;
+  font-weight: 500;
 }
 
 .active .icon {
   filter: brightness(0) saturate(100%) invert(28%) sepia(95%) saturate(1785%) hue-rotate(218deg) brightness(99%) contrast(102%);
+}
+
+/* Optional: Highlight on touch (for iOS/Android PWA feel) */
+.navItem:active {
+  background-color: #f0f4ff;
+  border-radius: 8px;
+}
+
+/* Responsive fallback for very small devices */
+@media (max-width: 400px) {
+  .icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .navItem {
+    font-size: 11px;
+  }
 }

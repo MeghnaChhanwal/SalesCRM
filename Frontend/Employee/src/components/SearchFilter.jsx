@@ -1,30 +1,31 @@
+// src/components/SearchFilter.jsx
 import React from "react";
 import styles from "../styles/SearchFilter.module.css";
 
-const SearchFilter = ({ search, setSearch, filter, setFilter, filterOptions }) => {
+const SearchFilter = ({ searchTerm, onSearch, statusFilter, onStatusFilter, options = ["Open", "Closed"] }) => {
   return (
-    <div className={styles.container}>
-      <div className={styles.searchWrapper}>
-        <img src="/images/search.png" alt="Search" className={styles.searchIcon} />
+    <div className={styles.filterContainer}>
+      <div className={styles.inputGroup}>
+        <img src="/images/search-icon.png" alt="Search" className={styles.icon} />
         <input
           type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search leads..."
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => onSearch(e.target.value)}
           className={styles.searchInput}
         />
       </div>
-      <div className={styles.filterWrapper}>
-        <img src="/images/filter.png" alt="Filter" className={styles.filterIcon} />
+
+      <div className={styles.selectGroup}>
+        <img src="/images/filter-icon.png" alt="Filter" className={styles.icon} />
         <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className={styles.select}
+          value={statusFilter}
+          onChange={(e) => onStatusFilter(e.target.value)}
+          className={styles.filterSelect}
         >
-          {filterOptions.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
+          <option value="">All</option>
+          {options.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
           ))}
         </select>
       </div>
