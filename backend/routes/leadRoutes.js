@@ -13,25 +13,13 @@ import {
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-// ✅ Route: GET /api/leads
-router.get("/", getLeads);
-
-// ✅ Route: POST /api/leads
-router.post("/", addLeadManually);
-
-// ✅ Route: POST /api/leads/upload
-router.post("/upload", upload.single("file"), uploadCSV);
-
-// ✅ Route: PATCH /api/leads/:id/type
-router.patch("/:id/type", updateLeadType);
-
-// ✅ Route: PATCH /api/leads/:id/status
-router.patch("/:id/status", updateLeadStatus);
-
-// ✅ Route: POST /api/leads/:id/schedule
-router.post("/:id/schedule", scheduleCall);
-
-// ✅ Route: GET /api/leads/schedule
-router.get("/schedule", getScheduledCalls);
+// 📌 Put more specific routes before general ones
+router.get("/schedule", getScheduledCalls);         // GET all scheduled calls
+router.get("/", getLeads);                          // GET all/searchable leads
+router.post("/", addLeadManually);                  // POST new lead
+router.post("/upload", upload.single("file"), uploadCSV); // CSV Upload
+router.patch("/:id/type", updateLeadType);          // Update lead type
+router.patch("/:id/status", updateLeadStatus);      // Update lead status
+router.post("/:id/schedule", scheduleCall);         // Schedule call
 
 export default router;
