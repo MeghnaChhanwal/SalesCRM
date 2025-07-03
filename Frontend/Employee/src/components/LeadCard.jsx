@@ -1,9 +1,6 @@
 // src/components/LeadCard.jsx
 import React from "react";
 import styles from "../styles/LeadCard.module.css";
-import editIcon from "../assets/edit.png";
-import calendarIcon from "../assets/calendar.png";
-import statusIcon from "../assets/status.png";
 
 const LeadCard = ({ lead, onEdit, onSchedule, onStatusChange }) => {
   const badgeColor = {
@@ -42,21 +39,21 @@ const LeadCard = ({ lead, onEdit, onSchedule, onStatusChange }) => {
 
         <div className={styles.actions}>
           <img
-            src={editIcon}
+            src="/images/edit.png"
             alt="Edit Lead"
             role="button"
             tabIndex={0}
             onClick={() => onEdit(lead)}
           />
           <img
-            src={calendarIcon}
+            src="/images/calendar.png"
             alt="Schedule Call"
             role="button"
             tabIndex={0}
             onClick={() => onSchedule(lead)}
           />
           <img
-            src={statusIcon}
+            src="/images/status.png"
             alt="Change Status"
             role="button"
             tabIndex={0}
