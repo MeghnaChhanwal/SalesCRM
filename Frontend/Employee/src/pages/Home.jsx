@@ -41,13 +41,13 @@ const Home = () => {
     fetchTiming();
   }, [employee]);
 
-  // ✅ Auto-checkout when tab is closed
+  // ✅ Auto-checkout on tab close (not refresh)
   useEffect(() => {
     if (!employee?._id) return;
 
     const handleUnload = () => {
       navigator.sendBeacon(
-        `${import.meta.env.VITE_API_URL}/api/timing/auto-checkout/${employee._id}`
+        `${import.meta.env.VITE_API_BASE}/api/timing/auto-checkout/${employee._id}`
       );
     };
 
