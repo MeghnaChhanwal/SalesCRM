@@ -8,10 +8,10 @@ const Leads = () => {
     <PageLayout>
       <div className={styles.placeholder}>
         {/* Optional: You can add lead list or empty state message here */}
-        <p>Leads page content coming soon...</p>
+        <p>solve the</p>
       </div>
     </PageLayout>
   );
 };
 
-export default Leads;
+export default Leads

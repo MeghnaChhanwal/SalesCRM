@@ -13,12 +13,11 @@ const Home = () => {
   const [breakLogs, setBreakLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Format helper
   const formatTime = (iso) =>
     iso ? new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "--:--";
 
   const getColor = (status) => {
-    return status === "Active" ? "#27ae60" : "#999999"; // green or grey
+    return status === "Active" ? "#27ae60" : "#999999";
   };
 
   useEffect(() => {
@@ -27,13 +26,11 @@ const Home = () => {
     const fetchTodayAndHistory = async () => {
       setLoading(true);
       try {
-        // today’s timing
         const resToday = await axios.get(`${API_BASE}/api/timing/${employee._id}`);
         const todayData = resToday.data?.[0] || null;
         setToday(todayData);
 
-        // past 7 days history
-        const resLogs = await axios.get(`${API_BASE}/api/timing/week/${employee._id}`);
+        const resLogs = await axios.get(`${API_BASE}/api/timing/history/${employee._id}`);
         setBreakLogs(resLogs.data || []);
       } catch (err) {
         console.error("Failed to load timing:", err);
@@ -54,7 +51,6 @@ const Home = () => {
       <div className={styles.container}>
         <h3 className={styles.sectionTitle}>Timings</h3>
 
-        {/* Check-in & Check-out box */}
         <div className={styles.cardRow}>
           <div className={styles.card}>
             <p className={styles.label}>Checked-In</p>
@@ -70,7 +66,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Break Status box */}
         <div className={styles.cardRow}>
           <div className={styles.card}>
             <p className={styles.label}>Break</p>
@@ -82,7 +77,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Break History Table */}
         <div className={styles.history}>
           {breakLogs.map((log, i) =>
             log.breaks
