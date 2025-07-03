@@ -1,9 +1,9 @@
-/* ===== Variables ===== */
+
 :root {
   --sidebar-width: 274px;
   --sidebar-bg: #d3d3d3;
   --sidebar-hover-bg: #bbb;
-  --active-bg: #4caf50;
+  --active-bg: #6b6d6b;
   --active-text: #ffffff;
   --text-color: #000000;
   --font-size-base: 1rem;
@@ -12,7 +12,7 @@
   --border-radius: 4px;
 }
 
-/* ===== Sidebar Container ===== */
+
 .sidebar {
   width: var(--sidebar-width);
   height: 100vh;

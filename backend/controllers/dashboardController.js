@@ -1,7 +1,7 @@
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 
-// 🔹 GET /api/dashboard/overview
+
 export const getDashboardOverview = async (req, res) => {
   try {
     const totalLeads = await Lead.countDocuments();
@@ -32,17 +32,17 @@ export const getDashboardOverview = async (req, res) => {
 
     for (const lead of recentLeads) {
       if (!lead.assignedEmployee) {
-        activity.push(`➕ Lead added: ${lead.name}`);
+        activity.push(` Lead added: ${lead.name}`);
       } else if (lead.status === "Closed") {
-        activity.push(`🎯 ${lead.assignedEmployee.firstName} closed lead: ${lead.name}`);
+        activity.push(`${lead.assignedEmployee.firstName} closed lead: ${lead.name}`);
       } else {
-        activity.push(`✅ Lead assigned to ${lead.assignedEmployee.firstName}`);
+        activity.push(`Lead assigned to ${lead.assignedEmployee.firstName}`);
       }
     }
 
     const recentActivities = activity.slice(0, 10);
 
-    // 🔸 Graph Data (past 10 days)
+   
     const today = new Date();
     const chartData = [];
 

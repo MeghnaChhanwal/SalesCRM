@@ -1,7 +1,13 @@
+.pageWrapper {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Main container */
 .dashboardContainer {
   padding: 1rem;
   background: #f9fafb;
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
@@ -52,14 +58,33 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+/* Chart height */
 .chartWrapper {
-  height: 170px;
+  height: 200px;
   margin-top: 0.5rem;
 }
 
-.activityBox ul {
+/* Activity list scroll */
+.activityBox {
+  display: flex;
+  flex-direction: column;
+  height: 200px;
+}
+
+.activityList {
+  overflow-y: auto;
   margin-top: 0.5rem;
   padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  flex: 1;
+}
+
+.activityList::-webkit-scrollbar {
+  width: 6px;
+}
+.activityList::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 6px;
 }
 
 .activityBox li {
@@ -70,7 +95,7 @@
 /* Table */
 .tableWrapper {
   background: white;
-  padding: 1rem;
+  padding: 0.5rem;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   overflow: hidden;
@@ -104,17 +129,13 @@
     grid-template-columns: 1fr;
   }
 
-  .chartBox,
-  .activityBox {
-    padding: 0.8rem;
-  }
-
   .cardGrid {
     grid-template-columns: 1fr 1fr;
   }
 
-  .tableScroll table {
-    min-width: 600px;
+  .chartBox,
+  .activityBox {
+    padding: 0.8rem;
   }
 }
 

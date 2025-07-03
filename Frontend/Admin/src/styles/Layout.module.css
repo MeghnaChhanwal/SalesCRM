@@ -2,7 +2,7 @@
 .container {
   display: flex;
   height: 100vh;
-  overflow: hidden; /* ✅ Prevent ALL scrollbars */
+  overflow: hidden; 
   background-color: #f5f5f5;
 }
 
@@ -13,7 +13,7 @@
   padding: 2rem;
   background-color: #f9f9f9;
   box-sizing: border-box;
-  overflow: hidden; /* ✅ Disable scroll inside content area */
+  overflow: hidden; 
 }
 
 /* Row containing breadcrumb and optional button */
@@ -32,7 +32,7 @@
   color: #333;
 }
 
-/* Container for right-side button (e.g. Add button) */
+
 .rightElementContainer {
   display: flex;
   align-items: center;

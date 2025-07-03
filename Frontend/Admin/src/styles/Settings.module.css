@@ -1,25 +1,38 @@
-/* Outer container - centers box */
+:root {
+  --primary-color: #4a90e2;
+  --bg-white: #ffffff;
+  --text-dark: #222;
+  --text-light: #444;
+  --border-radius: 12px;
+  --font-base: 14px;
+  --font-large: 24px;
+  --input-border: #ccc;
+  --input-focus-border: var(--primary-color);
+  --shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Outer Layout ===== */
 .container {
   max-width: 1100px;
-  margin: 10px auto; /* same top, right, bottom, left margin */
+  margin: 10px auto;
   padding: 10px;
-  background-color: #ffffff;
+  background-color: var(--bg-white);
   border-radius: 16px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-/* Title */
+/* ===== Title ===== */
 .title {
-  font-size: 24px;
+  font-size: var(--font-large);
   font-weight: 600;
   margin-bottom: 10px;
-  color: #222;
+  color: var(--text-dark);
 }
 
-/* Divider line */
+/* ===== Divider ===== */
 .divider {
   border: none;
   height: 1px;
@@ -28,7 +41,7 @@
   width: 100%;
 }
 
-/* Form layout */
+/* ===== Form Structure ===== */
 .form {
   display: flex;
   flex-direction: column;
@@ -36,36 +49,36 @@
   gap: 5px;
 }
 
-/* Field block */
 .field {
   display: flex;
   flex-direction: column;
 }
 
 .field label {
-  font-size: 14px;
+  font-size: var(--font-base);
   font-weight: 500;
   margin-bottom: 6px;
-  color: #444;
+  color: var(--text-light);
 }
 
-/* Input box - compact & clean */
 .field input {
   height: 34px;
   padding: 6px 10px;
-  font-size: 14px;
+  font-size: var(--font-base);
   width: 100%;
   max-width: 320px;
-  border: 1px solid #ccc;
-  border-radius: 12px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius);
   transition: border 0.2s ease;
 }
 
 .field input:focus {
   outline: none;
-  border-color: #4a90e2;
+  border-color: var(--input-focus-border);
   box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
 }
+
+/* ===== Password Input With Eye Icon ===== */
 .passwordWrapper {
   position: relative;
   display: flex;
@@ -73,7 +86,6 @@
   width: 100%;
   max-width: 320px;
 }
-
 
 .eyeBtn {
   position: absolute;
@@ -83,22 +95,23 @@
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
-  color: #4a90e2;
+  color: var(--primary-color);
   padding: 4px 8px;
 }
 
+/* ===== Save Button ===== */
 .saveBtn {
   background-color: #535456;
   color: white;
   border: none;
   padding: 10px 50px;
-  font-size: 14px;
+  font-size: var(--font-base);
   font-weight: 500;
   border-radius: 15px;
   cursor: pointer;
   transition: background 0.3s;
   margin-top: 20px;
-  align-self: flex-end; /* ✅ aligns it to the right */
+  align-self: flex-end;
 }
 
 .saveBtn:hover {

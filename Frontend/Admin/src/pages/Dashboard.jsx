@@ -1,3 +1,4 @@
+// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import MainLayout from "../components/Layout";
 import styles from "../styles/Dashboard.module.css";
@@ -9,14 +10,12 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  PointElement,
-  LineElement,
   Tooltip,
   Legend,
   Title,
 } from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Legend, Title);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
 
 const Dashboard = () => {
   const [employees, setEmployees] = useState([]);
@@ -64,9 +63,7 @@ const Dashboard = () => {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
       tooltip: {
         callbacks: {
           label: (context) => `Conversion: ${context.raw}%`,
@@ -80,12 +77,6 @@ const Dashboard = () => {
         ticks: {
           stepSize: 20,
           callback: (val) => `${val}%`,
-        },
-      },
-      x: {
-        ticks: {
-          maxRotation: 45,
-          minRotation: 30,
         },
       },
     },
@@ -103,89 +94,91 @@ const Dashboard = () => {
 
   return (
     <MainLayout showSearch={false}>
-      <div className={styles.dashboardContainer}>
-        {/* Top Summary Cards */}
-        <div className={styles.cardGrid}>
-          <div className={styles.card}>
-            <h4>Unassigned Leads</h4>
-            <p>{stats.unassignedLeads}</p>
-          </div>
-          <div className={styles.card}>
-            <h4>Assigned This Week</h4>
-            <p>{stats.assignedThisWeek}</p>
-          </div>
-          <div className={styles.card}>
-            <h4>Active Salespeople</h4>
-            <p>{stats.activeSalespeople}</p>
-          </div>
-          <div className={styles.card}>
-            <h4>Conversion Rate</h4>
-            <p>{stats.conversionRate}%</p>
-          </div>
-        </div>
-
-        {/* Chart + Recent Activities */}
-        <div className={styles.analyticsRow}>
-          <div className={styles.chartBox}>
-            <h4>Sales Analytics</h4>
-            <div className={styles.chartWrapper}>
-              <Bar data={chartData} options={chartOptions} />
+      <div className={styles.pageWrapper}>
+        <div className={styles.dashboardContainer}>
+          {/* Summary Cards */}
+          <div className={styles.cardGrid}>
+            <div className={styles.card}>
+              <h4>Unassigned Leads</h4>
+              <p>{stats.unassignedLeads}</p>
+            </div>
+            <div className={styles.card}>
+              <h4>Assigned This Week</h4>
+              <p>{stats.assignedThisWeek}</p>
+            </div>
+            <div className={styles.card}>
+              <h4>Active Salespeople</h4>
+              <p>{stats.activeSalespeople}</p>
+            </div>
+            <div className={styles.card}>
+              <h4>Conversion Rate</h4>
+              <p>{stats.conversionRate}%</p>
             </div>
           </div>
 
-          <div className={styles.activityBox}>
-            <h4>Recent Activity</h4>
-            <ul className={styles.activityList}>
-              {stats.recentActivities.length === 0 ? (
-                <li>No recent activities.</li>
-              ) : (
-                stats.recentActivities.map((activity, i) => (
-                  <li key={i}>• {activity}</li>
-                ))
-              )}
-            </ul>
-          </div>
-        </div>
+          {/* Chart and Activity */}
+          <div className={styles.analyticsRow}>
+            <div className={styles.chartBox}>
+              <h4>Sales Analytics</h4>
+              <div className={styles.chartWrapper}>
+                <Bar data={chartData} options={chartOptions} />
+              </div>
+            </div>
 
-        {/* Employee Performance Table */}
-        <div className={styles.tableWrapper}>
-          <h4>Employee Overview</h4>
-          <div className={styles.tableScroll}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Employee ID</th>
-                  <th>Status</th>
-                  <th>Assigned</th>
-                  <th>Closed</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employees.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: "center" }}>No employees found</td>
-                  </tr>
+            <div className={styles.activityBox}>
+              <h4>Recent Activity</h4>
+              <ul className={styles.activityList}>
+                {stats.recentActivities.length === 0 ? (
+                  <li>No recent activities.</li>
                 ) : (
-                  employees.map((emp) => (
-                    <tr key={emp._id}>
-                      <td>{emp.firstName} {emp.lastName}</td>
-                      <td>{emp.email}</td>
-                      <td>{emp.employeeId}</td>
-                      <td style={{
-                        color: emp.status === "Active" ? "#2ecc71" : "#e74c3c",
-                        fontWeight: "bold",
-                      }}>
-                        {emp.status}
-                      </td>
-                      <td>{emp.assignedLeads}</td>
-                      <td>{emp.closedLeads}</td>
-                    </tr>
+                  stats.recentActivities.map((activity, i) => (
+                    <li key={i}>• {activity}</li>
                   ))
                 )}
-              </tbody>
-            </table>
+              </ul>
+            </div>
+          </div>
+
+          {/* Employee Table */}
+          <div className={styles.tableWrapper}>
+            <h4>Employee Overview</h4>
+            <div className={styles.tableScroll}>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Employee ID</th>
+                    <th>Status</th>
+                    <th>Assigned</th>
+                    <th>Closed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employees.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: "center" }}>No employees found</td>
+                    </tr>
+                  ) : (
+                    employees.map((emp) => (
+                      <tr key={emp._id}>
+                        <td>{emp.firstName} {emp.lastName}</td>
+                        <td>{emp.email}</td>
+                        <td>{emp.employeeId}</td>
+                        <td style={{
+                          color: emp.status === "Active" ? "#2ecc71" : "#e74c3c",
+                          fontWeight: "bold",
+                        }}>
+                          {emp.status}
+                        </td>
+                        <td>{emp.assignedLeads}</td>
+                        <td>{emp.closedLeads}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
