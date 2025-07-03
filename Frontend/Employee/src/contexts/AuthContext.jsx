@@ -1,3 +1,5 @@
+// src/contexts/AuthContext.jsx
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
@@ -6,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 1. Mark refresh (F5 / Ctrl+R)
+  // ✅ Mark tab as refreshing before reload
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,14 +17,13 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // ✅ 2. Restore employee on load
+  // ✅ Restore session from sessionStorage
   useEffect(() => {
     const stored = sessionStorage.getItem("employee");
     if (stored && stored !== "undefined" && stored !== "null") {
       setEmployee(JSON.parse(stored));
     }
 
-    // Clear the flag after load
     setTimeout(() => {
       sessionStorage.removeItem("refreshing");
     }, 100);
@@ -30,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // ✅ 3. Auto-checkout on tab close (not refresh)
+  // ✅ Trigger auto-checkout on real tab close
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
@@ -40,18 +41,15 @@ export const AuthProvider = ({ children }) => {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
-            const url = `${import.meta.env.VITE_API_BASE}/api/auth/auto-checkout/${_id}`;
-            const blob = new Blob([], { type: "application/json" });
-            navigator.sendBeacon(url, blob);
+            navigator.sendBeacon(
+              `${import.meta.env.VITE_API_BASE}/api/timing/auto-checkout/${_id}`
+            );
           }
-
-          // ✅ Delay clearing session to ensure beacon is sent
-          setTimeout(() => {
-            sessionStorage.clear();
-          }, 100);
         } catch (e) {
           console.error("❌ Auto-checkout beacon error", e);
         }
+
+        sessionStorage.clear(); // Clear session only on close
       }
     };
 
@@ -60,7 +58,7 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // ✅ 4. Login
+  // ✅ Login handler
   const login = async (email, password) => {
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE}/api/auth/login`,
@@ -87,5 +85,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ✅ Custom hook to use context
 export const useAuth = () => useContext(AuthContext);

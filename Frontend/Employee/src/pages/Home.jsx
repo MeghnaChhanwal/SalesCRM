@@ -41,20 +41,6 @@ const Home = () => {
     fetchTiming();
   }, [employee]);
 
-  // ✅ Auto-checkout on tab close (not refresh)
-  useEffect(() => {
-    if (!employee?._id) return;
-
-    const handleUnload = () => {
-      navigator.sendBeacon(
-        `${import.meta.env.VITE_API_BASE}/api/timing/auto-checkout/${employee._id}`
-      );
-    };
-
-    window.addEventListener("beforeunload", handleUnload);
-    return () => window.removeEventListener("beforeunload", handleUnload);
-  }, [employee]);
-
   const checkIn = formatTime(today?.checkIn);
   const breakStatus = today?.breakStatus || "OffBreak";
   const latestBreak = today?.breaks?.slice(-1)?.[0] || {};
