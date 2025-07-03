@@ -1,118 +1,114 @@
-.container {
-  padding: 1rem;
-  background-color: #f5f5f5;
-  font-family: 'Segoe UI', sans-serif;
+.homeContainer {
+  padding: 1.2rem;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f9fafb;
+  min-height: 100vh;
 }
 
-/* Greeting Header */
-.greeting {
-  font-size: 1.3rem;
-  font-weight: 500;
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
-  color: #333;
+/* Greeting */
+.homeContainer h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
 }
 
-/* All cards (timing, break, activity) */
-.timingCard,
-.breakCard,
-.activityCard {
-  background-color: #ffffff;
+/* Timing box */
+.timingBox {
+  background-color: #1e57d1;
+  color: white;
   border-radius: 12px;
   padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* Row inside cards */
-.cardRow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  margin-bottom: 1.2rem;
 }
 
-/* Colored status dot */
-.statusLight {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-left: auto;
-  margin-right: 0.5rem;
-}
-
-/* Status color variants */
-.active {
-  background-color: #4caf50; /* Green */
-}
-
-.inactive {
-  background-color: #f44336; /* Red */
-}
-
-.break {
-  background-color: #ffc107; /* Amber */
-}
-
-.offline {
-  background-color: #9e9e9e; /* Gray */
-}
-
-/* Break history layout */
-.breakHistory {
-  margin-top: 1rem;
+.checkIn,
+.checkOut {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  font-size: 0.95rem;
 }
 
-/* Divider and spacing for each break session */
-.breakBlock {
-  margin-top: 0.75rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #eee;
+.checkOut span,
+.checkIn span {
+  margin-top: 4px;
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
-/* Row showing break start/end */
-.breakRow {
+/* Status indicators */
+.checkOut::after {
+  content: "";
+  display: inline-block;
+  margin-top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #28c76f; /* Green */
+}
+
+.checkOut[data-status="break"]::after {
+  background-color: #ff4d4f; /* Red */
+}
+
+/* Break Section */
+.breakSection {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.2rem;
+}
+
+.breakSection h4 {
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.breakItem {
+  background-color: #f0f4ff;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.6rem;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   font-size: 0.9rem;
-  background-color: #f9f9f9;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid #eee;
 }
 
-/* Activity heading inside card */
-.activityCard h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+.breakItem p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Recent Activity */
+.recentActivity {
+  background-color: #f0f0f0;
+  padding: 0.9rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
   color: #333;
 }
 
-/* List of recent activity updates */
-.activityList {
+.recentActivity ul {
   list-style: none;
-  padding: 0;
+  padding-left: 0;
   margin: 0;
-  font-size: 0.95rem;
-  color: #555;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
-/* 🔽 Mobile responsiveness (optional if needed) */
-@media (max-width: 400px) {
-  .greeting {
-    font-size: 1.15rem;
-  }
+.recentActivity li {
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-left: 1rem;
+}
 
-  .breakRow,
-  .activityList {
-    font-size: 0.85rem;
-  }
+.recentActivity li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #888;
 }

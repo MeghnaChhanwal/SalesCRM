@@ -1,54 +1,21 @@
 import mongoose from "mongoose";
 
-// Break subdocument schema
-const breakSchema = new mongoose.Schema(
-  {
-    start: { type: Date },
-    end: { type: Date },
-  },
-  { _id: false } // prevent Mongoose from auto-generating _id for each break
-);
+const breakSchema = new mongoose.Schema({
+  start: String,
+  end: String,
+});
 
-// Main Timing schema
 const timingSchema = new mongoose.Schema(
   {
-    employee: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Employee",
-      required: true,
-    },
-    date: {
-      type: String, // format: "YYYY-MM-DD"
-      required: true,
-    },
-    checkIn: { type: Date },
-    checkOut: { type: Date },
-    status: {
-      type: String,
-      enum: ["Active", "Inactive"],
-      default: "Inactive",
-    },
-    breakStatus: {
-      type: String,
-      enum: ["OnBreak", "OffBreak"],
-      default: "OffBreak",
-    },
+    employee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
+    date: String, // YYYY-MM-DD
+    checkIn: String,
+    checkOut: String,
+    status: { type: String, default: "Inactive" },
+    breakStatus: { type: String, default: "OffBreak" },
     breaks: [breakSchema],
   },
-  {
-    timestamps: true,
-    toJSON: {
-      virtuals: true,
-      versionKey: false,
-      transform: (_, ret) => {
-        delete ret._id;
-        return ret;
-      },
-    },
-  }
+  { timestamps: true }
 );
 
-
-
-const Timing = mongoose.model("Timing", timingSchema);
-export default Timing;
+export default mongoose.model("Timing", timingSchema);
