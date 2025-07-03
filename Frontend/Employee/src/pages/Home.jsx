@@ -9,6 +9,7 @@ const Home = () => {
   const [today, setToday] = useState(null);
   const [breakLogs, setBreakLogs] = useState([]);
 
+  // 🕒 Format ISO time to HH:MM AM/PM
   const formatTime = (iso) =>
     iso
       ? new Date(iso).toLocaleTimeString("en-IN", {
@@ -17,9 +18,9 @@ const Home = () => {
         })
       : "--:--";
 
-  const getColor = (status) => {
-    return status === "Active" ? "#27ae60" : "#e74c3c"; // green or red
-  };
+  // 🟢 Dot Color (green always since employee is Active if logged in)
+  const getColor = (status) =>
+    status === "Active" ? "#27ae60" : "#e74c3c";
 
   useEffect(() => {
     if (!employee?._id) return;
@@ -32,7 +33,7 @@ const Home = () => {
         const resBreaks = await API.get(`/api/timing/breaks/${employee._id}`);
         setBreakLogs(resBreaks.data || []);
       } catch (err) {
-        console.error("❌ Fetch error:", err);
+        console.error("❌ Fetch timing error:", err);
       }
     };
 
@@ -57,25 +58,24 @@ const Home = () => {
           </p>
         </div>
 
-        {/* Timings Section */}
+        {/* Timing Cards */}
         <h3 className={styles.sectionTitle}>Timings</h3>
-
         <div className={styles.cardRow}>
           <div className={styles.blueCard}>
             <p className={styles.label}>Checked-In</p>
             <p className={styles.time}>{checkIn}</p>
           </div>
           <div className={styles.blueCard}>
-            <p className={styles.label}>Check Out</p>
+            <p className={styles.label}>Check-Out</p>
             <p className={styles.time}>--:--</p>
             <span
               className={styles.statusDot}
-              style={{ backgroundColor: "#27ae60" }} // always green when logged in
+              style={{ backgroundColor: "#27ae60" }}
             />
           </div>
         </div>
 
-        {/* Break Status (latest) */}
+        {/* Break Session */}
         <div className={styles.cardRow}>
           <div className={styles.blueCard}>
             <p className={styles.label}>Break</p>
@@ -95,7 +95,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Break History */}
+        {/* Break History Table */}
         <div className={styles.historyBox}>
           {breakLogs.map((log, i) =>
             log.breaks
@@ -121,12 +121,12 @@ const Home = () => {
           )}
         </div>
 
-        {/* Optional: Recent Activity (Static for now) */}
+        {/* Recent Activity Placeholder */}
         <div className={styles.recentActivityBox}>
           <p className={styles.recentTitle}>Recent Activity</p>
           <ul className={styles.activityList}>
-            <li>You were assigned 3 more new leads – 1 hour ago</li>
-            <li>You closed a deal today – 2 hours ago</li>
+            <li>You were assigned 3 new leads – 1 hour ago</li>
+            <li>You closed a deal – 2 hours ago</li>
           </ul>
         </div>
       </div>
