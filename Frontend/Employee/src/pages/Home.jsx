@@ -1,5 +1,3 @@
-// src/pages/Home.jsx
-
 import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import styles from "../styles/Home.module.css";
@@ -48,6 +46,7 @@ const Home = () => {
   return (
     <Layout>
       <div className={styles.container}>
+        {/* Header */}
         <div className={styles.headerBox}>
           <p className={styles.crmText}>
             Canova<span style={{ color: "#FFD700" }}>CRM</span>
@@ -58,6 +57,7 @@ const Home = () => {
           </p>
         </div>
 
+        {/* Timings Section */}
         <h3 className={styles.sectionTitle}>Timings</h3>
 
         <div className={styles.cardRow}>
@@ -70,11 +70,12 @@ const Home = () => {
             <p className={styles.time}>--:--</p>
             <span
               className={styles.statusDot}
-              style={{ backgroundColor: "#27ae60" }}
+              style={{ backgroundColor: "#27ae60" }} // always green when logged in
             />
           </div>
         </div>
 
+        {/* Break Status (latest) */}
         <div className={styles.cardRow}>
           <div className={styles.blueCard}>
             <p className={styles.label}>Break</p>
@@ -94,40 +95,37 @@ const Home = () => {
           </div>
         </div>
 
+        {/* Break History */}
         <div className={styles.historyBox}>
-          <h4 className={styles.recentTitle}>Break History (Last 7 Days)</h4>
-          {breakLogs.length === 0 ? (
-            <p className={styles.noBreaks}>No break data found.</p>
-          ) : (
-            breakLogs.map((log, i) =>
-              log.breaks
-                ?.filter((b) => b.start && b.end)
-                .map((b, idx) => (
-                  <div key={`${i}-${idx}`} className={styles.breakRow}>
-                    <div>
-                      <p className={styles.breakLabel}>Break</p>
-                      <p className={styles.breakTime}>{formatTime(b.start)}</p>
-                    </div>
-                    <div>
-                      <p className={styles.breakLabel}>Ended</p>
-                      <p className={styles.breakTime}>{formatTime(b.end)}</p>
-                    </div>
-                    <div>
-                      <p className={styles.breakLabel}>Date</p>
-                      <p className={styles.breakTime}>
-                        {new Date(log.date).toLocaleDateString("en-IN")}
-                      </p>
-                    </div>
+          {breakLogs.map((log, i) =>
+            log.breaks
+              ?.filter((b) => b.start && b.end)
+              .map((b, idx) => (
+                <div key={`${i}-${idx}`} className={styles.breakRow}>
+                  <div>
+                    <p className={styles.breakLabel}>Break</p>
+                    <p className={styles.breakTime}>{formatTime(b.start)}</p>
                   </div>
-                ))
-            )
+                  <div>
+                    <p className={styles.breakLabel}>Ended</p>
+                    <p className={styles.breakTime}>{formatTime(b.end)}</p>
+                  </div>
+                  <div>
+                    <p className={styles.breakLabel}>Date</p>
+                    <p className={styles.breakTime}>
+                      {new Date(log.date).toLocaleDateString("en-IN")}
+                    </p>
+                  </div>
+                </div>
+              ))
           )}
         </div>
 
+        {/* Optional: Recent Activity (Static for now) */}
         <div className={styles.recentActivityBox}>
           <p className={styles.recentTitle}>Recent Activity</p>
           <ul className={styles.activityList}>
-            <li>You were assigned 3 new leads – 1 hour ago</li>
+            <li>You were assigned 3 more new leads – 1 hour ago</li>
             <li>You closed a deal today – 2 hours ago</li>
           </ul>
         </div>

@@ -6,42 +6,38 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 1. Mark tab as refreshing
+  // ✅ 1. Mark tab as refreshing BEFORE reload
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
     };
     window.addEventListener("beforeunload", markRefreshing);
-    return () => {
-      window.removeEventListener("beforeunload", markRefreshing);
-    };
+    return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // ✅ 2. Restore session on load
+  // ✅ 2. Restore session on load (with slight delay for safety)
   useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem("employee");
-      const isRefreshing = sessionStorage.getItem("refreshing") === "true";
+    const isRefreshing = sessionStorage.getItem("refreshing") === "true";
+    const stored = sessionStorage.getItem("employee");
 
-      if (stored && stored !== "undefined" && stored !== "null") {
-        setEmployee(JSON.parse(stored));
-      }
-
-      sessionStorage.removeItem("refreshing"); // Always clear after load
-    } catch (err) {
-      console.error("❌ Session restore error:", err);
-      sessionStorage.removeItem("employee");
-    } finally {
-      setLoading(false);
+    if (stored && stored !== "undefined" && stored !== "null") {
+      setEmployee(JSON.parse(stored));
     }
+
+    setTimeout(() => {
+      sessionStorage.removeItem("refreshing"); // ⏱️ delayed clear
+    }, 100); // allows visibility event to detect it safely
+
+    setLoading(false);
   }, []);
 
-  // ✅ 3. Auto logout on tab close (not refresh)
+  // ✅ 3. Trigger logout only on actual tab close (not refresh)
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
       const emp = sessionStorage.getItem("employee");
 
+      // 🚫 Don't logout if refreshing
       if (document.visibilityState === "hidden" && !isRefreshing && emp) {
         try {
           const { _id } = JSON.parse(emp);
@@ -54,17 +50,16 @@ export const AuthProvider = ({ children }) => {
           console.error("❌ Logout beacon error", e);
         }
 
-        sessionStorage.clear();
+        sessionStorage.clear(); // ✅ ensure it's cleared on tab close
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
+    return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
   }, []);
 
-  // ✅ 4. Login method
+  // ✅ 4. Login function
   const login = async (email, password) => {
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE}/api/auth/login`,
