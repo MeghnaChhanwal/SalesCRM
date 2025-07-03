@@ -9,7 +9,7 @@
 
 /* Add Button */
 .addBtn {
-  background-color: #007bff;
+  background-color: #969a9d;
   color: white;
   padding: 10px 18px;
   border: none;
@@ -21,7 +21,7 @@
 }
 
 .addBtn:hover {
-  background-color: #0056b3;
+  background-color: #797979;
 }
 
 /* Error Message */
@@ -94,7 +94,7 @@
   font-weight: 600;
   font-size: 0.8rem;
   display: inline-block;
-  min-width: 90px;
+  min-width: 100px;
   text-align: center;
 }
 

@@ -2,91 +2,82 @@
 
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
-import moment from "moment-timezone";
 
-// ✅ 1. Get today's timings for a given employee
+// ✅ Get Today's Timing
 export const getTodayTiming = async (req, res) => {
-  const { employeeId } = req.params;
+  const { id: employeeId } = req.params;
+  const date = todayIST();
 
   try {
-    const date = todayIST(); // format: YYYY-MM-DD
-
-    const timings = await Timing.find({
-      employee: employeeId,
-      date,
-    }).sort({ createdAt: -1 });
-
-    res.status(200).json(timings);
-  } catch (error) {
-    console.error("Fetch Today Timing Error:", error);
-    res.status(500).json({ error: "Failed to fetch timings" });
+    const timing = await Timing.find({ employee: employeeId, date });
+    res.json(timing);
+  } catch (err) {
+    console.error("❌ Error fetching today's timing:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// ✅ 2. Get last 7 days of timing logs (checkIn, checkOut, breaks)
-export const getPast7DaysTiming = async (req, res) => {
-  const { employeeId } = req.params;
+// ✅ Get Break History
+export const getBreakHistory = async (req, res) => {
+  const { id: employeeId } = req.params;
 
   try {
-    const fromDate = moment().tz("Asia/Kolkata").subtract(6, "days").format("YYYY-MM-DD");
-
-    const timings = await Timing.find({
+    const history = await Timing.find({
       employee: employeeId,
-      date: { $gte: fromDate },
+      breaks: { $exists: true, $not: { $size: 0 } }
     }).sort({ date: -1 });
 
-    res.status(200).json(timings);
-  } catch (error) {
-    console.error("Fetch 7-day Timing Error:", error);
-    res.status(500).json({ error: "Failed to fetch past 7 days" });
+    res.json(history);
+  } catch (err) {
+    console.error("❌ Error fetching break history:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// ✅ 3. Get total work & break summary for week/month
-export const getSummaryTiming = async (req, res) => {
-  const { employeeId } = req.params;
-  const { range = "week" } = req.query; // "week" or "month"
+// ✅ Start Break
+export const startBreak = async (req, res) => {
+  const { id: employeeId } = req.params;
+  const date = todayIST();
+  const now = new Date();
 
   try {
-    const daysBack = range === "month" ? 29 : 6;
-    const fromDate = moment().tz("Asia/Kolkata").subtract(daysBack, "days").format("YYYY-MM-DD");
+    const timing = await Timing.findOne({ employee: employeeId, date });
+    if (!timing)
+      return res.status(404).json({ error: "No timing record found" });
 
-    const logs = await Timing.find({
-      employee: employeeId,
-      date: { $gte: fromDate },
-    });
+    timing.breaks.push({ start: now });
+    timing.breakStatus = "OnBreak";
+    timing.status = "Inactive";
 
-    let totalWorkMinutes = 0;
-    let totalBreakMinutes = 0;
+    await timing.save();
+    res.json({ message: "Break started", timing });
+  } catch (err) {
+    console.error("❌ Start Break Error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
-    logs.forEach((log) => {
-      const checkIn = moment.tz(`${log.date} ${log.checkIn}`, "Asia/Kolkata");
-      const checkOut = log.checkOut
-        ? moment.tz(`${log.date} ${log.checkOut}`, "Asia/Kolkata")
-        : moment();
+// ✅ End Break
+export const endBreak = async (req, res) => {
+  const { id: employeeId } = req.params;
+  const date = todayIST();
+  const now = new Date();
 
-      const workDuration = checkOut.diff(checkIn, "minutes");
+  try {
+    const timing = await Timing.findOne({ employee: employeeId, date });
+    if (!timing || !timing.breaks.length)
+      return res.status(404).json({ error: "No ongoing break found" });
 
-      const breakDuration = log.breaks.reduce((sum, brk) => {
-        if (brk.start && brk.end) {
-          const start = moment.tz(`${log.date} ${brk.start}`, "Asia/Kolkata");
-          const end = moment.tz(`${log.date} ${brk.end}`, "Asia/Kolkata");
-          return sum + end.diff(start, "minutes");
-        }
-        return sum;
-      }, 0);
+    const lastBreak = timing.breaks[timing.breaks.length - 1];
+    if (!lastBreak.end) lastBreak.end = now;
 
-      totalWorkMinutes += workDuration;
-      totalBreakMinutes += breakDuration;
-    });
+    timing.breakStatus = "OffBreak";
+    timing.status = "Active";
 
-    res.status(200).json({
-      totalWorkMinutes,
-      totalBreakMinutes,
-      daysCounted: logs.length,
-    });
-  } catch (error) {
-    console.error("Fetch Summary Error:", error);
-    res.status(500).json({ error: "Failed to fetch summary" });
+    await timing.save();
+    res.json({ message: "Break ended", timing });
+  } catch (err) {
+    console.error("❌ End Break Error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

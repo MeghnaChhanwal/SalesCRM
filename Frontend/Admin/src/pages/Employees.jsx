@@ -132,7 +132,7 @@ const Employee = () => {
   return (
     <MainLayout
       onSearch={setSearchTerm}
-      rightElement={<button className={styles.addBtn} onClick={handleAddClick}>➕ Add Employee</button>}
+      rightElement={<button className={styles.addBtn} onClick={handleAddClick}> Add Employee</button>}
     >
       {errorMessage && <p className={styles.error}>{errorMessage}</p>}
 
@@ -145,7 +145,7 @@ const Employee = () => {
               <th onClick={() => handleSort("status")}>Status</th>
               <th onClick={() => handleSort("assignedLeads")}>Assigned</th>
               <th onClick={() => handleSort("closedLeads")}>Closed</th>
-              <th>⋮</th>
+             
             </tr>
           </thead>
           <tbody>

@@ -1,8 +1,6 @@
-import mongoose from "mongoose";
-
 const breakSchema = new mongoose.Schema({
-  start: { type: String },  // time string (e.g., "11:00:00")
-  end: { type: String },    // time string (e.g., "11:30:00")
+  start: { type: Date },  // full ISO date-time
+  end: { type: Date },
 }, { _id: false });
 
 const timingSchema = new mongoose.Schema({
@@ -12,14 +10,14 @@ const timingSchema = new mongoose.Schema({
     required: true,
   },
   date: {
-    type: String, // Format: "YYYY-MM-DD"
+    type: String, // still fine for grouping: YYYY-MM-DD
     required: true,
   },
   checkIn: {
-    type: String, // Format: "HH:mm:ss"
+    type: Date, // changed from String
   },
   checkOut: {
-    type: String,
+    type: Date, // changed from String
   },
   status: {
     type: String,
@@ -33,5 +31,3 @@ const timingSchema = new mongoose.Schema({
   },
   breaks: [breakSchema],
 }, { timestamps: true });
-
-export default mongoose.model("Timing", timingSchema);

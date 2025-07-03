@@ -1,7 +1,24 @@
 .pageWrapper {
-  height: calc(100vh - 64px); /* Adjust based on header height */
+  height: calc(100vh - 64px); /* Adjust if header is taller */
   overflow-y: auto;
-  padding-right: 8px;
+  padding-right: 2px;
+
+  /* Scrollbar for full page scroll */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+.pageWrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pageWrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.pageWrapper::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .dashboardContainer {
@@ -46,26 +63,12 @@
   height: 280px;
 }
 
+/* No internal scroll inside activity box */
 .activityBox {
   flex: 1;
   background: white;
   padding: 1rem;
   border-radius: 12px;
-  max-height: 300px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #ccc #f1f1f1;
-}
-
-.activityBox::-webkit-scrollbar {
-  width: 6px;
-}
-.activityBox::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 4px;
-}
-.activityBox::-webkit-scrollbar-track {
-  background: #f1f1f1;
 }
 
 .activityList {
@@ -85,6 +88,15 @@
 
 .tableScroll {
   overflow-x: auto;
+}
+
+.tableScroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tableScroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
 }
 
 table {
