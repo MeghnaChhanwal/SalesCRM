@@ -2,7 +2,7 @@ import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
-// ✅ LOGIN Controller
+// ✅ LOGIN CONTROLLER
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
 
@@ -23,22 +23,20 @@ export const loginEmployee = async (req, res) => {
     const date = todayIST();
     const now = new Date();
 
-    let timing = await Timing.findOne({
-      employee: employee._id,
-      date,
-    }).sort({ createdAt: -1 });
+    let timing = await Timing.findOne({ employee: employee._id, date }).sort({ createdAt: -1 });
 
     if (timing && !timing.checkOut) {
-      // ✅ Mark login as resume from break
+      // Resuming session: end last break if open
       timing.status = "Active";
-
-      const lastBreak = timing.breaks?.[timing.breaks.length - 1];
-      if (lastBreak && !lastBreak.end) {
-        lastBreak.end = now; // ⏹ End last break now
-        timing.breakStatus = "OffBreak";
+      if (timing.breaks?.length > 0) {
+        const lastBreak = timing.breaks[timing.breaks.length - 1];
+        if (!lastBreak.end) {
+          lastBreak.end = now;
+          timing.breakStatus = "OffBreak";
+        }
       }
     } else {
-      // ✅ First login of the day
+      // Fresh login
       timing = new Timing({
         employee: employee._id,
         date,
@@ -67,7 +65,7 @@ export const loginEmployee = async (req, res) => {
   }
 };
 
-// ✅ LOGOUT Controller
+// ✅ LOGOUT CONTROLLER
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -93,14 +91,11 @@ export const logoutEmployee = async (req, res) => {
 
     if (timing) {
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
-      if (lastBreak && !lastBreak.end) {
-        lastBreak.end = now;
-      }
+      if (lastBreak && !lastBreak.end) lastBreak.end = now;
 
       timing.checkOut = now;
       timing.status = "Inactive";
       timing.breakStatus = "OffBreak";
-
       await timing.save();
     }
 
@@ -111,7 +106,7 @@ export const logoutEmployee = async (req, res) => {
   }
 };
 
-// ✅ AUTO CHECKOUT Controller (on tab close)
+// ✅ AUTO CHECKOUT (on tab close only)
 export const autoCheckout = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -135,12 +130,12 @@ export const autoCheckout = async (req, res) => {
     if (timing) {
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
 
-      // ✅ If break already running, end it
+      // If already on break (started but not ended)
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = now;
       }
 
-      // ✅ If no break started yet, add break start now
+      // If no break exists or previous one is closed, add a new break start
       if (!lastBreak || lastBreak.end) {
         timing.breaks.push({ start: now });
       }

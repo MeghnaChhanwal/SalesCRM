@@ -1,7 +1,7 @@
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
-// ✅ Get today's timing for employee
+// ✅ 1. Get today's timing
 export const getTodayTiming = async (req, res) => {
   try {
     const { id } = req.params;
@@ -15,7 +15,7 @@ export const getTodayTiming = async (req, res) => {
   }
 };
 
-// ✅ Get 7-day break history
+// ✅ 2. Get break history for last 7 days
 export const getBreakHistory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -26,7 +26,7 @@ export const getBreakHistory = async (req, res) => {
     const history = await Timing.find({
       employee: id,
       date: { $gte: fromDate.toISOString().split("T")[0] },
-      "breaks.0": { $exists: true }, // Only timings with at least 1 break
+      "breaks.0": { $exists: true },
     });
 
     res.json(history);
@@ -36,7 +36,7 @@ export const getBreakHistory = async (req, res) => {
   }
 };
 
-// ✅ Auto-checkout on tab close
+// ✅ 3. Auto-checkout on tab close (not refresh)
 export const autoCheckout = async (req, res) => {
   try {
     const { id } = req.params;
@@ -52,18 +52,14 @@ export const autoCheckout = async (req, res) => {
     if (timing) {
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
 
-      // ✅ Start new break if none active
+      // ✅ Only push break start if NO break started or previous ended
       if (!lastBreak || lastBreak.end) {
         timing.breaks.push({ start: now });
-      } 
-      // ✅ Or end ongoing break (edge case fallback)
-      else if (!lastBreak.end) {
-        lastBreak.end = now;
+        timing.breakStatus = "OnBreak";
       }
 
       timing.checkOut = now;
       timing.status = "Inactive";
-      timing.breakStatus = "OffBreak";
 
       await timing.save();
     }

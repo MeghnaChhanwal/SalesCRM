@@ -1,5 +1,3 @@
-// routes/timingRoutes.js
-
 import express from "express";
 import {
   getTodayTiming,
@@ -9,13 +7,13 @@ import {
 
 const router = express.Router();
 
-// ✅ Get today's timing for an employee
+// ✅ Get today's timing for an employee (e.g. /api/timing/EMP_ID)
 router.get("/:id", getTodayTiming);
 
-// ✅ Get last 7 days break history
+// ✅ Get last 7 days' break logs for an employee (e.g. /api/timing/breaks/EMP_ID)
 router.get("/breaks/:id", getBreakHistory);
 
-// ✅ Auto-checkout on tab close
+// ✅ Auto-checkout on tab close (e.g. /api/timing/auto-checkout/EMP_ID)
 router.post("/auto-checkout/:id", autoCheckout);
 
 export default router;
