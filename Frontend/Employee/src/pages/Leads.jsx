@@ -1,4 +1,3 @@
-// src/pages/Leads.jsx
 import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import SearchFilter from "../components/SearchFilter";
@@ -11,7 +10,7 @@ const Leads = () => {
   const { employee } = useAuth();
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState(""); // "Open", "Closed", or ""
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,6 +28,8 @@ const Leads = () => {
       });
 
       let data = res.data.leads;
+
+      // Filter leads assigned to the logged-in employee (if any)
       if (employee?._id) {
         data = data.filter(
           (lead) => lead.assignedEmployee?._id === employee._id
@@ -46,7 +47,7 @@ const Leads = () => {
   const handleStatusChange = async (leadId, newStatus) => {
     try {
       await API.patch(`/api/leads/${leadId}/status`, { status: newStatus });
-      fetchLeads();
+      fetchLeads(); // Refresh data after update
     } catch (err) {
       alert(err?.response?.data?.error || "Failed to update status.");
       console.error("Status update failed:", err);
@@ -56,7 +57,7 @@ const Leads = () => {
   const handleTypeChange = async (leadId, newType) => {
     try {
       await API.patch(`/api/leads/${leadId}/type`, { type: newType });
-      fetchLeads();
+      fetchLeads(); // Refresh data after update
     } catch (err) {
       console.error("Type update failed:", err);
     }

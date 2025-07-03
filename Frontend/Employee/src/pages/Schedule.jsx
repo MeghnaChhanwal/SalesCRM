@@ -1,22 +1,52 @@
-// src/pages/Schedule.jsx
 import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import SearchFilter from "../components/SearchFilter";
 import styles from "../styles/Schedule.module.css";
 import API from "../utils/axios";
+import { useAuth } from "../contexts/AuthContext";
 
 const Schedule = () => {
-  const [scheduledLeads, setScheduledLeads] = useState([]);
+  const { employee } = useAuth();
+  const [leads, setLeads] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dayFilter, setDayFilter] = useState("Today"); // "Today" or "All"
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchScheduledLeads();
-  }, []);
+  }, [searchTerm, dayFilter]);
 
   const fetchScheduledLeads = async () => {
     setLoading(true);
     try {
-      const res = await API.get("/api/schedule");
-      setScheduledLeads(res.data.scheduled || []);
+      const res = await API.get("/api/leads", {
+        params: { search: searchTerm },
+      });
+
+      // Filter leads that have scheduled calls
+      let allLeads = res.data.leads.filter(
+        (lead) => lead.scheduledCalls && lead.scheduledCalls.length > 0
+      );
+
+      // Filter by employee (if logged in as employee)
+      if (employee?._id) {
+        allLeads = allLeads.filter(
+          (lead) => lead.assignedEmployee?._id === employee._id
+        );
+      }
+
+      // Filter by day (Today or All)
+      const filtered = allLeads.filter((lead) => {
+        if (dayFilter === "All") return true;
+
+        return lead.scheduledCalls.some((call) => {
+          const callDate = new Date(call.callDate).toDateString();
+          const today = new Date().toDateString();
+          return callDate === today;
+        });
+      });
+
+      setLeads(filtered);
     } catch (err) {
       console.error("Error fetching scheduled leads:", err);
     } finally {
@@ -27,20 +57,32 @@ const Schedule = () => {
   return (
     <Layout>
       <div className={styles.container}>
-        <h2>📅 Scheduled Calls</h2>
+        <SearchFilter
+          searchTerm={searchTerm}
+          onSearch={setSearchTerm}
+          statusFilter={dayFilter}
+          onStatusFilter={setDayFilter}
+          options={["Today", "All"]}
+        />
+
         {loading ? (
-          <p>Loading...</p>
-        ) : scheduledLeads.length === 0 ? (
-          <p>No scheduled calls found.</p>
+          <p className={styles.message}>Loading schedule...</p>
+        ) : leads.length === 0 ? (
+          <p className={styles.message}>No scheduled calls found.</p>
         ) : (
-          <ul className={styles.scheduleList}>
-            {scheduledLeads.map((lead) => (
-              <li key={lead._id} className={styles.scheduleItem}>
-                <strong>{lead.name}</strong> — Scheduled at{" "}
-                {new Date(lead.scheduledDate).toLocaleString()}
-              </li>
+          <div className={styles.cardList}>
+            {leads.map((lead) => (
+              <div className={styles.card} key={lead._id}>
+                <h4>{lead.name}</h4>
+                {lead.scheduledCalls.map((call, index) => (
+                  <div key={index} className={styles.callInfo}>
+                    <p><strong>{call.callType}</strong></p>
+                    <p>{new Date(call.callDate).toLocaleString()}</p>
+                  </div>
+                ))}
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </Layout>
