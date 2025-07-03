@@ -13,12 +13,25 @@ import {
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-router.get("/leads", getLeads);
-router.post("/leads", addLeadManually);
-router.post("/leads/upload", upload.single("file"), uploadCSV);
-router.patch("/leads/:id/type", updateLeadType);
-router.patch("/leads/:id/status", updateLeadStatus);
-router.post("/leads/:id/schedule", scheduleCall);
+// ✅ Route: GET /api/leads
+router.get("/", getLeads);
+
+// ✅ Route: POST /api/leads
+router.post("/", addLeadManually);
+
+// ✅ Route: POST /api/leads/upload
+router.post("/upload", upload.single("file"), uploadCSV);
+
+// ✅ Route: PATCH /api/leads/:id/type
+router.patch("/:id/type", updateLeadType);
+
+// ✅ Route: PATCH /api/leads/:id/status
+router.patch("/:id/status", updateLeadStatus);
+
+// ✅ Route: POST /api/leads/:id/schedule
+router.post("/:id/schedule", scheduleCall);
+
+// ✅ Route: GET /api/leads/schedule
 router.get("/schedule", getScheduledCalls);
 
 export default router;
