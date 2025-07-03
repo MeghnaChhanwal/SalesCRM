@@ -1,3 +1,5 @@
+// src/pages/Home.jsx
+
 import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import styles from "../styles/Home.module.css";
@@ -9,7 +11,6 @@ const Home = () => {
   const [today, setToday] = useState(null);
   const [breakLogs, setBreakLogs] = useState([]);
 
-  // 🕒 Format ISO time to HH:MM AM/PM
   const formatTime = (iso) =>
     iso
       ? new Date(iso).toLocaleTimeString("en-IN", {
@@ -18,9 +19,9 @@ const Home = () => {
         })
       : "--:--";
 
-  // 🟢 Dot Color (green always since employee is Active if logged in)
-  const getColor = (status) =>
-    status === "Active" ? "#27ae60" : "#e74c3c";
+  const getColor = (status) => {
+    return status === "Active" ? "#27ae60" : "#e74c3c";
+  };
 
   useEffect(() => {
     if (!employee?._id) return;
@@ -33,11 +34,25 @@ const Home = () => {
         const resBreaks = await API.get(`/api/timing/breaks/${employee._id}`);
         setBreakLogs(resBreaks.data || []);
       } catch (err) {
-        console.error("❌ Fetch timing error:", err);
+        console.error("❌ Fetch error:", err);
       }
     };
 
     fetchTiming();
+  }, [employee]);
+
+  // ✅ Auto-checkout when tab is closed
+  useEffect(() => {
+    if (!employee?._id) return;
+
+    const handleUnload = () => {
+      navigator.sendBeacon(
+        `${import.meta.env.VITE_API_URL}/api/timing/auto-checkout/${employee._id}`
+      );
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
   }, [employee]);
 
   const checkIn = formatTime(today?.checkIn);
@@ -47,7 +62,6 @@ const Home = () => {
   return (
     <Layout>
       <div className={styles.container}>
-        {/* Header */}
         <div className={styles.headerBox}>
           <p className={styles.crmText}>
             Canova<span style={{ color: "#FFD700" }}>CRM</span>
@@ -58,31 +72,30 @@ const Home = () => {
           </p>
         </div>
 
-        {/* Timing Cards */}
         <h3 className={styles.sectionTitle}>Timings</h3>
+
         <div className={styles.cardRow}>
           <div className={styles.blueCard}>
             <p className={styles.label}>Checked-In</p>
             <p className={styles.time}>{checkIn}</p>
           </div>
           <div className={styles.blueCard}>
-            <p className={styles.label}>Check-Out</p>
-            <p className={styles.time}>--:--</p>
+            <p className={styles.label}>Status</p>
+            <p className={styles.time}>{today?.status || "Inactive"}</p>
             <span
               className={styles.statusDot}
-              style={{ backgroundColor: "#27ae60" }}
+              style={{ backgroundColor: getColor(today?.status) }}
             />
           </div>
         </div>
 
-        {/* Break Session */}
         <div className={styles.cardRow}>
           <div className={styles.blueCard}>
-            <p className={styles.label}>Break</p>
+            <p className={styles.label}>Break Start</p>
             <p className={styles.time}>{formatTime(latestBreak?.start)}</p>
           </div>
           <div className={styles.blueCard}>
-            <p className={styles.label}>Ended</p>
+            <p className={styles.label}>Break End</p>
             <p className={styles.time}>{formatTime(latestBreak?.end)}</p>
             <span
               className={styles.statusDot}
@@ -95,8 +108,10 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Break History Table */}
         <div className={styles.historyBox}>
+          {breakLogs.length === 0 && (
+            <p className={styles.noData}>No break logs found.</p>
+          )}
           {breakLogs.map((log, i) =>
             log.breaks
               ?.filter((b) => b.start && b.end)
@@ -119,15 +134,6 @@ const Home = () => {
                 </div>
               ))
           )}
-        </div>
-
-        {/* Recent Activity Placeholder */}
-        <div className={styles.recentActivityBox}>
-          <p className={styles.recentTitle}>Recent Activity</p>
-          <ul className={styles.activityList}>
-            <li>You were assigned 3 new leads – 1 hour ago</li>
-            <li>You closed a deal – 2 hours ago</li>
-          </ul>
         </div>
       </div>
     </Layout>

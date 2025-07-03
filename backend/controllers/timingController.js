@@ -1,43 +1,42 @@
+// controllers/timingController.js
 
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
-// ✅ GET Today’s Timing (for Home Page)
-export const getTodayTiming = async (req, res) => {
-  const { employeeId } = req.params;
-  const date = todayIST();
-
+// ✅ Auto Checkout Controller — called when tab closes
+export const autoCheckout = async (req, res) => {
   try {
-    const today = await Timing.find({
+    const { employeeId } = req.params;
+    if (!employeeId) return res.status(400).json({ error: "Missing ID" });
+
+    const date = todayIST();
+    const now = new Date();
+
+    const timing = await Timing.findOne({
       employee: employeeId,
       date,
-    }).sort({ createdAt: -1 });
+      checkOut: { $exists: false },
+    });
 
-    res.status(200).json(today);
-  } catch (err) {
-    console.error("❌ Error fetching today timing:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
+    if (timing) {
+      const lastBreak = timing.breaks?.[timing.breaks.length - 1];
 
-// ✅ GET 7-Day Break Logs
-export const get7DayBreakLogs = async (req, res) => {
-  const { employeeId } = req.params;
-  const today = new Date();
-  const past7 = new Date();
-  past7.setDate(today.getDate() - 6);
+      if (!lastBreak || lastBreak.end) {
+        // ➤ Start new break if none is open
+        timing.breaks.push({ start: now });
+        timing.breakStatus = "OnBreak";
+      }
 
-  try {
-    const logs = await Timing.find({
-      employee: employeeId,
-      date: { $gte: past7.toISOString().split("T")[0] },
-    })
-      .select("date breaks")
-      .sort({ date: -1 });
+      // ➤ Perform checkout
+      timing.checkOut = now;
+      timing.status = "Inactive";
 
-    res.status(200).json(logs);
-  } catch (err) {
-    console.error("❌ Error fetching 7-day logs:", err);
-    res.status(500).json({ error: "Internal server error" });
+      await timing.save();
+    }
+
+    res.status(200).json({ message: "Auto checkout done" });
+  } catch (error) {
+    console.error("❌ AutoCheckout Error:", error);
+    res.status(500).json({ error: "Auto-checkout failed" });
   }
 };
