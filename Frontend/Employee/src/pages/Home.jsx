@@ -1,3 +1,5 @@
+// src/pages/Home.jsx
+
 import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import styles from "../styles/Home.module.css";
@@ -93,35 +95,40 @@ const Home = () => {
         </div>
 
         <div className={styles.historyBox}>
-          {breakLogs.map((log, i) =>
-            log.breaks
-              ?.filter((b) => b.start && b.end)
-              .map((b, idx) => (
-                <div key={`${i}-${idx}`} className={styles.breakRow}>
-                  <div>
-                    <p className={styles.breakLabel}>Break</p>
-                    <p className={styles.breakTime}>{formatTime(b.start)}</p>
+          <h4 className={styles.recentTitle}>Break History (Last 7 Days)</h4>
+          {breakLogs.length === 0 ? (
+            <p className={styles.noBreaks}>No break data found.</p>
+          ) : (
+            breakLogs.map((log, i) =>
+              log.breaks
+                ?.filter((b) => b.start && b.end)
+                .map((b, idx) => (
+                  <div key={`${i}-${idx}`} className={styles.breakRow}>
+                    <div>
+                      <p className={styles.breakLabel}>Break</p>
+                      <p className={styles.breakTime}>{formatTime(b.start)}</p>
+                    </div>
+                    <div>
+                      <p className={styles.breakLabel}>Ended</p>
+                      <p className={styles.breakTime}>{formatTime(b.end)}</p>
+                    </div>
+                    <div>
+                      <p className={styles.breakLabel}>Date</p>
+                      <p className={styles.breakTime}>
+                        {new Date(log.date).toLocaleDateString("en-IN")}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className={styles.breakLabel}>Ended</p>
-                    <p className={styles.breakTime}>{formatTime(b.end)}</p>
-                  </div>
-                  <div>
-                    <p className={styles.breakLabel}>Date</p>
-                    <p className={styles.breakTime}>
-                      {new Date(log.date).toLocaleDateString("en-IN")}
-                    </p>
-                  </div>
-                </div>
-              ))
+                ))
+            )
           )}
         </div>
 
         <div className={styles.recentActivityBox}>
           <p className={styles.recentTitle}>Recent Activity</p>
           <ul className={styles.activityList}>
-            <li>You were assigned 3 more new lead – 1 hour ago</li>
-            <li>You Closed a deal today – 2 hours ago</li>
+            <li>You were assigned 3 new leads – 1 hour ago</li>
+            <li>You closed a deal today – 2 hours ago</li>
           </ul>
         </div>
       </div>
