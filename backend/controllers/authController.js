@@ -1,21 +1,15 @@
-// controllers/authController.js
-
 import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
-// ✅ Login Controller (renamed to match route import)
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
-
   if (!email || !password)
     return res.status(400).json({ error: "Email and password required" });
 
   try {
     const employee = await Employee.findOne({ email });
-    if (!employee)
-      return res.status(404).json({ error: "Employee not found" });
-
+    if (!employee) return res.status(404).json({ error: "Employee not found" });
     if (employee.lastName.toLowerCase() !== password.toLowerCase())
       return res.status(401).json({ error: "Invalid credentials" });
 
@@ -23,7 +17,7 @@ export const loginEmployee = async (req, res) => {
     await employee.save();
 
     const date = todayIST();
-    const time = new Date();
+    const now = new Date();
 
     let timing = await Timing.findOne({
       employee: employee._id,
@@ -35,17 +29,16 @@ export const loginEmployee = async (req, res) => {
       timing = new Timing({
         employee: employee._id,
         date,
-        checkIn: time,
+        checkIn: now,
         status: "Active",
         breakStatus: "OffBreak",
         breaks: [],
       });
     } else {
       timing.status = "Active";
-
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
-        lastBreak.end = time;
+        lastBreak.end = now;
         timing.breakStatus = "OffBreak";
       }
     }
@@ -62,29 +55,25 @@ export const loginEmployee = async (req, res) => {
         status: employee.status,
       },
     });
-  } catch (error) {
-    console.error("❌ Auth Login Error:", error);
+  } catch (err) {
+    console.error("❌ Login error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// ✅ Logout Controller (renamed to match route import)
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
-
-  if (!employeeId || employeeId === "undefined")
-    return res.status(400).json({ error: "Invalid or missing employee ID" });
+  if (!employeeId) return res.status(400).json({ error: "Missing ID" });
 
   try {
     const employee = await Employee.findById(employeeId);
-    if (!employee)
-      return res.status(404).json({ error: "Employee not found" });
+    if (!employee) return res.status(404).json({ error: "Not found" });
 
     employee.status = "Inactive";
     await employee.save();
 
     const date = todayIST();
-    const time = new Date();
+    const now = new Date();
 
     const timing = await Timing.findOne({
       employee: employeeId,
@@ -94,23 +83,18 @@ export const logoutEmployee = async (req, res) => {
 
     if (timing) {
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
-      if (lastBreak && !lastBreak.end) {
-        lastBreak.end = time;
-      }
+      if (lastBreak && !lastBreak.end) lastBreak.end = now;
 
-      timing.checkOut = time;
+      timing.checkOut = now;
       timing.status = "Inactive";
       timing.breakStatus = "OffBreak";
 
       await timing.save();
     }
 
-    res.status(200).json({
-      message: "Logout successful",
-      timing,
-    });
-  } catch (error) {
-    console.error("❌ Auth Logout Error:", error);
+    res.status(200).json({ message: "Logout successful", timing });
+  } catch (err) {
+    console.error("❌ Logout error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
