@@ -13,7 +13,7 @@ export const getLeads = async (req, res) => {
     const {
       search = "",
       page = 1,
-      limit = 8,
+      limit = 7,
       sortBy = "receivedDate",
       order = "desc"
     } = req.query;
