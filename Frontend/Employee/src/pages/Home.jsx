@@ -1,5 +1,3 @@
-// src/pages/Home.jsx
-
 import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import styles from "../styles/Home.module.css";
@@ -48,6 +46,7 @@ const Home = () => {
   return (
     <Layout>
       <div className={styles.container}>
+        {/* Header */}
         <div className={styles.headerBox}>
           <p className={styles.crmText}>
             Canova<span style={{ color: "#FFD700" }}>CRM</span>
@@ -58,6 +57,7 @@ const Home = () => {
           </p>
         </div>
 
+        {/* Timings */}
         <h3 className={styles.sectionTitle}>Timings</h3>
 
         <div className={styles.cardRow}>
@@ -94,6 +94,7 @@ const Home = () => {
           </div>
         </div>
 
+        {/* Break History */}
         <div className={styles.historyBox}>
           {breakLogs.length === 0 && (
             <p className={styles.noData}>No break logs found.</p>

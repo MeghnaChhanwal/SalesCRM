@@ -1,5 +1,4 @@
 // src/contexts/AuthContext.jsx
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
@@ -8,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Mark tab as refreshing before reload
+  // ✅ Mark refresh
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -17,7 +16,7 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // ✅ Restore session from sessionStorage
+  // ✅ Restore session
   useEffect(() => {
     const stored = sessionStorage.getItem("employee");
     if (stored && stored !== "undefined" && stored !== "null") {
@@ -31,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // ✅ Trigger auto-checkout on real tab close
+  // ✅ Auto-checkout on tab close (not refresh)
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
@@ -49,7 +48,8 @@ export const AuthProvider = ({ children }) => {
           console.error("❌ Auto-checkout beacon error", e);
         }
 
-        sessionStorage.clear(); // Clear session only on close
+        // ❌ Don't clear all session storage
+        sessionStorage.removeItem("employee");
       }
     };
 
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // ✅ Login handler
+  // ✅ Login function
   const login = async (email, password) => {
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE}/api/auth/login`,

@@ -1,7 +1,7 @@
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
-// ✅ 1. Get today's timing
+// ✅ Get today's timing for employee
 export const getTodayTiming = async (req, res) => {
   try {
     const { id } = req.params;
@@ -15,7 +15,7 @@ export const getTodayTiming = async (req, res) => {
   }
 };
 
-// ✅ 2. Get break history for last 7 days
+// ✅ Get last 7 days break history
 export const getBreakHistory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -26,8 +26,8 @@ export const getBreakHistory = async (req, res) => {
     const history = await Timing.find({
       employee: id,
       date: { $gte: fromDate.toISOString().split("T")[0] },
-      "breaks.0": { $exists: true },
-    });
+      breaks: { $exists: true, $not: { $size: 0 } }, // ✅ At least one break
+    }).sort({ date: -1 });
 
     res.json(history);
   } catch (error) {
@@ -36,7 +36,7 @@ export const getBreakHistory = async (req, res) => {
   }
 };
 
-// ✅ 3. Auto-checkout on tab close (not refresh)
+// ✅ Auto-checkout on tab close
 export const autoCheckout = async (req, res) => {
   try {
     const { id } = req.params;
@@ -52,14 +52,19 @@ export const autoCheckout = async (req, res) => {
     if (timing) {
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
 
-      // ✅ Only push break start if NO break started or previous ended
+      // ✅ If break already running, end it
+      if (lastBreak && !lastBreak.end) {
+        lastBreak.end = now;
+      }
+
+      // ✅ If no break started yet, add break start now
       if (!lastBreak || lastBreak.end) {
-        timing.breaks.push({ start: now });
-        timing.breakStatus = "OnBreak";
+        timing.breaks.push({ start: now, end: now });
       }
 
       timing.checkOut = now;
       timing.status = "Inactive";
+      timing.breakStatus = "OffBreak";
 
       await timing.save();
     }
