@@ -4,6 +4,7 @@ import Pagination from "../components/Pagination";
 import API from "../utils/axios";
 import Papa from "papaparse";
 import styles from "../styles/Lead.module.css";
+import ProfileLogo from "../components/ProfileLogo";
 
 const Lead = () => {
   const [leads, setLeads] = useState([]);
@@ -23,7 +24,7 @@ const Lead = () => {
   const [sortConfig, setSortConfig] = useState({ key: "receivedDate", direction: "desc" });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const leadsPerPage = 8;
+  const leadsPerPage = 7;
 
   useEffect(() => {
     fetchLeads();
@@ -136,6 +137,7 @@ const Lead = () => {
         </div>
       }
     >
+      {/* Upload Modal */}
       {modalType === "upload" && (
         <div className={styles.modalOverlay} onClick={() => setModalType(null)}>
           <form
@@ -191,14 +193,7 @@ const Lead = () => {
               <button type="submit" disabled={uploading || !file}>
                 Upload
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setFile(null);
-                  setModalType(null);
-                }}
-                disabled={uploading}
-              >
+              <button type="button" onClick={() => { setFile(null); setModalType(null); }} disabled={uploading}>
                 Cancel
               </button>
             </div>
@@ -206,6 +201,7 @@ const Lead = () => {
         </div>
       )}
 
+      {/* Manual Add Modal */}
       {modalType === "manual" && (
         <div className={styles.modalOverlay} onClick={() => setModalType(null)}>
           <form className={styles.modalForm} onClick={(e) => e.stopPropagation()} onSubmit={handleManualSubmit}>
@@ -227,14 +223,13 @@ const Lead = () => {
             </select>
             <div className={styles.formActions}>
               <button type="submit">Save</button>
-              <button type="button" onClick={() => setModalType(null)}>
-                Cancel
-              </button>
+              <button type="button" onClick={() => setModalType(null)}>Cancel</button>
             </div>
           </form>
         </div>
       )}
 
+      {/* Lead Table */}
       {loading ? (
         <p className={styles.loadingText}>Loading leads...</p>
       ) : (
@@ -257,19 +252,24 @@ const Lead = () => {
                   </td>
                 </tr>
               ) : (
-                leads.map((lead, index) => (
-                  <tr key={lead._id || index}>
-                    <td>{lead.name}</td>
-                    <td>{lead.email || "-"}</td>
-                    <td>{lead.phone || "-"}</td>
-                    <td>{lead.receivedDate ? new Date(lead.receivedDate).toLocaleDateString() : "-"}</td>
-                    <td>
-                      {lead.assignedEmployee
-                        ? `${lead.assignedEmployee.firstName} ${lead.assignedEmployee.lastName}`
-                        : "-"}
-                    </td>
-                  </tr>
-                ))
+                leads.map((lead, index) => {
+                  const [firstName = "", lastName = ""] = lead.name?.split(" ") || [];
+                  return (
+                    <tr key={lead._id || index}>
+                      <td>
+                        <ProfileLogo firstName={firstName} lastName={lastName} showEmail={false} />
+                      </td>
+                      <td>{lead.email || "-"}</td>
+                      <td>{lead.phone || "-"}</td>
+                      <td>{lead.receivedDate ? new Date(lead.receivedDate).toLocaleDateString() : "-"}</td>
+                      <td>
+                        {lead.assignedEmployee
+                          ? `${lead.assignedEmployee.firstName} ${lead.assignedEmployee.lastName}`
+                          : "-"}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

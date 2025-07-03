@@ -1,159 +1,138 @@
-.dashboardContainerFull {
-  padding: 0.5em;
-  background-color: #f5f7fa;
+.dashboardContainer {
+  padding: 1rem;
+  background: #f9fafb;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* Cards Row */
-.cardRow {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: 1.2rem;
 }
 
+/* Cards */
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
 .card {
-  background: #ffffff;
-  padding: 1rem;
+  background: #fff;
+  padding: 0.6rem 0.8rem;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 75px;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-}
-
-.card h3 {
-  font-size: 1rem;
-  margin-bottom: 0.2rem;
-  color: #333;
+.card h4 {
+  font-size: 0.65rem;
+  color: #4b5563;
+  margin-bottom: 0.3rem;
 }
 
 .card p {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #007bff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
 }
 
-/* Bottom Section */
-.bottomSection {
+/* Chart + Activity */
+.analyticsRow {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.9rem;
 }
 
-/* Smaller Chart Box */
-.analyticsSmall {
-  background-color: #ffffff;
-  padding: 1rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-}
-
-.chartContainer {
-  height: 240px;
-  width: 100%;
-}
-
-/* Sales Activity */
+.chartBox,
 .activityBox {
-  background-color: #ffffff;
+  background: white;
   padding: 1rem;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.activityBox h3,
-.analyticsSmall h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.4rem;
-  color: #333;
+.chartWrapper {
+  height: 170px;
+  margin-top: 0.5rem;
 }
 
-.activityList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.activityBox ul {
+  margin-top: 0.5rem;
+  padding-left: 0.5rem;
 }
 
-.activityList li {
-  padding: 0.4rem 0;
-  border-bottom: 1px solid #eee;
-  font-size: 0.95rem;
-  color: #555;
+.activityBox li {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 }
 
-/* Employee Table */
-.employeeTableSection {
-  background-color: #ffffff;
-  padding: 1rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  margin-top: 1rem;
-}
-
-.employeeTableSection h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.8rem;
-  color: #333;
-}
-
-/* Scrollable Table Wrapper */
+/* Table */
 .tableWrapper {
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
 
-.employeeTable {
+.tableWrapper h4 {
+  margin-bottom: 1rem;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.tableScroll table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 700px;
+  min-width: 800px;
 }
 
-.employeeTable th,
-.employeeTable td {
-  padding: 0.6rem 1rem;
+.tableScroll th,
+.tableScroll td {
+  padding: 10px 12px;
   text-align: left;
-  border-bottom: 1px solid #eee;
-  font-size: 0.95rem;
-}
-
-.employeeTable th {
-  background-color: #f9f9f9;
-  font-weight: 600;
-  color: #444;
-}
-
-.employeeTable tr:hover {
-  background-color: #f6f6f6;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.88rem;
 }
 
 /* Responsive */
-@media screen and (max-width: 768px) {
-  .cardRow {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .bottomSection {
+@media (max-width: 768px) {
+  .analyticsRow {
     grid-template-columns: 1fr;
   }
 
-  .employeeTableSection h3 {
-    font-size: 1rem;
+  .chartBox,
+  .activityBox {
+    padding: 0.8rem;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tableScroll table {
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    min-height: 65px;
   }
 
   .card p {
-    font-size: 1.4rem;
+    font-size: 1rem;
   }
 
-  .chartContainer {
-    height: 200px;
+  .dashboardContainer {
+    padding: 0.8rem;
+    gap: 1rem;
   }
 }

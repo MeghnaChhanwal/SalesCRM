@@ -1,7 +1,7 @@
 // src/components/EmployeeForm.jsx
 
 import React from "react";
-import styles from "../styles/Employees.module.css";
+import styles from "../styles/EmployeeForm.module.css";
 
 const EmployeeForm = ({
   formMode,

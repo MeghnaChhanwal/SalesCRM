@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import MainLayout from "../components/Layout";
 import styles from "../styles/Dashboard.module.css";
@@ -18,112 +17,136 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const Dashboard = () => {
   const [employees, setEmployees] = useState([]);
+  const [stats, setStats] = useState({
+    unassigned: 0,
+    assignedThisWeek: 0,
+    activeSalespeople: 0,
+    conversionRate: 0,
+    recentActivities: [],
+    graphData: [],
+  });
 
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const fetchDashboardStats = async () => {
       try {
-        const res = await API.get("/api/employees/all");
-        setEmployees(res.data || []);
+        const res = await API.get("/api/dashboard/overview");
+        setStats(res.data);
+        setEmployees(res.data.employees || []);
       } catch (err) {
-        console.error("Error fetching employees:", err);
+        console.error("Dashboard error:", err);
       }
     };
-    fetchEmployees();
+    fetchDashboardStats();
   }, []);
 
-  const barData = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+  const chartData = {
+    labels: stats.graphData.map((d) => d.date),
     datasets: [
       {
-        label: "Conversion Rate %",
-        data: [12, 19, 32, 27, 38],
+        label: "Sales %",
+        data: stats.graphData.map((d) => d.conversion),
         backgroundColor: "#007bff",
-        borderRadius: 8,
+        borderRadius: 6,
       },
     ],
   };
 
-  const barOptions = {
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: (context) => `Sales: ${context.raw}%`,
+        },
+      },
+    },
     scales: {
       y: {
         beginAtZero: true,
         max: 100,
+        ticks: { stepSize: 20 },
       },
     },
-    responsive: true,
-    maintainAspectRatio: false,
   };
 
   return (
     <MainLayout showSearch={false}>
-      <div className={styles.dashboardContainerFull}>
-        {/* Example Cards */}
-        <div className={styles.cardRow}>
-          <div className={styles.card}><h3>Unassigned Leads</h3><p>12</p></div>
-          <div className={styles.card}><h3>Assigned This Week</h3><p>24</p></div>
-          <div className={styles.card}><h3>Active Salespeople</h3><p>5</p></div>
-          <div className={styles.card}><h3>Conversion Rate</h3><p>32%</p></div>
+      <div className={styles.dashboardContainer}>
+        {/* Top Cards */}
+        <div className={styles.cardGrid}>
+          <div className={styles.card}>
+            <h4>Unassigned Leads</h4>
+            <p>{stats.unassigned}</p>
+          </div>
+          <div className={styles.card}>
+            <h4>Assigned This Week</h4>
+            <p>{stats.assignedThisWeek}</p>
+          </div>
+          <div className={styles.card}>
+            <h4>Active Salespeople</h4>
+            <p>{stats.activeSalespeople}</p>
+          </div>
+          <div className={styles.card}>
+            <h4>Conversion Rate</h4>
+            <p>{stats.conversionRate}%</p>
+          </div>
         </div>
 
-        {/* Bar Chart + Activity */}
-        <div className={styles.bottomSection}>
-          <div className={styles.analyticsSmall}>
-            <h3>Sales Analytics</h3>
-            <div className={styles.chartContainer}>
-              <Bar data={barData} options={barOptions} />
+        {/* Chart + Activity */}
+        <div className={styles.analyticsRow}>
+          <div className={styles.chartBox}>
+            <h4>Sales Analytics</h4>
+            <div className={styles.chartWrapper}>
+              <Bar data={chartData} options={chartOptions} />
             </div>
           </div>
 
           <div className={styles.activityBox}>
-            <h3>Sales Activity</h3>
-            <ul className={styles.activityList}>
-              <li>✅ You assigned a lead to Priya – 1 hour ago</li>
-              <li>🎯 Jay closed a deal – 2 hours ago</li>
-              <li>📞 Client call scheduled – 3 hours ago</li>
+            <h4>Recent Activity</h4>
+            <ul>
+              {stats.recentActivities.map((a, i) => (
+                <li key={i}>• {a}</li>
+              ))}
             </ul>
           </div>
         </div>
 
-        {/* ✅ Employee Table (Dynamic) */}
-        <div className={styles.employeeTableSection}>
-          <h3>Employee Data</h3>
-          <table className={styles.employeeTable}>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Employee ID</th>
-                <th>Status</th>
-                <th>Assigned</th>
-                <th>Closed</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees.length === 0 ? (
+        {/* Employee Table */}
+        <div className={styles.tableWrapper}>
+          <h4>Employee Overview</h4>
+          <div className={styles.tableScroll}>
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan="6" style={{ textAlign: "center" }}>
-                    No employees found.
-                  </td>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Employee ID</th>
+                  <th>Status</th>
+                  <th>Assigned</th>
+                  <th>Closed</th>
                 </tr>
-              ) : (
-                employees.map((emp) => (
-                  <tr key={emp._id}>
-                    <td>{emp.firstName} {emp.lastName}</td>
-                    <td>{emp.email}</td>
-                    <td>{emp.employeeId}</td>
-                    <td style={{
-                      color: emp.status === "Active" ? "green" : "red",
-                      fontWeight: "bold",
-                    }}>
-                      {emp.status}
-                    </td>
-                    <td>{emp.assignedLeads || 0}</td>
-                    <td>{emp.closedLeads || 0}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {employees.length === 0 ? (
+                  <tr><td colSpan="6" style={{ textAlign: "center" }}>No employees found</td></tr>
+                ) : (
+                  employees.map(emp => (
+                    <tr key={emp._id}>
+                      <td>{emp.firstName} {emp.lastName}</td>
+                      <td>{emp.email}</td>
+                      <td>{emp.employeeId}</td>
+                      <td style={{ color: emp.status === "Active" ? "green" : "red", fontWeight: "600" }}>
+                        {emp.status}
+                      </td>
+                      <td>{emp.assignedLeads}</td>
+                      <td>{emp.closedLeads}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </MainLayout>
