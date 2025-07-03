@@ -29,14 +29,16 @@ export const loginEmployee = async (req, res) => {
     }).sort({ createdAt: -1 });
 
     if (timing && !timing.checkOut) {
+      // ✅ Mark login as resume from break
       timing.status = "Active";
 
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
-        lastBreak.end = now;
+        lastBreak.end = now; // ⏹ End last break now
         timing.breakStatus = "OffBreak";
       }
     } else {
+      // ✅ First login of the day
       timing = new Timing({
         employee: employee._id,
         date,
@@ -109,7 +111,7 @@ export const logoutEmployee = async (req, res) => {
   }
 };
 
-// ✅ AUTO CHECKOUT Controller (for tab close)
+// ✅ AUTO CHECKOUT Controller (on tab close)
 export const autoCheckout = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -132,8 +134,15 @@ export const autoCheckout = async (req, res) => {
 
     if (timing) {
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
+
+      // ✅ If break already running, end it
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = now;
+      }
+
+      // ✅ If no break started yet, add break start now
+      if (!lastBreak || lastBreak.end) {
+        timing.breaks.push({ start: now });
       }
 
       timing.checkOut = now;

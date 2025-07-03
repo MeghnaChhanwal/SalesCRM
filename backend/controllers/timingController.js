@@ -1,4 +1,3 @@
-// controllers/timingController.js
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
@@ -8,8 +7,8 @@ export const getTodayTiming = async (req, res) => {
     const { id } = req.params;
     const date = todayIST();
 
-    const timing = await Timing.findOne({ employee: id, date });
-    res.json(timing || {});
+    const timing = await Timing.find({ employee: id, date }).sort({ createdAt: -1 });
+    res.json(timing);
   } catch (error) {
     console.error("❌ getTodayTiming Error:", error);
     res.status(500).json({ error: "Server error" });
@@ -27,8 +26,8 @@ export const getBreakHistory = async (req, res) => {
     const history = await Timing.find({
       employee: id,
       date: { $gte: fromDate.toISOString().split("T")[0] },
-      "breaks.0": { $exists: true },
-    }).sort({ date: -1 });
+      "breaks.0": { $exists: true }, // Only timings with at least 1 break
+    });
 
     res.json(history);
   } catch (error) {
@@ -52,7 +51,15 @@ export const autoCheckout = async (req, res) => {
 
     if (timing) {
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
-      if (lastBreak && !lastBreak.end) lastBreak.end = now;
+
+      // ✅ Start new break if none active
+      if (!lastBreak || lastBreak.end) {
+        timing.breaks.push({ start: now });
+      } 
+      // ✅ Or end ongoing break (edge case fallback)
+      else if (!lastBreak.end) {
+        lastBreak.end = now;
+      }
 
       timing.checkOut = now;
       timing.status = "Inactive";

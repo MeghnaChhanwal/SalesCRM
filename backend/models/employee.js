@@ -67,9 +67,7 @@ employeeSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Optional: Indexes for faster search
-employeeSchema.index({ email: 1 });
-employeeSchema.index({ employeeId: 1 });
+
 
 const Employee = mongoose.model("Employee", employeeSchema);
 export default Employee;

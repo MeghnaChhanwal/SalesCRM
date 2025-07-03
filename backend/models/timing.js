@@ -48,8 +48,7 @@ const timingSchema = new mongoose.Schema(
   }
 );
 
-// Optional: Index for faster querying per employee/day
-timingSchema.index({ employee: 1, date: 1 });
+
 
 const Timing = mongoose.model("Timing", timingSchema);
 export default Timing;
