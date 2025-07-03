@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // ✅ 2. Restore session on load (with slight delay for safety)
+  // ✅ 2. Restore session on load
   useEffect(() => {
     const isRefreshing = sessionStorage.getItem("refreshing") === "true";
     const stored = sessionStorage.getItem("employee");
@@ -25,32 +25,31 @@ export const AuthProvider = ({ children }) => {
     }
 
     setTimeout(() => {
-      sessionStorage.removeItem("refreshing"); // ⏱️ delayed clear
-    }, 100); // allows visibility event to detect it safely
+      sessionStorage.removeItem("refreshing");
+    }, 100);
 
     setLoading(false);
   }, []);
 
-  // ✅ 3. Trigger logout only on actual tab close (not refresh)
+  // ✅ 3. Auto-checkout on tab close (not refresh)
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
       const emp = sessionStorage.getItem("employee");
 
-      // 🚫 Don't logout if refreshing
       if (document.visibilityState === "hidden" && !isRefreshing && emp) {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
             navigator.sendBeacon(
-              `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`
+              `${import.meta.env.VITE_API_BASE}/api/timing/auto-checkout/${_id}`
             );
           }
         } catch (e) {
-          console.error("❌ Logout beacon error", e);
+          console.error("❌ Auto-checkout beacon error", e);
         }
 
-        sessionStorage.clear(); // ✅ ensure it's cleared on tab close
+        sessionStorage.clear(); // ✅ clean session
       }
     };
 
