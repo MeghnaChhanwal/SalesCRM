@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import MainLayout from "../components/Layout";
 import styles from "../styles/Dashboard.module.css";

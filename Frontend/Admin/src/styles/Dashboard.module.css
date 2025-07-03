@@ -1,159 +1,103 @@
 .pageWrapper {
-  height: 100vh;
+  height: calc(100vh - 64px); /* Adjust based on header height */
   overflow-y: auto;
+  padding-right: 8px;
 }
 
-/* Main container */
 .dashboardContainer {
   padding: 1rem;
   background: #f9fafb;
-  min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1rem;
+  min-height: 100%;
 }
 
-/* Cards */
+/* Summary cards */
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
 .card {
-  background: #fff;
-  padding: 0.6rem 0.8rem;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 75px;
-}
-
-.card h4 {
-  font-size: 0.65rem;
-  color: #4b5563;
-  margin-bottom: 0.3rem;
-}
-
-.card p {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-/* Chart + Activity */
-.analyticsRow {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 0.9rem;
-}
-
-.chartBox,
-.activityBox {
   background: white;
   padding: 1rem;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-/* Chart height */
-.chartWrapper {
-  height: 200px;
-  margin-top: 0.5rem;
-}
-
-/* Activity list scroll */
-.activityBox {
+/* Analytics row */
+.analyticsRow {
   display: flex;
-  flex-direction: column;
-  height: 200px;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chartBox {
+  flex: 2;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  min-width: 300px;
+}
+
+.chartWrapper {
+  height: 280px;
+}
+
+.activityBox {
+  flex: 1;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #f1f1f1;
+}
+
+.activityBox::-webkit-scrollbar {
+  width: 6px;
+}
+.activityBox::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+.activityBox::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
 .activityList {
-  overflow-y: auto;
-  margin-top: 0.5rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  flex: 1;
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
 }
 
-.activityList::-webkit-scrollbar {
-  width: 6px;
-}
-.activityList::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 6px;
-}
-
-.activityBox li {
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-/* Table */
+/* Employee table */
 .tableWrapper {
   background: white;
-  padding: 0.5rem;
+  padding: 1rem;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-}
-
-.tableWrapper h4 {
-  margin-bottom: 1rem;
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .tableScroll {
   overflow-x: auto;
 }
 
-.tableScroll table {
+table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 800px;
 }
 
-.tableScroll th,
-.tableScroll td {
-  padding: 10px 12px;
+th, td {
+  padding: 0.75rem;
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 0.88rem;
+  border-bottom: 1px solid #eee;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .analyticsRow {
-    grid-template-columns: 1fr;
-  }
-
-  .cardGrid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .chartBox,
-  .activityBox {
-    padding: 0.8rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .cardGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .card {
-    min-height: 65px;
-  }
-
-  .card p {
-    font-size: 1rem;
-  }
-
-  .dashboardContainer {
-    padding: 0.8rem;
-    gap: 1rem;
-  }
+th {
+  background-color: #f2f2f2;
 }
