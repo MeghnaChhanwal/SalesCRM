@@ -1,4 +1,5 @@
 // controllers/authController.js
+
 import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
@@ -18,35 +19,39 @@ export const loginEmployee = async (req, res) => {
     if (employee.lastName.toLowerCase() !== password.toLowerCase())
       return res.status(401).json({ error: "Invalid credentials" });
 
-    // 🟢 Mark employee active
     employee.status = "Active";
     await employee.save();
 
     const date = todayIST();
-    const time = new Date();
+    const now = new Date();
 
-    // 🟢 Check last timing entry for today
-    let timing = await Timing.findOne({ employee: employee._id, date }).sort({ createdAt: -1 });
+    // ✅ Fetch latest timing entry for today
+    let timing = await Timing.findOne({
+      employee: employee._id,
+      date,
+    }).sort({ createdAt: -1 });
 
-    if (!timing || timing.checkOut) {
-      // ✅ No existing or last was checked out — new login
+    if (timing && !timing.checkOut) {
+      // ✅ Update existing active session
+      timing.status = "Active";
+
+      // Close last break if it was left open
+      const lastBreak = timing.breaks?.[timing.breaks.length - 1];
+      if (lastBreak && !lastBreak.end) {
+        lastBreak.end = now;
+        timing.breakStatus = "OffBreak";
+      }
+
+    } else {
+      // ✅ Create new timing entry if none active for today
       timing = new Timing({
         employee: employee._id,
         date,
-        checkIn: time,
+        checkIn: now,
         status: "Active",
         breakStatus: "OffBreak",
         breaks: [],
       });
-    } else {
-      // ✅ Existing active session — resume and end break if open
-      timing.status = "Active";
-
-      const lastBreak = timing.breaks?.[timing.breaks.length - 1];
-      if (lastBreak && !lastBreak.end) {
-        lastBreak.end = time;
-        timing.breakStatus = "OffBreak";
-      }
     }
 
     await timing.save();
@@ -83,7 +88,7 @@ export const logoutEmployee = async (req, res) => {
     await employee.save();
 
     const date = todayIST();
-    const time = new Date();
+    const now = new Date();
 
     const timing = await Timing.findOne({
       employee: employeeId,
@@ -92,13 +97,12 @@ export const logoutEmployee = async (req, res) => {
     });
 
     if (timing) {
-      // 🟢 End open break if any
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
-        lastBreak.end = time;
+        lastBreak.end = now;
       }
 
-      timing.checkOut = time;
+      timing.checkOut = now;
       timing.status = "Inactive";
       timing.breakStatus = "OffBreak";
 
