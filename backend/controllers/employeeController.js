@@ -1,7 +1,8 @@
 import Employee from "../models/employee.js";
+import Lead from "../models/lead.js";
 import { buildQueryOptions } from "../utils/query.js";
 
-// GET employees with search, pagination, sorting
+// 🔹 GET /api/employees - Paginated, searchable, sortable list with dynamic lead counts
 export const getEmployees = async (req, res) => {
   try {
     const { search, sortBy, order, page, limit, skip, regex } = buildQueryOptions(req);
@@ -22,8 +23,25 @@ export const getEmployees = async (req, res) => {
       .limit(limit)
       .sort({ [sortBy]: order });
 
+    // Add dynamic assignedLeads and closedLeads counts
+    const enrichedEmployees = await Promise.all(
+      employees.map(async (emp) => {
+        const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
+        const closedLeads = await Lead.countDocuments({
+          assignedEmployee: emp._id,
+          status: "Closed",
+        });
+
+        return {
+          ...emp.toObject(),
+          assignedLeads,
+          closedLeads,
+        };
+      })
+    );
+
     res.status(200).json({
-      employees,
+      employees: enrichedEmployees,
       totalPages: Math.ceil(total / limit),
       currentPage: page,
       totalEmployees: total,
@@ -34,17 +52,35 @@ export const getEmployees = async (req, res) => {
   }
 };
 
-// ✅ Get all employees without pagination — for dashboard
+// 🔹 GET /api/employees/all - All employees for dashboard (no pagination)
 export const getAllEmployees = async (req, res) => {
   try {
     const employees = await Employee.find().sort({ createdAt: -1 });
-    res.status(200).json(employees);
+
+    const enriched = await Promise.all(
+      employees.map(async (emp) => {
+        const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
+        const closedLeads = await Lead.countDocuments({
+          assignedEmployee: emp._id,
+          status: "Closed",
+        });
+
+        return {
+          ...emp.toObject(),
+          assignedLeads,
+          closedLeads,
+        };
+      })
+    );
+
+    res.status(200).json(enriched);
   } catch (err) {
+    console.error("Error fetching all employees:", err);
     res.status(500).json({ error: "Failed to fetch all employees" });
   }
 };
 
-// ✅ Create new employee
+// 🔹 POST /api/employees - Create new employee
 export const createEmployee = async (req, res) => {
   try {
     const newEmp = new Employee(req.body);
@@ -56,12 +92,13 @@ export const createEmployee = async (req, res) => {
     } else if (err.code === 11000) {
       res.status(400).json({ error: "Email or Employee ID already exists" });
     } else {
+      console.error("Create employee error:", err);
       res.status(500).json({ error: "Failed to create employee" });
     }
   }
 };
 
-// ✅ Update employee
+// 🔹 PUT /api/employees/:id - Update employee
 export const updateEmployee = async (req, res) => {
   try {
     const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, {
@@ -78,12 +115,13 @@ export const updateEmployee = async (req, res) => {
     if (err.name === "ValidationError") {
       res.status(400).json({ error: err.message });
     } else {
+      console.error("Update employee error:", err);
       res.status(500).json({ error: "Failed to update employee" });
     }
   }
 };
 
-// ✅ Delete employee
+// 🔹 DELETE /api/employees/:id - Delete employee
 export const deleteEmployee = async (req, res) => {
   try {
     const deleted = await Employee.findByIdAndDelete(req.params.id);
@@ -92,6 +130,7 @@ export const deleteEmployee = async (req, res) => {
     }
     res.status(200).json({ message: "Employee deleted successfully" });
   } catch (err) {
+    console.error("Delete employee error:", err);
     res.status(500).json({ error: "Failed to delete employee" });
   }
 };

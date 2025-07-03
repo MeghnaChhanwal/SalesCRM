@@ -1,3 +1,4 @@
+// src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import MainLayout from "../components/Layout";
 import styles from "../styles/Dashboard.module.css";
@@ -18,13 +19,14 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 const Dashboard = () => {
   const [employees, setEmployees] = useState([]);
   const [stats, setStats] = useState({
-    unassigned: 0,
+    unassignedLeads: 0,
     assignedThisWeek: 0,
     activeSalespeople: 0,
     conversionRate: 0,
     recentActivities: [],
     graphData: [],
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
@@ -34,17 +36,19 @@ const Dashboard = () => {
         setEmployees(res.data.employees || []);
       } catch (err) {
         console.error("Dashboard error:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchDashboardStats();
   }, []);
 
   const chartData = {
-    labels: stats.graphData.map((d) => d.date),
+    labels: (stats.graphData || []).map((d) => d.date),
     datasets: [
       {
         label: "Sales %",
-        data: stats.graphData.map((d) => d.conversion),
+        data: (stats.graphData || []).map((d) => d.conversion),
         backgroundColor: "#007bff",
         borderRadius: 6,
       },
@@ -70,6 +74,16 @@ const Dashboard = () => {
     },
   };
 
+  if (loading) {
+    return (
+      <MainLayout showSearch={false}>
+        <div className={styles.dashboardContainer}>
+          <h4>Loading dashboard...</h4>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout showSearch={false}>
       <div className={styles.dashboardContainer}>
@@ -77,7 +91,7 @@ const Dashboard = () => {
         <div className={styles.cardGrid}>
           <div className={styles.card}>
             <h4>Unassigned Leads</h4>
-            <p>{stats.unassigned}</p>
+            <p>{stats.unassignedLeads}</p>
           </div>
           <div className={styles.card}>
             <h4>Assigned This Week</h4>
@@ -105,7 +119,7 @@ const Dashboard = () => {
           <div className={styles.activityBox}>
             <h4>Recent Activity</h4>
             <ul>
-              {stats.recentActivities.map((a, i) => (
+              {(stats.recentActivities || []).map((a, i) => (
                 <li key={i}>• {a}</li>
               ))}
             </ul>
@@ -129,7 +143,9 @@ const Dashboard = () => {
               </thead>
               <tbody>
                 {employees.length === 0 ? (
-                  <tr><td colSpan="6" style={{ textAlign: "center" }}>No employees found</td></tr>
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center" }}>No employees found</td>
+                  </tr>
                 ) : (
                   employees.map(emp => (
                     <tr key={emp._id}>

@@ -1,20 +1,18 @@
-// backend/models/lead.js
 import mongoose from "mongoose";
 
 const leadSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, "Lead name is required"],
     trim: true,
   },
   email: {
     type: String,
-    default: null,
     trim: true,
+    lowercase: true,
   },
   phone: {
     type: String,
-    default: null,
     trim: true,
   },
   receivedDate: {
@@ -23,29 +21,29 @@ const leadSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Open", "In Progress", "Closed"],
+    enum: ["Open", "Closed", "In Progress", "Follow Up"],
     default: "Open",
   },
   type: {
     type: String,
-    enum: ["Cold", "Warm", "Hot"],
+    enum: ["Hot", "Warm", "Cold"],
     default: "Warm",
   },
   language: {
     type: String,
-    required: true,
-    trim: true,
+    required: [true, "Language is required"],
   },
   location: {
     type: String,
-    required: true,
-    trim: true,
+    required: [true, "Location is required"],
   },
   assignedEmployee: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Employee",
     default: null,
   },
+}, {
+  timestamps: true
 });
 
 export default mongoose.model("Lead", leadSchema);
