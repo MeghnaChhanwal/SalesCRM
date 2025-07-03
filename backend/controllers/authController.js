@@ -4,8 +4,8 @@ import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
-// ✅ LOGIN CONTROLLER
-export const login = async (req, res) => {
+// ✅ Login Controller (renamed to match route import)
+export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password)
@@ -19,14 +19,12 @@ export const login = async (req, res) => {
     if (employee.lastName.toLowerCase() !== password.toLowerCase())
       return res.status(401).json({ error: "Invalid credentials" });
 
-    // ✅ Mark as active
     employee.status = "Active";
     await employee.save();
 
     const date = todayIST();
     const time = new Date();
 
-    // ✅ Check if already logged in today (but not checked out)
     let timing = await Timing.findOne({
       employee: employee._id,
       date,
@@ -34,7 +32,6 @@ export const login = async (req, res) => {
     });
 
     if (!timing) {
-      // First login of the day or after logout
       timing = new Timing({
         employee: employee._id,
         date,
@@ -44,7 +41,6 @@ export const login = async (req, res) => {
         breaks: [],
       });
     } else {
-      // Already active session — resume
       timing.status = "Active";
 
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
@@ -72,8 +68,8 @@ export const login = async (req, res) => {
   }
 };
 
-// ✅ LOGOUT CONTROLLER
-export const logout = async (req, res) => {
+// ✅ Logout Controller (renamed to match route import)
+export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
   if (!employeeId || employeeId === "undefined")
@@ -84,7 +80,6 @@ export const logout = async (req, res) => {
     if (!employee)
       return res.status(404).json({ error: "Employee not found" });
 
-    // Mark as inactive
     employee.status = "Inactive";
     await employee.save();
 
@@ -98,13 +93,11 @@ export const logout = async (req, res) => {
     });
 
     if (timing) {
-      // ✅ End ongoing break (if any)
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = time;
       }
 
-      // ✅ Log checkout
       timing.checkOut = time;
       timing.status = "Inactive";
       timing.breakStatus = "OffBreak";

@@ -1,33 +1,41 @@
-const breakSchema = new mongoose.Schema({
-  start: { type: Date },  // full ISO date-time
-  end: { type: Date },
-}, { _id: false });
+import mongoose from "mongoose";
 
-const timingSchema = new mongoose.Schema({
-  employee: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Employee",
-    required: true,
+const breakSchema = new mongoose.Schema(
+  {
+    start: { type: Date },
+    end: { type: Date },
   },
-  date: {
-    type: String, // still fine for grouping: YYYY-MM-DD
-    required: true,
+  { _id: false }
+);
+
+const timingSchema = new mongoose.Schema(
+  {
+    employee: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+      required: true,
+    },
+    date: {
+      type: String, // YYYY-MM-DD
+      required: true,
+    },
+    checkIn: Date,
+    checkOut: Date,
+    status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default: "Inactive",
+    },
+    breakStatus: {
+      type: String,
+      enum: ["OnBreak", "OffBreak"],
+      default: "OffBreak",
+    },
+    breaks: [breakSchema],
   },
-  checkIn: {
-    type: Date, // changed from String
-  },
-  checkOut: {
-    type: Date, // changed from String
-  },
-  status: {
-    type: String,
-    enum: ["Active", "Inactive"],
-    default: "Inactive",
-  },
-  breakStatus: {
-    type: String,
-    enum: ["OnBreak", "OffBreak"],
-    default: "OffBreak",
-  },
-  breaks: [breakSchema],
-}, { timestamps: true });
+  { timestamps: true }
+);
+
+// ✅ Final export
+const Timing = mongoose.model("Timing", timingSchema);
+export default Timing;

@@ -1,83 +1,43 @@
-// controllers/timingController.js
-
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
-// ✅ Get Today's Timing
+// ✅ 1. GET TODAY'S TIMING (check-in, check-out, break status)
 export const getTodayTiming = async (req, res) => {
-  const { id: employeeId } = req.params;
+  const { employeeId } = req.params;
   const date = todayIST();
 
   try {
-    const timing = await Timing.find({ employee: employeeId, date });
-    res.json(timing);
-  } catch (err) {
-    console.error("❌ Error fetching today's timing:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// ✅ Get Break History
-export const getBreakHistory = async (req, res) => {
-  const { id: employeeId } = req.params;
-
-  try {
-    const history = await Timing.find({
+    const today = await Timing.find({
       employee: employeeId,
-      breaks: { $exists: true, $not: { $size: 0 } }
-    }).sort({ date: -1 });
+      date,
+    }).sort({ createdAt: -1 });
 
-    res.json(history);
-  } catch (err) {
-    console.error("❌ Error fetching break history:", err);
+    res.status(200).json(today);
+  } catch (error) {
+    console.error("❌ Error fetching today’s timing:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// ✅ Start Break
-export const startBreak = async (req, res) => {
-  const { id: employeeId } = req.params;
-  const date = todayIST();
-  const now = new Date();
+// ✅ 2. GET 7-DAY BREAK LOGS (for Home.jsx summary)
+export const get7DayBreakLogs = async (req, res) => {
+  const { employeeId } = req.params;
+
+  const today = new Date();
+  const past7Date = new Date();
+  past7Date.setDate(today.getDate() - 6);
 
   try {
-    const timing = await Timing.findOne({ employee: employeeId, date });
-    if (!timing)
-      return res.status(404).json({ error: "No timing record found" });
+    const logs = await Timing.find({
+      employee: employeeId,
+      date: { $gte: past7Date.toISOString().split("T")[0] },
+    })
+      .select("date breaks")
+      .sort({ date: -1 });
 
-    timing.breaks.push({ start: now });
-    timing.breakStatus = "OnBreak";
-    timing.status = "Inactive";
-
-    await timing.save();
-    res.json({ message: "Break started", timing });
-  } catch (err) {
-    console.error("❌ Start Break Error:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// ✅ End Break
-export const endBreak = async (req, res) => {
-  const { id: employeeId } = req.params;
-  const date = todayIST();
-  const now = new Date();
-
-  try {
-    const timing = await Timing.findOne({ employee: employeeId, date });
-    if (!timing || !timing.breaks.length)
-      return res.status(404).json({ error: "No ongoing break found" });
-
-    const lastBreak = timing.breaks[timing.breaks.length - 1];
-    if (!lastBreak.end) lastBreak.end = now;
-
-    timing.breakStatus = "OffBreak";
-    timing.status = "Active";
-
-    await timing.save();
-    res.json({ message: "Break ended", timing });
-  } catch (err) {
-    console.error("❌ End Break Error:", err);
+    res.status(200).json(logs);
+  } catch (error) {
+    console.error("❌ Error fetching 7-day break logs:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
