@@ -6,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 1. Mark tab as refreshing BEFORE reload
+  // ✅ 1. Mark tab as refreshing BEFORE reload (e.g., Ctrl+R or F5)
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,15 +15,14 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // ✅ 2. Restore session on load
+  // ✅ 2. Restore employee session on load
   useEffect(() => {
-    const isRefreshing = sessionStorage.getItem("refreshing") === "true";
     const stored = sessionStorage.getItem("employee");
-
     if (stored && stored !== "undefined" && stored !== "null") {
       setEmployee(JSON.parse(stored));
     }
 
+    // Clear refreshing flag after short delay
     setTimeout(() => {
       sessionStorage.removeItem("refreshing");
     }, 100);
@@ -31,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // ✅ 3. Auto-checkout on tab close (not refresh)
+  // ✅ 3. Auto-checkout on actual tab close (not refresh)
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
@@ -41,15 +40,16 @@ export const AuthProvider = ({ children }) => {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
+            // This hits your backend auto-checkout route
             navigator.sendBeacon(
-              `${import.meta.env.VITE_API_BASE}/api/timing/auto-checkout/${_id}`
+              `${import.meta.env.VITE_API_BASE}/api/auth/auto-checkout/${_id}`
             );
           }
         } catch (e) {
           console.error("❌ Auto-checkout beacon error", e);
         }
 
-        sessionStorage.clear(); // ✅ clean session
+        sessionStorage.clear(); // Clear session on real close
       }
     };
 
@@ -85,4 +85,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// ✅ Custom hook
 export const useAuth = () => useContext(AuthContext);

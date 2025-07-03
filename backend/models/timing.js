@@ -1,13 +1,15 @@
 import mongoose from "mongoose";
 
+// Break subdocument schema
 const breakSchema = new mongoose.Schema(
   {
     start: { type: Date },
     end: { type: Date },
   },
-  { _id: false }
+  { _id: false } // prevent Mongoose from auto-generating _id for each break
 );
 
+// Main Timing schema
 const timingSchema = new mongoose.Schema(
   {
     employee: {
@@ -16,11 +18,11 @@ const timingSchema = new mongoose.Schema(
       required: true,
     },
     date: {
-      type: String, // YYYY-MM-DD
+      type: String, // format: "YYYY-MM-DD"
       required: true,
     },
-    checkIn: Date,
-    checkOut: Date,
+    checkIn: { type: Date },
+    checkOut: { type: Date },
     status: {
       type: String,
       enum: ["Active", "Inactive"],
@@ -33,9 +35,21 @@ const timingSchema = new mongoose.Schema(
     },
     breaks: [breakSchema],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: (_, ret) => {
+        delete ret._id;
+        return ret;
+      },
+    },
+  }
 );
 
-// ✅ Final export
+// Optional: Index for faster querying per employee/day
+timingSchema.index({ employee: 1, date: 1 });
+
 const Timing = mongoose.model("Timing", timingSchema);
 export default Timing;

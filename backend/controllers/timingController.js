@@ -8,8 +8,8 @@ export const getTodayTiming = async (req, res) => {
     const { id } = req.params;
     const date = todayIST();
 
-    const timing = await Timing.find({ employee: id, date }).sort({ createdAt: -1 });
-    res.json(timing);
+    const timing = await Timing.findOne({ employee: id, date });
+    res.json(timing || {});
   } catch (error) {
     console.error("❌ getTodayTiming Error:", error);
     res.status(500).json({ error: "Server error" });
@@ -27,8 +27,8 @@ export const getBreakHistory = async (req, res) => {
     const history = await Timing.find({
       employee: id,
       date: { $gte: fromDate.toISOString().split("T")[0] },
-      "breaks.0": { $exists: true }, // Only timings with at least 1 break
-    });
+      "breaks.0": { $exists: true },
+    }).sort({ date: -1 });
 
     res.json(history);
   } catch (error) {
