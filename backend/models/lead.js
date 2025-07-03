@@ -21,12 +21,12 @@ const leadSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Ongoing", "Closed"],  // match your UI
+    enum: ["Ongoing", "Closed"],  // ✅ correct options for filtering
     default: "Ongoing",
   },
   type: {
     type: String,
-    enum: ["Hot", "Warm", "Cold"],
+    enum: ["Hot", "Warm", "Cold"], // ✅ call logic will use this
     default: "Warm",
   },
   language: {
@@ -50,13 +50,13 @@ const leadSchema = new mongoose.Schema({
       },
       callType: {
         type: String,
-        enum: ["Referral", "Cold Call", "Follow Up"],
+        enum: ["Referral", "Cold Call"], // ✅ conditional logic handled in controller
         required: true,
       },
     }
   ]
 }, {
-  timestamps: true
+  timestamps: true, // ✅ auto adds createdAt and updatedAt
 });
 
 export default mongoose.model("Lead", leadSchema);

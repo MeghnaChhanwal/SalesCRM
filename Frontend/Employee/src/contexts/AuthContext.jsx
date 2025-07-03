@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // ✅ 3. Auto logout on tab close (not refresh) using visibilitychange
+  // ✅ 3. Auto logout on tab close (not refresh)
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  // ✅ 4. Login (manual)
+  // ✅ 4. Login method
   const login = async (email, password) => {
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE}/api/auth/login`,
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ employee, login, loading }}>
+    <AuthContext.Provider value={{ employee, setEmployee, login, loading }}>
       {children}
     </AuthContext.Provider>
   );

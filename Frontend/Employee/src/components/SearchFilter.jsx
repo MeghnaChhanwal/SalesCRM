@@ -1,12 +1,56 @@
-// src/components/SearchFilter.jsx
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "../styles/SearchFilter.module.css";
 
-const SearchFilter = ({ searchTerm, onSearch, statusFilter, onStatusFilter, options = ["Open", "Closed"] }) => {
+const SearchFilter = ({
+  searchTerm,
+  onSearch,
+  filterOption,
+  onFilterChange,
+  pageType = "lead", // "lead" or "schedule"
+}) => {
+  const [showPopup, setShowPopup] = useState(false);
+  const [tempOption, setTempOption] = useState(filterOption || "");
+  const popupRef = useRef(null);
+
+  const dropdownOptions =
+    pageType === "schedule" ? ["All Day", "Today"] : ["Ongoing", "Closed"];
+
+  const togglePopup = () => {
+    setShowPopup(true);
+    setTempOption(filterOption);
+  };
+
+  const handleSave = () => {
+    onFilterChange(tempOption);
+    setShowPopup(false);
+  };
+
+  // Close popup when clicked outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target)) {
+        setShowPopup(false);
+      }
+    };
+
+    if (showPopup) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showPopup]);
+
   return (
-    <div className={styles.filterContainer}>
-      <div className={styles.inputGroup}>
-        <img src="/images/search.png" alt="Search" className={styles.icon} />
+    <div className={styles.container}>
+      {/* Search Bar */}
+      <div className={styles.searchWrapper}>
+        <img
+          src="/images/search.png"
+          alt="Search"
+          className={styles.searchIcon}
+        />
         <input
           type="text"
           placeholder="Search..."
@@ -16,18 +60,37 @@ const SearchFilter = ({ searchTerm, onSearch, statusFilter, onStatusFilter, opti
         />
       </div>
 
-      <div className={styles.selectGroup}>
-        <img src="/images/filter.png" alt="Filter" className={styles.icon} />
-        <select
-          value={statusFilter}
-          onChange={(e) => onStatusFilter(e.target.value)}
-          className={styles.filterSelect}
-        >
-          <option value="">All</option>
-          {options.map((opt) => (
-            <option key={opt} value={opt}>{opt}</option>
-          ))}
-        </select>
+      {/* Filter Icon */}
+      <div className={styles.filterWrapper}>
+        <div className={styles.filterCircle} onClick={togglePopup}>
+          <img
+            src="/images/filter.png"
+            alt="Filter"
+            className={styles.filterIcon}
+          />
+        </div>
+
+        {/* Popup */}
+        {showPopup && (
+          <div className={styles.popupCard} ref={popupRef}>
+            <label className={styles.popupLabel}>Filter By</label>
+            <select
+              value={tempOption}
+              onChange={(e) => setTempOption(e.target.value)}
+              className={styles.popupSelect}
+            >
+              <option value="">Select</option>
+              {dropdownOptions.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+            <button className={styles.saveBtn} onClick={handleSave}>
+              Save
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

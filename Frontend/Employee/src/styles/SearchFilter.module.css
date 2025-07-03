@@ -1,65 +1,127 @@
-/* src/styles/SearchFilter.module.css */
-
 .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 12px;
+  width: 100%;
   gap: 12px;
-  margin: 12px 0;
-  flex-wrap: wrap;
+  position: relative;
 }
 
+/* Search bar */
 .searchWrapper {
+  flex: 1;
   display: flex;
   align-items: center;
-  background-color: #f5f5f5;
-  padding: 6px 10px;
-  border-radius: 8px;
-  flex: 1;
+  background-color: #f1f1f1;
+  border-radius: 20px;
+  padding: 6px 12px;
 }
 
 .searchIcon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   margin-right: 8px;
-  opacity: 0.6;
 }
 
 .searchInput {
   border: none;
   background: transparent;
   outline: none;
+  width: 100%;
   font-size: 14px;
-  flex: 1;
+  color: #333;
 }
 
+/* Filter icon */
 .filterWrapper {
+  position: relative;
+}
+
+.filterCircle {
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  padding: 10px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
 }
 
 .filterIcon {
   width: 18px;
   height: 18px;
-  opacity: 0.6;
 }
 
-.select {
-  padding: 6px;
-  border-radius: 6px;
+/* Popup Card */
+.popupCard {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  padding: 14px;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Dropdown Label */
+.popupLabel {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+/* Dropdown */
+.popupSelect {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
   border: 1px solid #ccc;
-  background-color: #fff;
+  font-size: 14px;
+  color: #333;
 }
 
-@media (max-width: 400px) {
+/* Save Button */
+.saveBtn {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+.saveBtn:hover {
+  background-color: #0056b3;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
   .container {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    padding: 10px 12px;
   }
 
-  .filterWrapper {
-    justify-content: space-between;
-    margin-top: 8px;
+  .popupCard {
+    width: 170px;
+    right: 0;
+  }
+
+  .searchInput {
+    font-size: 13px;
+  }
+
+  .popupSelect,
+  .saveBtn {
+    font-size: 13px;
+    padding: 6px 10px;
   }
 }

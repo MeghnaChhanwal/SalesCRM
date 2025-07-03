@@ -1,10 +1,11 @@
+// controllers/leadController.js
 import fs from "fs";
 import csv from "csv-parser";
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 import { prepareLeadDistribution, assignEmployeeByConditions } from "../utils/assign.js";
 
-// Get all leads with filters, pagination, search
+// Get all leads with search, pagination, filter
 export const getLeads = async (req, res) => {
   try {
     const {
@@ -13,7 +14,7 @@ export const getLeads = async (req, res) => {
       limit = 7,
       sortBy = "receivedDate",
       order = "desc",
-      filter = "" // status: "Open" or "Closed"
+      filter = "" // "Ongoing" or "Closed"
     } = req.query;
 
     const skip = (page - 1) * limit;
@@ -53,7 +54,7 @@ export const getLeads = async (req, res) => {
   }
 };
 
-// Add single lead manually
+// Manually add a lead
 export const addLeadManually = async (req, res) => {
   try {
     const { name, email, phone, language, location, status, type } = req.body;
@@ -70,7 +71,7 @@ export const addLeadManually = async (req, res) => {
       phone: phone || null,
       language,
       location,
-      status: status || "Open",
+      status: status || "Ongoing",
       type: type || "Warm",
       receivedDate: new Date(),
       assignedEmployee: assignedEmployee || null
@@ -84,7 +85,7 @@ export const addLeadManually = async (req, res) => {
   }
 };
 
-// Upload leads via CSV
+// Upload leads from CSV
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
@@ -114,7 +115,7 @@ export const uploadCSV = async (req, res) => {
         email: row.email || null,
         phone: row.phone || null,
         receivedDate: row.receivedDate ? new Date(row.receivedDate) : new Date(),
-        status: row.status || "Open",
+        status: row.status || "Ongoing",
         type: row.type || "Warm",
         language: row.language,
         location: row.location,
@@ -132,7 +133,7 @@ export const uploadCSV = async (req, res) => {
   }
 };
 
-// Update lead type (Hot / Warm / Cold)
+// Update type (Hot / Warm / Cold)
 export const updateLeadType = async (req, res) => {
   try {
     const { id } = req.params;
@@ -150,7 +151,7 @@ export const updateLeadType = async (req, res) => {
   }
 };
 
-// Update lead status (Open / Closed)
+// Update status (Ongoing / Closed)
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -173,22 +174,25 @@ export const updateLeadStatus = async (req, res) => {
   }
 };
 
-// Schedule a call for a lead
+// Schedule a call with auto callType
 export const scheduleCall = async (req, res) => {
   try {
     const { id } = req.params;
-    const { callDate, callType } = req.body;
+    const { callDate } = req.body;
 
-    const sameTimeLead = await Lead.findOne({ "scheduledCalls.callDate": new Date(callDate) });
-    if (sameTimeLead) {
+    const existing = await Lead.findOne({ "scheduledCalls.callDate": new Date(callDate) });
+    if (existing) {
       return res.status(400).json({ error: "A lead is already scheduled at this time" });
     }
 
     const lead = await Lead.findById(id);
     if (!lead) return res.status(404).json({ error: "Lead not found" });
 
+    const autoCallType = lead.type === "Cold" ? "Cold Call" : "Referral";
+
     lead.scheduledCalls = lead.scheduledCalls || [];
-    lead.scheduledCalls.push({ callDate: new Date(callDate), callType });
+    lead.scheduledCalls.push({ callDate: new Date(callDate), callType: autoCallType });
+
     await lead.save();
 
     res.status(200).json({ message: "Call scheduled", lead });
@@ -197,7 +201,7 @@ export const scheduleCall = async (req, res) => {
   }
 };
 
-// Get schedule page data
+// Get scheduled calls (all or today's)
 export const getScheduledCalls = async (req, res) => {
   try {
     const { filter = "all" } = req.query;
@@ -216,7 +220,9 @@ export const getScheduledCalls = async (req, res) => {
         },
       });
     } else {
-      leads = await Lead.find({ scheduledCalls: { $exists: true, $not: { $size: 0 } } });
+      leads = await Lead.find({
+        scheduledCalls: { $exists: true, $not: { $size: 0 } }
+      });
     }
 
     res.status(200).json({ leads });

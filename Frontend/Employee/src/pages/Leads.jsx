@@ -10,12 +10,12 @@ const Leads = () => {
   const { employee } = useAuth();
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState(""); // "Open", "Closed", or ""
+  const [filterOption, setFilterOption] = useState(""); // "Ongoing", "Closed"
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchLeads();
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, filterOption]);
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -23,13 +23,13 @@ const Leads = () => {
       const res = await API.get("/api/leads", {
         params: {
           search: searchTerm,
-          filter: statusFilter,
+          filter: filterOption,
         },
       });
 
       let data = res.data.leads;
 
-      // Filter leads assigned to the logged-in employee (if any)
+      // Filter by employee
       if (employee?._id) {
         data = data.filter(
           (lead) => lead.assignedEmployee?._id === employee._id
@@ -47,17 +47,16 @@ const Leads = () => {
   const handleStatusChange = async (leadId, newStatus) => {
     try {
       await API.patch(`/api/leads/${leadId}/status`, { status: newStatus });
-      fetchLeads(); // Refresh data after update
+      fetchLeads();
     } catch (err) {
       alert(err?.response?.data?.error || "Failed to update status.");
-      console.error("Status update failed:", err);
     }
   };
 
   const handleTypeChange = async (leadId, newType) => {
     try {
       await API.patch(`/api/leads/${leadId}/type`, { type: newType });
-      fetchLeads(); // Refresh data after update
+      fetchLeads();
     } catch (err) {
       console.error("Type update failed:", err);
     }
@@ -69,9 +68,9 @@ const Leads = () => {
         <SearchFilter
           searchTerm={searchTerm}
           onSearch={setSearchTerm}
-          statusFilter={statusFilter}
-          onStatusFilter={setStatusFilter}
-          options={["", "Open", "Closed"]}
+          filterOption={filterOption}
+          onFilterChange={setFilterOption}
+          pageType="lead" // Enables "Ongoing" / "Closed"
         />
 
         {loading ? (

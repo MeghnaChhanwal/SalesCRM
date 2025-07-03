@@ -1,4 +1,3 @@
-// src/components/LeadCard.jsx
 import React, { useState } from "react";
 import styles from "../styles/LeadCard.module.css";
 
@@ -32,19 +31,23 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
   };
 
   return (
-    <div className={`${styles.card} ${typeColor[lead.type] || ""}`}>
-      <div className={styles.leftIndicator}></div>
-      <div className={styles.details}>
-        <div className={styles.header}>
-          <h4>{lead.name}</h4>
-          <span className={styles.statusCircle}>{lead.status}</span>
+    <div className={`${styles.card}`}>
+      <div className={styles.leftSection}>
+        <h4 className={styles.name}>{lead.name}</h4>
+        <p className={styles.email}>@{lead.email}</p>
+        <p className={styles.date}>
+          Date: {new Date(lead.receivedDate).toLocaleDateString()}
+        </p>
+      </div>
+
+      <div className={styles.rightSection}>
+        <div className={`${styles.statusText} ${typeColor[lead.type] || ""}`}>
+          {lead.status}
         </div>
-        <p>@{lead.email}</p>
-        <p>Date: {new Date(lead.receivedDate).toLocaleDateString()}</p>
 
         <div className={styles.actions}>
           {/* Type Icon */}
-          <div className={styles.actionIcon} onClick={(e) => {
+          <div className={styles.iconWrapper} onClick={(e) => {
             e.stopPropagation();
             setShowTypeDropdown(!showTypeDropdown);
             setShowDateTime(false);
@@ -61,7 +64,7 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
           </div>
 
           {/* Calendar Icon */}
-          <div className={styles.actionIcon} onClick={(e) => {
+          <div className={styles.iconWrapper} onClick={(e) => {
             e.stopPropagation();
             setShowDateTime(!showDateTime);
             setShowTypeDropdown(false);
@@ -86,7 +89,7 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
           </div>
 
           {/* Status Icon */}
-          <div className={styles.actionIcon} onClick={(e) => {
+          <div className={styles.iconWrapper} onClick={(e) => {
             e.stopPropagation();
             setShowStatus(!showStatus);
             setShowTypeDropdown(false);
@@ -99,7 +102,7 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
                 <button onClick={handleClose} disabled={lead.hasFutureCall}>
                   Close
                 </button>
-                {lead.hasFutureCall && <p>Lead cannot be closed</p>}
+                {lead.hasFutureCall && <p className={styles.warnText}>Lead cannot be closed</p>}
               </div>
             )}
           </div>
