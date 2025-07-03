@@ -4,16 +4,14 @@ import Layout from "../components/Layout";
 import SearchFilter from "../components/SearchFilter";
 import LeadCard from "../components/LeadCard";
 import styles from "../styles/Leads.module.css";
-import axios from "axios";
+import API from "../utils/axios";
 import { useAuth } from "../contexts/AuthContext";
 
-const API_BASE = import.meta.env.VITE_API_BASE;
-
 const Leads = () => {
-  const { employee } = useAuth(); // Ensure lowercase variable
+  const { employee } = useAuth();
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState(""); // "Open" or "Closed"
+  const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,17 +21,18 @@ const Leads = () => {
   const fetchLeads = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/api/leads`, {
+      const res = await API.get("/api/leads", {
         params: {
           search: searchTerm,
           filter: statusFilter,
         },
       });
 
-      // If employee-specific view is required
       let data = res.data.leads;
       if (employee?._id) {
-        data = data.filter((lead) => lead.assignedEmployee?._id === employee._id);
+        data = data.filter(
+          (lead) => lead.assignedEmployee?._id === employee._id
+        );
       }
 
       setLeads(data);
@@ -46,7 +45,7 @@ const Leads = () => {
 
   const handleStatusChange = async (leadId, newStatus) => {
     try {
-      await axios.put(`${API_BASE}/api/leads/${leadId}`, { status: newStatus });
+      await API.patch(`/api/leads/${leadId}/status`, { status: newStatus });
       fetchLeads();
     } catch (err) {
       alert(err?.response?.data?.error || "Failed to update status.");
@@ -56,7 +55,7 @@ const Leads = () => {
 
   const handleTypeChange = async (leadId, newType) => {
     try {
-      await axios.put(`${API_BASE}/api/leads/${leadId}`, { type: newType });
+      await API.patch(`/api/leads/${leadId}/type`, { type: newType });
       fetchLeads();
     } catch (err) {
       console.error("Type update failed:", err);
