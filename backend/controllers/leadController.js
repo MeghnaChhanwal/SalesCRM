@@ -4,6 +4,7 @@ import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 import { prepareLeadDistribution, assignEmployeeByConditions } from "../utils/assign.js";
 
+// Get all leads with filters, pagination, search
 export const getLeads = async (req, res) => {
   try {
     const {
@@ -12,7 +13,7 @@ export const getLeads = async (req, res) => {
       limit = 7,
       sortBy = "receivedDate",
       order = "desc",
-      filter = ""
+      filter = "" // status: "Open" or "Closed"
     } = req.query;
 
     const skip = (page - 1) * limit;
@@ -52,6 +53,7 @@ export const getLeads = async (req, res) => {
   }
 };
 
+// Add single lead manually
 export const addLeadManually = async (req, res) => {
   try {
     const { name, email, phone, language, location, status, type } = req.body;
@@ -82,6 +84,7 @@ export const addLeadManually = async (req, res) => {
   }
 };
 
+// Upload leads via CSV
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
@@ -129,6 +132,25 @@ export const uploadCSV = async (req, res) => {
   }
 };
 
+// Update lead type (Hot / Warm / Cold)
+export const updateLeadType = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type } = req.body;
+    if (!["Hot", "Warm", "Cold"].includes(type)) {
+      return res.status(400).json({ error: "Invalid lead type" });
+    }
+
+    const lead = await Lead.findByIdAndUpdate(id, { type }, { new: true });
+    if (!lead) return res.status(404).json({ error: "Lead not found" });
+
+    res.status(200).json({ message: "Lead type updated", lead });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to update lead type" });
+  }
+};
+
+// Update lead status (Open / Closed)
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -151,6 +173,7 @@ export const updateLeadStatus = async (req, res) => {
   }
 };
 
+// Schedule a call for a lead
 export const scheduleCall = async (req, res) => {
   try {
     const { id } = req.params;
@@ -171,5 +194,34 @@ export const scheduleCall = async (req, res) => {
     res.status(200).json({ message: "Call scheduled", lead });
   } catch (err) {
     res.status(500).json({ error: "Failed to schedule call" });
+  }
+};
+
+// Get schedule page data
+export const getScheduledCalls = async (req, res) => {
+  try {
+    const { filter = "all" } = req.query;
+    let leads;
+
+    if (filter === "today") {
+      const today = new Date();
+      const start = new Date(today.setHours(0, 0, 0, 0));
+      const end = new Date(today.setHours(23, 59, 59, 999));
+
+      leads = await Lead.find({
+        scheduledCalls: {
+          $elemMatch: {
+            callDate: { $gte: start, $lte: end },
+          },
+        },
+      });
+    } else {
+      leads = await Lead.find({ scheduledCalls: { $exists: true, $not: { $size: 0 } } });
+    }
+
+    res.status(200).json({ leads });
+  } catch (error) {
+    console.error("Error fetching schedule:", error);
+    res.status(500).json({ error: "Failed to fetch schedule" });
   }
 };

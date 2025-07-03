@@ -1,30 +1,24 @@
-// backend/routes/leadRoutes.js
 import express from "express";
 import multer from "multer";
 import {
   getLeads,
-  uploadCSV,
   addLeadManually,
+  uploadCSV,
+  updateLeadType,
   updateLeadStatus,
-  scheduleCall
+  scheduleCall,
+  getScheduledCalls
 } from "../controllers/leadController.js";
 
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-// ✅ Fetch leads with search + filter
-router.get("/", getLeads);
-
-// ✅ Add lead manually
-router.post("/", addLeadManually);
-
-// ✅ Upload CSV
-router.post("/upload", upload.single("file"), uploadCSV);
-
-// ✅ Update lead status (Open/Closed)
-router.patch("/status/:id", updateLeadStatus);
-
-// ✅ Schedule call
-router.post("/schedule/:id", scheduleCall);
+router.get("/leads", getLeads);
+router.post("/leads", addLeadManually);
+router.post("/leads/upload", upload.single("file"), uploadCSV);
+router.patch("/leads/:id/type", updateLeadType);
+router.patch("/leads/:id/status", updateLeadStatus);
+router.post("/leads/:id/schedule", scheduleCall);
+router.get("/schedule", getScheduledCalls);
 
 export default router;
