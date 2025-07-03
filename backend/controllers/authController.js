@@ -26,7 +26,7 @@ export const loginEmployee = async (req, res) => {
     let timing = await Timing.findOne({ employee: employee._id, date }).sort({ createdAt: -1 });
 
     if (timing && !timing.checkOut) {
-      // Resuming session: end last break if open
+      // Resuming session: end last break if it's still open
       timing.status = "Active";
       if (timing.breaks?.length > 0) {
         const lastBreak = timing.breaks[timing.breaks.length - 1];
@@ -77,9 +77,6 @@ export const logoutEmployee = async (req, res) => {
     if (!employee)
       return res.status(404).json({ error: "Employee not found" });
 
-    employee.status = "Inactive";
-    await employee.save();
-
     const date = todayIST();
     const now = new Date();
 
@@ -99,6 +96,9 @@ export const logoutEmployee = async (req, res) => {
       await timing.save();
     }
 
+    employee.status = "Inactive";
+    await employee.save();
+
     res.status(200).json({ message: "Logout successful" });
   } catch (error) {
     console.error("❌ Logout Error:", error);
@@ -106,7 +106,7 @@ export const logoutEmployee = async (req, res) => {
   }
 };
 
-// ✅ AUTO CHECKOUT (on tab close only)
+// ✅ AUTO CHECKOUT CONTROLLER (on tab close only)
 export const autoCheckout = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -130,14 +130,12 @@ export const autoCheckout = async (req, res) => {
     if (timing) {
       const lastBreak = timing.breaks?.[timing.breaks.length - 1];
 
-      // If already on break (started but not ended)
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = now;
       }
 
-      // If no break exists or previous one is closed, add a new break start
       if (!lastBreak || lastBreak.end) {
-        timing.breaks.push({ start: now });
+        timing.breaks.push({ start: now, end: now });
       }
 
       timing.checkOut = now;
