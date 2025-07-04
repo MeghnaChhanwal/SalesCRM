@@ -7,12 +7,23 @@ export const getEmployees = async (req, res) => {
   try {
     const { search, sortBy, order, page, limit, skip, regex } = buildQueryOptions(req);
 
+    const allowedSortFields = ["firstName", "lastName", "email", "employeeId", "createdAt"];
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+
     const query = {
       $or: [
         { firstName: { $regex: regex } },
         { lastName: { $regex: regex } },
         { email: { $regex: regex } },
         { employeeId: { $regex: regex } },
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $concat: ["$firstName", " ", "$lastName"] },
+              regex: regex,
+            },
+          },
+        },
       ],
     };
 
@@ -21,9 +32,8 @@ export const getEmployees = async (req, res) => {
     const employees = await Employee.find(query)
       .skip(skip)
       .limit(limit)
-      .sort({ [sortBy]: order });
+      .sort({ [sortField]: order });
 
-    // Add dynamic assignedLeads and closedLeads counts
     const enrichedEmployees = await Promise.all(
       employees.map(async (emp) => {
         const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
