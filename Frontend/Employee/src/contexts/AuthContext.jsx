@@ -30,44 +30,38 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Auto-checkout on tab close only
+  // Auto-checkout on tab close or page unload
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      const isRefreshing = sessionStorage.getItem("refreshing") === "true";
+    const handleBeforeUnload = (event) => {
       const emp = sessionStorage.getItem("employee");
-
-      if (document.visibilityState === "hidden" && !isRefreshing && emp) {
+      if (emp) {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
-            navigator.sendBeacon(
-              `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`
-            );
+            const url = `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`;
+            const sent = navigator.sendBeacon(url);
+            console.log("Logout beacon sent:", sent);
           }
         } catch (err) {
           console.error("Auto-checkout error", err);
         }
-
-        sessionStorage.removeItem("employee"); // ✅ delete on tab close
+        // Don't remove employee here to avoid race condition
       }
+      // No need to call event.preventDefault(), just sendBeacon
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
   // Login function
   const login = async (email, password) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_BASE}/api/auth/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      }
-    );
+    const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
 
     if (!res.ok) throw new Error("Login failed");
 

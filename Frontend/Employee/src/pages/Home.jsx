@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import API from "../utils/axios";
@@ -17,7 +16,7 @@ const Home = () => {
     try {
       const res = await API.get(`/api/timing/${employee._id}`);
       if (res.data && res.data.length > 0) {
-        setTiming(res.data[0]); // Use first timing record
+        setTiming(res.data[0]);
       } else {
         setTiming(null);
       }
@@ -26,11 +25,10 @@ const Home = () => {
     }
   };
 
-  // Parse "05:38 am" style time strings to proper formatted time
+  // Format time strings like "05:38 am" to display format
   const formatTime = (timeStr) => {
     if (!timeStr) return "--:--";
 
-    // Normalize and split time and meridian
     const normalized = timeStr.trim().toUpperCase(); // "05:38 AM"
     const [time, meridian] = normalized.split(" ");
     if (!time || !meridian) return "--:--";
