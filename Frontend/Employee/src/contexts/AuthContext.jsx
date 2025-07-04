@@ -6,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Store flag when refreshing the tab
+  // 🔄 Store flag when refreshing the tab
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // Load from sessionStorage on initial render
+  // 🔃 Load from sessionStorage on initial render
   useEffect(() => {
     const stored = sessionStorage.getItem("employee");
     if (stored && stored !== "undefined" && stored !== "null") {
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Auto logout on tab/browser close
+  // ❗ Auto logout on tab/browser close
   useEffect(() => {
     const handleBeforeUnload = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
@@ -37,12 +37,14 @@ export const AuthProvider = ({ children }) => {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
-            const url = `${import.meta.env.VITE_API_BASE}/api/employees/logout/${_id}`;
+            // ✅ FIXED: Use correct logout route
+            const url = `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`;
             const blob = new Blob([JSON.stringify({})], {
               type: "application/json",
             });
             const sent = navigator.sendBeacon(url, blob);
 
+            // Fallback if Beacon fails
             if (!sent) {
               fetch(url, {
                 method: "POST",
@@ -61,7 +63,7 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // Login API call
+  // 🔐 Login API call
   const login = async (email, password) => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
       method: "POST",

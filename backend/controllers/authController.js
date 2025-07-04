@@ -16,13 +16,11 @@ export const loginEmployee = async (req, res) => {
     if (employee.lastName.toLowerCase() !== password.toLowerCase())
       return res.status(401).json({ error: "Invalid credentials" });
 
-    // Prevent double login
     if (employee.status === "Active")
       return res.status(403).json({ error: "Already logged in on another device" });
 
-    // Update employee status to active
-    employee.status = "Active";
-    await employee.save();
+    // ✅ Update employee status using updateOne (ensures save)
+    await Employee.updateOne({ _id: employee._id }, { $set: { status: "Active" } });
 
     const date = todayIST();
     const time = timeIST();
@@ -30,7 +28,6 @@ export const loginEmployee = async (req, res) => {
     let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
-      // Create new timing if not found
       timing = new Timing({
         employee: employee._id,
         date,
@@ -40,7 +37,6 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      // Resume timing (e.g., if app crashed)
       timing.status = "Active";
       timing.breakStatus = "OffBreak";
 
@@ -48,7 +44,6 @@ export const loginEmployee = async (req, res) => {
         timing.checkIn = time;
       }
 
-      // If last break was not ended, end it now
       const lastBreak = timing.breaks[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = time;
@@ -57,7 +52,8 @@ export const loginEmployee = async (req, res) => {
 
     await timing.save();
 
-    const { password: _, ...empData } = employee.toObject();
+    const updatedEmployee = await Employee.findById(employee._id).lean();
+    const { password: _, ...empData } = updatedEmployee;
     res.status(200).json(empData);
   } catch (error) {
     console.error("Login error:", error);
@@ -74,9 +70,8 @@ export const logoutEmployee = async (req, res) => {
     if (!employee)
       return res.status(404).json({ error: "Employee not found" });
 
-    // Set status to inactive
-    employee.status = "Inactive";
-    await employee.save();
+    // ✅ Update employee status using updateOne
+    await Employee.updateOne({ _id: employeeId }, { $set: { status: "Inactive" } });
 
     const date = todayIST();
     const time = timeIST();
@@ -85,12 +80,10 @@ export const logoutEmployee = async (req, res) => {
     if (!timing)
       return res.status(404).json({ error: "No timing record found" });
 
-    // Set checkout and break info
     if (!timing.checkOut) timing.checkOut = time;
     timing.status = "Inactive";
     timing.breakStatus = "OffBreak";
 
-    // If last break started but not ended, close it
     const lastBreak = timing.breaks[timing.breaks.length - 1];
     if (lastBreak && !lastBreak.end) {
       lastBreak.end = time;

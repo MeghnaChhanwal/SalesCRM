@@ -1,12 +1,14 @@
 import express from "express";
-import { getTodayTiming, getBreakHistory } from "../controllers/timingController.js";
+import {
+  getTodayTiming,
+  getBreakHistory,
+  getBreakHistoryBasic,
+} from "../controllers/timingController.js";
 
 const router = express.Router();
 
-// 🔁 Get complete break history for an employee
 router.get("/breaks/:id", getBreakHistory);
-
-// 📅 Get today’s timing details (check-in, check-out, breaks)
+router.get("/history/basic/:id", getBreakHistoryBasic); // <- new route
 router.get("/:id", getTodayTiming);
 
 export default router;
