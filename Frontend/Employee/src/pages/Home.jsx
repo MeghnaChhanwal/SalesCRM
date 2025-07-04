@@ -16,15 +16,33 @@ const Home = () => {
   const fetchTiming = async () => {
     try {
       const res = await API.get(`/api/timing/${employee._id}`);
-      setTiming(res.data);
+      if (res.data && res.data.length > 0) {
+        setTiming(res.data[0]); // Use first timing record
+      } else {
+        setTiming(null);
+      }
     } catch (err) {
       console.error("Fetch timing error:", err);
     }
   };
 
+  // Parse "05:38 am" style time strings to proper formatted time
   const formatTime = (timeStr) => {
     if (!timeStr) return "--:--";
-    const date = new Date(`1970-01-01T${timeStr}Z`);
+
+    // Normalize and split time and meridian
+    const normalized = timeStr.trim().toUpperCase(); // "05:38 AM"
+    const [time, meridian] = normalized.split(" ");
+    if (!time || !meridian) return "--:--";
+
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (meridian === "PM" && hours < 12) hours += 12;
+    if (meridian === "AM" && hours === 12) hours = 0;
+
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+
     return date.toLocaleTimeString("en-IN", {
       hour: "2-digit",
       minute: "2-digit",
@@ -33,6 +51,7 @@ const Home = () => {
   };
 
   const formatDate = (isoDate) => {
+    if (!isoDate) return "--/--/----";
     const d = new Date(isoDate);
     return d.toLocaleDateString("en-IN", {
       day: "2-digit",

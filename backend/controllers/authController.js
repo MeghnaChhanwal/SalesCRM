@@ -1,12 +1,9 @@
-// backend/controllers/authController.js
 import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ Login Controller
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
-
   if (!email || !password)
     return res.status(400).json({ error: "Email and password are required" });
 
@@ -40,12 +37,12 @@ export const loginEmployee = async (req, res) => {
       });
     } else {
       timing.status = "Active";
-
       const lastBreak = timing.breaks[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = time;
         timing.breakStatus = "OffBreak";
       }
+      timing.checkIn = time;  // update checkIn time on relogin
     }
 
     await timing.save();
@@ -58,7 +55,6 @@ export const loginEmployee = async (req, res) => {
   }
 };
 
-// ✅ Logout Controller (called on tab close)
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -73,18 +69,19 @@ export const logoutEmployee = async (req, res) => {
     const date = todayIST();
     const time = timeIST();
 
-    const timing = await Timing.findOneAndUpdate(
-      { employee: employeeId, date, checkOut: { $exists: false } },
-      {
-        checkOut: time,
-        status: "Inactive",
-        breakStatus: "OnBreak",
-        $push: { breaks: { start: time } },
-      },
-      { new: true }
-    );
+    const timing = await Timing.findOne({ employee: employeeId, date, checkOut: { $exists: false } });
+    if (!timing) {
+      return res.status(404).json({ error: "No active timing record for logout" });
+    }
 
-    res.status(200).json({ message: "Logged out", timing });
+    timing.breaks.push({ start: time });
+    timing.checkOut = time;
+    timing.status = "Inactive";
+    timing.breakStatus = "OnBreak";
+
+    await timing.save();
+
+    res.status(200).json({ message: "Logged out, break started", timing });
   } catch (error) {
     console.error("Logout Error:", error);
     res.status(500).json({ error: "Logout failed" });

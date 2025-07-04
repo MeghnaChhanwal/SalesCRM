@@ -1,4 +1,3 @@
-// utils/time.js
 export const todayIST = () => {
   const now = new Date();
   now.setUTCHours(now.getUTCHours() + 5.5);
