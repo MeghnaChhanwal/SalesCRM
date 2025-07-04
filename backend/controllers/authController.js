@@ -43,6 +43,7 @@ export const loginEmployee = async (req, res) => {
       // Update existing timing: active + end last break if ongoing
       timing.status = "Active";
       timing.breakStatus = "OffBreak";
+      timing.checkIn = time;
 
       const lastBreak = timing.breaks.length
         ? timing.breaks[timing.breaks.length - 1]
