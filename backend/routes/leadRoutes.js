@@ -1,4 +1,3 @@
-// routes/leadRoutes.js
 import express from "express";
 import multer from "multer";
 import {
@@ -14,13 +13,29 @@ import {
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-// 🔁 Routes
-router.get("/schedule", getScheduledCalls);               // ✅ Get scheduled calls (all/today)
-router.get("/", getLeads);                                // ✅ Get leads with filters
-router.post("/", addLeadManually);                        // ✅ Add new lead manually
-router.post("/upload", upload.single("file"), uploadCSV); // ✅ Upload leads via CSV
-router.patch("/:id/type", updateLeadType);                // ✅ Update lead type
-router.patch("/:id/status", updateLeadStatus);            // ✅ Update lead status
-router.post("/:id/schedule", scheduleCall);               // ✅ Schedule a call
+/**
+ * 📦 ROUTES FOR LEADS
+ */
+
+// 🗓️ Get all scheduled calls or today's calls
+router.get("/schedule", getScheduledCalls);
+
+// 📄 Get all leads with pagination, search, filter, and assignedEmployee param
+router.get("/", getLeads);
+
+// ➕ Add a lead manually (used in Admin panel)
+router.post("/", addLeadManually);
+
+// ⬆️ Upload multiple leads via CSV (Admin panel bulk import)
+router.post("/upload", upload.single("file"), uploadCSV);
+
+// 🔁 Update type of a lead (Hot, Warm, Cold)
+router.patch("/:id/type", updateLeadType);
+
+// 🔒 Update status of a lead (Ongoing ↔ Closed)
+router.patch("/:id/status", updateLeadStatus);
+
+// 📞 Schedule a follow-up call for a lead
+router.post("/:id/schedule", scheduleCall);
 
 export default router;

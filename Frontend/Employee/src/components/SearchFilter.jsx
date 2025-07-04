@@ -1,4 +1,3 @@
-// src/components/SearchFilter.jsx
 import React, { useEffect, useRef, useState } from "react";
 import styles from "../styles/SearchFilter.module.css";
 
@@ -7,13 +6,13 @@ const SearchFilter = ({
   onSearch,
   filterOption,
   onFilterChange,
-  pageType = "lead", // "lead" किंवा "schedule"
+  pageType = "lead", // "lead" or "schedule"
 }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [tempOption, setTempOption] = useState(filterOption || "");
   const popupRef = useRef(null);
 
-  // Filter options based on pageType
+  // Determine filter options based on page type
   const dropdownOptions =
     pageType === "schedule" ? ["All Day", "Today"] : ["Ongoing", "Closed"];
 
@@ -27,7 +26,7 @@ const SearchFilter = ({
     setShowPopup(false);
   };
 
-  // Popup बाहेर क्लिक केल्यावर बंद करणे
+  // Close popup if clicked outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (popupRef.current && !popupRef.current.contains(e.target)) {
@@ -46,7 +45,7 @@ const SearchFilter = ({
 
   return (
     <div className={styles.container}>
-      {/* Search Bar */}
+      {/* 🔍 Search Bar */}
       <div className={styles.searchWrapper}>
         <img
           src="/images/search.png"
@@ -62,7 +61,7 @@ const SearchFilter = ({
         />
       </div>
 
-      {/* Filter Icon */}
+      {/* 🧰 Filter Dropdown */}
       <div className={styles.filterWrapper}>
         <div className={styles.filterCircle} onClick={togglePopup}>
           <img
@@ -72,7 +71,7 @@ const SearchFilter = ({
           />
         </div>
 
-        {/* Popup */}
+        {/* Filter Popup Card */}
         {showPopup && (
           <div className={styles.popupCard} ref={popupRef}>
             <label className={styles.popupLabel}>Filter By</label>

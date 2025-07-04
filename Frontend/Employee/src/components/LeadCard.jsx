@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import styles from "../styles/LeadCard.module.css";
 
-const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
+const LeadCard = ({ lead, onTypeChange, onStatusChange, onScheduleCall }) => {
   const [showTypeOptions, setShowTypeOptions] = useState(false);
+  const [showStatusLock, setShowStatusLock] = useState(false);
 
   const getRingColor = () => {
     if (lead.status === "Closed") return "#c4c4c4";
@@ -10,6 +11,17 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
     if (lead.type === "Warm") return "#fbbf24";
     if (lead.type === "Cold") return "#22d3ee";
     return "#d1d5db";
+  };
+
+  const handleStatusClick = () => {
+    // Ongoing → Closed
+    if (lead.status === "Closed") return; // Already closed
+    if (lead.scheduledCalls?.some((c) => new Date(c.callDate) > new Date())) {
+      setShowStatusLock(true);
+      setTimeout(() => setShowStatusLock(false), 2000);
+    } else {
+      onStatusChange(lead._id, "Closed");
+    }
   };
 
   return (
@@ -37,6 +49,7 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
       </div>
 
       <div className={styles.right}>
+        {/* Status Circle */}
         <div
           className={`${styles.typeCircle} ${
             lead.status === "Closed"
@@ -47,23 +60,30 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
               ? styles.warm
               : styles.cold
           }`}
+          onClick={handleStatusClick}
         >
           {lead.status}
         </div>
 
+        {/* Action Icons */}
         <div className={styles.icons}>
-          <button
-            className={styles.iconBtn}
-            onClick={() => setShowTypeOptions(!showTypeOptions)}
-          >
-            <img src="/image/pencil.png" alt="edit" width={16} height={16} />
-          </button>
+          {/* Edit Type */}
+          {lead.status !== "Closed" && (
+            <button
+              className={styles.iconBtn}
+              onClick={() => setShowTypeOptions(!showTypeOptions)}
+            >
+              <img src="/image/pencil.png" alt="edit" width={16} height={16} />
+            </button>
+          )}
 
-          <button className={styles.iconBtn}>
+          {/* Schedule Call */}
+          <button className={styles.iconBtn} onClick={() => onScheduleCall(lead)}>
             <img src="/image/phone.png" alt="call" width={16} height={16} />
           </button>
         </div>
 
+        {/* Type Dropdown */}
         {showTypeOptions && lead.status !== "Closed" && (
           <div className={styles.typeDropdown}>
             {["Hot", "Warm", "Cold"].map((t) => (
@@ -84,6 +104,13 @@ const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
                 {t}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Status lock popup (if future call exists) */}
+        {showStatusLock && (
+          <div className={styles.statusLockPopup}>
+            Lead cannot be closed — future call scheduled.
           </div>
         )}
       </div>

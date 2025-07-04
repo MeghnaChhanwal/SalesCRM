@@ -4,7 +4,7 @@ import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 import { prepareLeadDistribution, assignEmployeeByConditions } from "../utils/assign.js";
 
-// GET: All leads with search, pagination, sort, filter
+// ✅ GET: All leads with search, pagination, sort, filter
 export const getLeads = async (req, res) => {
   try {
     const {
@@ -13,7 +13,8 @@ export const getLeads = async (req, res) => {
       limit = 7,
       sortBy = "receivedDate",
       order = "desc",
-      filter = ""
+      filter = "",
+      assignedEmployee = null
     } = req.query;
 
     const skip = (page - 1) * limit;
@@ -30,7 +31,8 @@ export const getLeads = async (req, res) => {
             { status: { $regex: regex } }
           ]
         },
-        filter ? { status: filter } : {}
+        filter ? { status: filter } : {},
+        assignedEmployee ? { assignedEmployee } : {}
       ]
     };
 
@@ -52,7 +54,7 @@ export const getLeads = async (req, res) => {
   }
 };
 
-// POST: Manually add a lead
+// ✅ POST: Add lead manually
 export const addLeadManually = async (req, res) => {
   try {
     const { name, email, phone, language, location, status, type } = req.body;
@@ -83,7 +85,7 @@ export const addLeadManually = async (req, res) => {
   }
 };
 
-// POST: Upload leads from CSV
+// ✅ POST: Upload CSV
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
@@ -130,7 +132,7 @@ export const uploadCSV = async (req, res) => {
   }
 };
 
-// PUT: Update type
+// ✅ PUT: Update lead type (Hot, Warm, Cold)
 export const updateLeadType = async (req, res) => {
   try {
     const { id } = req.params;
@@ -149,7 +151,7 @@ export const updateLeadType = async (req, res) => {
   }
 };
 
-// PUT: Update status
+// ✅ PUT: Update lead status (Ongoing, Closed)
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -172,7 +174,7 @@ export const updateLeadStatus = async (req, res) => {
   }
 };
 
-// POST: Schedule a call
+// ✅ POST: Schedule a call
 export const scheduleCall = async (req, res) => {
   try {
     const { id } = req.params;
@@ -199,7 +201,7 @@ export const scheduleCall = async (req, res) => {
   }
 };
 
-// GET: Scheduled calls (all or today's)
+// ✅ GET: Scheduled calls (all or today)
 export const getScheduledCalls = async (req, res) => {
   try {
     const { filter = "all" } = req.query;
