@@ -7,7 +7,7 @@ import {
   updateLeadStatus,
   scheduleCall,
   getScheduledCalls,
-} from "../controllers/leadsController.js";
+} from "../controllers/leadController.js";
 
 const router = express.Router();
 
