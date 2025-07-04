@@ -3,8 +3,10 @@ import { getTodayTiming, getBreakHistory } from "../controllers/timingController
 
 const router = express.Router();
 
-// ✅ More specific routes go first
+// 🔁 Get complete break history for an employee
 router.get("/breaks/:id", getBreakHistory);
+
+// 📅 Get today’s timing details (check-in, check-out, breaks)
 router.get("/:id", getTodayTiming);
 
 export default router;

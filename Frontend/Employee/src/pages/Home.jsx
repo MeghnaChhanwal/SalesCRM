@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import API from "../utils/axios";
@@ -75,7 +74,7 @@ const Home = () => {
   return (
     <Layout>
       <div className={styles.container}>
-        {/* Main Timing */}
+        {/* Check-In / Check-Out Info */}
         <div className={styles.card}>
           <div className={styles.timingHeader}>
             <div>
@@ -113,7 +112,7 @@ const Home = () => {
           </div>
         )}
 
-        {/* Break History */}
+        {/* Break History Table */}
         {breakHistory.length > 0 && (
           <div className={styles.breakHistory}>
             {breakHistory.map((brk, i) => (
@@ -126,7 +125,7 @@ const Home = () => {
           </div>
         )}
 
-        {/* Activity */}
+        {/* Static Recent Activity */}
         <div className={styles.activityCard}>
           <h4>Recent Activity</h4>
           <ul>
