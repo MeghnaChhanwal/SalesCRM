@@ -11,13 +11,13 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
   const scheduleRef = useRef();
   const statusRef = useRef();
 
-  // Detect outside clicks for popups
+  // Close popups on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
-        typeRef.current && !typeRef.current.contains(e.target) &&
-        scheduleRef.current && !scheduleRef.current.contains(e.target) &&
-        statusRef.current && !statusRef.current.contains(e.target)
+        (!typeRef.current || !typeRef.current.contains(e.target)) &&
+        (!scheduleRef.current || !scheduleRef.current.contains(e.target)) &&
+        (!statusRef.current || !statusRef.current.contains(e.target))
       ) {
         setShowTypePopup(false);
         setShowSchedulePopup(false);
@@ -29,6 +29,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Color bar based on type
   const getColor = () => {
     if (lead.type === "Hot") return "#ff4d4f";
     if (lead.type === "Warm") return "#fbbf24";
@@ -46,10 +47,12 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
 
   return (
     <div className={styles.card}>
+      {/* Left vertical bar */}
       <div className={styles.leftBar} style={{ backgroundColor: getColor() }} />
 
+      {/* Main card content */}
       <div className={styles.mainContent}>
-        {/* Top: Name + Circle */}
+        {/* Top Row - Name + Email + Status */}
         <div className={styles.topRow}>
           <div className={styles.nameEmail}>
             <h4 className={styles.name}>{lead.name}</h4>
@@ -60,7 +63,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
           </div>
         </div>
 
-        {/* Date + Icons */}
+        {/* Received Date Row */}
         <p className={styles.label}>date</p>
         <div className={styles.dateAndIconsRow}>
           <div className={styles.dateRow}>
@@ -74,6 +77,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
             </span>
           </div>
 
+          {/* Action icons */}
           <div className={styles.actionsRowRight}>
             <img
               src="/images/type.png"
@@ -86,7 +90,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
             />
             <img
               src="/images/calendar.png"
-              alt="calendar"
+              alt="Schedule"
               onClick={() => {
                 setShowSchedulePopup(!showSchedulePopup);
                 setShowTypePopup(false);
