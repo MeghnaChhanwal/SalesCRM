@@ -3,7 +3,8 @@ import { getTodayTiming, getBreakHistory } from "../controllers/timingController
 
 const router = express.Router();
 
-router.get("/:id", getTodayTiming);
+// ✅ More specific routes go first
 router.get("/breaks/:id", getBreakHistory);
+router.get("/:id", getTodayTiming);
 
 export default router;
