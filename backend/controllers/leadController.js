@@ -63,9 +63,7 @@ export const addLeadManually = async (req, res) => {
     const { name, email, phone, language, location, status, type } = req.body;
 
     if (!name || !language || !location) {
-      return res
-        .status(400)
-        .json({ error: "Name, language, and location are required" });
+      return res.status(400).json({ error: "Name, language, and location are required" });
     }
 
     const { maxPerEmployee } = await prepareLeadDistribution(1);
@@ -87,15 +85,13 @@ export const addLeadManually = async (req, res) => {
     });
 
     await newLead.save();
-    res
-      .status(201)
-      .json({ message: "Lead added successfully", lead: newLead });
+    res.status(201).json({ message: "Lead added successfully", lead: newLead });
   } catch (error) {
     res.status(500).json({ error: "Failed to add lead" });
   }
 };
 
-// ✅ POST: Upload leads via CSV
+// ✅ POST: Upload leads via CSV (only 5 required fields check)
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
@@ -165,17 +161,24 @@ export const updateLeadType = async (req, res) => {
   }
 };
 
-// ✅ PATCH: Update lead status (Ongoing, Closed)
+// ✅ PATCH: Update lead status (Ongoing, Closed) with delete future calls
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
+    if (!["Ongoing", "Closed"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
     const lead = await Lead.findById(id);
     if (!lead) return res.status(404).json({ error: "Lead not found" });
 
+    const now = new Date();
+
+    // ❌ Block closing if future call exists
     const hasFutureCall = lead.scheduledCalls?.some(
-      (call) => new Date(call.callDate) > new Date()
+      (call) => new Date(call.callDate) > now
     );
 
     if (status === "Closed" && hasFutureCall) {
@@ -184,33 +187,44 @@ export const updateLeadStatus = async (req, res) => {
         .json({ error: "Cannot close lead with upcoming scheduled call" });
     }
 
+    // ✅ Optional: Delete only future scheduled calls
+    if (status === "Closed") {
+      lead.scheduledCalls = lead.scheduledCalls.filter(
+        (call) => new Date(call.callDate) <= now
+      );
+    }
+
     lead.status = status;
     await lead.save();
 
     res.status(200).json({ message: "Lead status updated", lead });
-  } catch {
+  } catch (error) {
+    console.error("Lead Status Update Error:", error);
     res.status(500).json({ error: "Failed to update lead status" });
   }
 };
 
-// ✅ POST: Schedule call
+// ✅ POST: Schedule call (block if lead is closed)
 export const scheduleCall = async (req, res) => {
   try {
     const { id } = req.params;
     const { callDate } = req.body;
+
+    const lead = await Lead.findById(id);
+    if (!lead) return res.status(404).json({ error: "Lead not found" });
+
+    // ❌ Block scheduling if lead is closed
+    if (lead.status === "Closed") {
+      return res.status(400).json({ error: "Cannot schedule call for closed lead" });
+    }
 
     const existing = await Lead.findOne({
       "scheduledCalls.callDate": new Date(callDate),
     });
 
     if (existing) {
-      return res
-        .status(400)
-        .json({ error: "A lead is already scheduled at this time" });
+      return res.status(400).json({ error: "Another call already scheduled at this time" });
     }
-
-    const lead = await Lead.findById(id);
-    if (!lead) return res.status(404).json({ error: "Lead not found" });
 
     const autoCallType = lead.type === "Cold" ? "Cold Call" : "Referral";
 
@@ -227,14 +241,13 @@ export const scheduleCall = async (req, res) => {
   }
 };
 
-// ✅ GET: Scheduled Calls (today or all upcoming)
+// ✅ GET: Scheduled Calls (today or upcoming)
 export const getScheduledCalls = async (req, res) => {
   try {
     const { filter = "all" } = req.query;
     let leads;
 
     if (filter === "today") {
-      const now = new Date();
       const start = new Date();
       start.setHours(0, 0, 0, 0);
       const end = new Date();
@@ -243,7 +256,7 @@ export const getScheduledCalls = async (req, res) => {
       leads = await Lead.find({
         scheduledCalls: {
           $elemMatch: {
-            callDate: { $gte: now, $lte: end },
+            callDate: { $gte: start, $lte: end },
           },
         },
       }).populate("assignedEmployee", "firstName lastName");
