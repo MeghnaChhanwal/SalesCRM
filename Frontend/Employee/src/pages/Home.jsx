@@ -7,48 +7,45 @@ import styles from "../styles/Home.module.css";
 const Home = () => {
   const { employee } = useAuth();
   const [timing, setTiming] = useState(null);
-  const [breakHistory, setBreakHistory] = useState([]);
 
   useEffect(() => {
-    if (employee && employee._id) {
-      fetchTiming();
-      fetchBreakHistory();
-    }
+    if (employee) fetchTiming();
   }, [employee]);
 
   const fetchTiming = async () => {
     try {
       const res = await API.get(`/api/timing/${employee._id}`);
-      const timingData = Array.isArray(res.data) ? res.data[0] : res.data;
-      setTiming(timingData || null);
+      if (res.data && res.data.length > 0) {
+        setTiming(res.data[0]);
+      } else {
+        setTiming(null);
+      }
     } catch (err) {
-      console.error("Fetch timing error:", err.response?.data || err.message);
-      setTiming(null);
+      console.error("Fetch timing error:", err);
     }
   };
 
-  const fetchBreakHistory = async () => {
-    try {
-      const res = await API.get(`/api/timing/breaks/${employee._id}`);
-      const last7 = res.data.slice(0, 7);
-      setBreakHistory(last7);
-    } catch (err) {
-      console.error("Fetch break history error:", err);
-    }
-  };
-
+  // Format time strings like "05:38 am" to display format
   const formatTime = (timeStr) => {
     if (!timeStr) return "--:--";
-    const d = new Date(timeStr);
-    if (!isNaN(d.getTime())) {
-      return d.toLocaleTimeString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-        timeZone: "Asia/Kolkata",
-      });
-    }
-    return timeStr;
+
+    const normalized = timeStr.trim().toUpperCase(); // "05:38 AM"
+    const [time, meridian] = normalized.split(" ");
+    if (!time || !meridian) return "--:--";
+
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (meridian === "PM" && hours < 12) hours += 12;
+    if (meridian === "AM" && hours === 12) hours = 0;
+
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+
+    return date.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   const formatDate = (isoDate) => {
@@ -58,73 +55,61 @@ const Home = () => {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
-      timeZone: "Asia/Kolkata",
     });
   };
-
-  const lastBreak = timing?.breaks?.[timing.breaks.length - 1];
 
   return (
     <Layout>
       <div className={styles.container}>
-        <div className={styles.headerCard}>
-          <p className={styles.welcome}>Good Morning</p>
-          <h2 className={styles.name}>{employee?.firstName} {employee?.lastName}</h2>
-        </div>
+        <h3 className={styles.welcome}>Good Morning, {employee?.firstName}</h3>
 
-        <h3 className={styles.sectionTitle}>Timings</h3>
-
-        {/* Check-In / Check-Out */}
-        <div className={styles.timingCard}>
-          <div>
-            <p className={styles.label}>Checked-In</p>
-            <p className={styles.time}>{formatTime(timing?.checkIn)}</p>
-          </div>
-          <div>
-            <p className={styles.label}>Check Out</p>
-            <p className={styles.time}>{formatTime(timing?.checkOut)}</p>
-          </div>
-          <div
-            className={
-              timing?.breakStatus === "OnBreak"
-                ? styles.redStatus
-                : styles.greenStatus
-            }
-          />
-        </div>
-
-        {/* Last Break Section */}
-        {lastBreak && (
-          <div className={styles.timingCard}>
+        <div className={styles.card}>
+          <div className={styles.headerRow}>
             <div>
-              <p className={styles.label}>Break</p>
-              <p className={styles.time}>{formatTime(lastBreak.start)}</p>
+              <strong>Checked-In</strong>
+              <p>{formatTime(timing?.checkIn)}</p>
             </div>
             <div>
-              <p className={styles.label}>Ended</p>
-              <p className={styles.time}>{formatTime(lastBreak.end)}</p>
+              <strong>Check Out</strong>
+              <p>{formatTime(timing?.checkOut)}</p>
             </div>
-            <div className={styles.redStatus} />
+            <div className={styles.status}>
+              <div
+                className={
+                  timing?.status === "Active" ? styles.greenDot : styles.redDot
+                }
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Break History */}
+        {timing?.breaks?.length > 0 && (
+          <div className={styles.breakCard}>
+            <div className={styles.breakHeader}>
+              <strong>Break</strong>
+              <strong>Ended</strong>
+              <strong>Date</strong>
+            </div>
+
+            {timing.breaks
+              .filter((b) => b.start && b.end)
+              .map((brk, i) => (
+                <div key={i} className={styles.breakRow}>
+                  <span>{formatTime(brk.start)}</span>
+                  <span>{formatTime(brk.end)}</span>
+                  <span>{formatDate(timing.date)}</span>
+                </div>
+              ))}
           </div>
         )}
 
-        {/* Break History (last 7 days) */}
-        <div className={styles.breakHistory}>
-          {breakHistory.map((brk, i) => (
-            <div key={i} className={styles.breakRow}>
-              <span>Break {formatTime(brk.start)}</span>
-              <span>Ended {formatTime(brk.end)}</span>
-              <span>Date {formatDate(brk.date)}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Static Activity */}
+        {/* Recent Activity (Mock) */}
         <div className={styles.activityCard}>
           <h4>Recent Activity</h4>
           <ul>
-            <li>You were assigned 3 more new lead – 1 hour ago</li>
-            <li>You Closed a deal today – 2 hours ago</li>
+            <li>You were assigned 3 more new leads – 1 hour ago</li>
+            <li>You closed a deal today – 2 hours ago</li>
           </ul>
         </div>
       </div>

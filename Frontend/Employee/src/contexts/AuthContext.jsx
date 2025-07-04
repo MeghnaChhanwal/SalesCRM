@@ -6,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔄 Store flag when refreshing the tab
+  // ✅ Set refreshing flag on hard reload
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,21 +15,24 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // 🔃 Load from sessionStorage on initial render
+  // ✅ Restore session after reload
   useEffect(() => {
     const stored = sessionStorage.getItem("employee");
     if (stored && stored !== "undefined" && stored !== "null") {
       setEmployee(JSON.parse(stored));
     }
+
+    // Clear refresh flag
     setTimeout(() => {
       sessionStorage.removeItem("refreshing");
     }, 100);
+
     setLoading(false);
   }, []);
 
-  // ❗ Auto logout on tab/browser close
+  // ✅ Logout only if NOT refreshing (pure tab close)
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    const handleBeforeUnload = (event) => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
       const emp = sessionStorage.getItem("employee");
 
@@ -37,33 +40,22 @@ export const AuthProvider = ({ children }) => {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
-            // ✅ FIXED: Use correct logout route
             const url = `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`;
-            const blob = new Blob([JSON.stringify({})], {
-              type: "application/json",
-            });
-            const sent = navigator.sendBeacon(url, blob);
-
-            // Fallback if Beacon fails
-            if (!sent) {
-              fetch(url, {
-                method: "POST",
-                body: JSON.stringify({}),
-                headers: { "Content-Type": "application/json" },
-              });
-            }
+            navigator.sendBeacon(url);
           }
         } catch (err) {
-          console.error("Auto-logout error:", err);
+          console.error("Auto-checkout error", err);
         }
+        // employee remove only on frontend load
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    return () =>
+      window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // 🔐 Login API call
+  // ✅ Login
   const login = async (email, password) => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
       method: "POST",
