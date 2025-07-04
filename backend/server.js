@@ -30,6 +30,8 @@ app.options("*", cors());
 
 // JSON body parser
 app.use(express.json());
+app.use(express.text()); // ✅ Required for navigator.sendBeacon to work properly
+
 
 // ✅ Connect MongoDB
 mongoose
