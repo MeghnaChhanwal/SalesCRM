@@ -23,22 +23,18 @@ const Schedule = () => {
         params: { search: searchTerm },
       });
 
-      // Filter leads that have scheduled calls
       let allLeads = res.data.leads.filter(
         (lead) => lead.scheduledCalls && lead.scheduledCalls.length > 0
       );
 
-      // Filter by employee (if logged in as employee)
       if (employee?._id) {
         allLeads = allLeads.filter(
           (lead) => lead.assignedEmployee?._id === employee._id
         );
       }
 
-      // Filter by day (Today or All)
       const filtered = allLeads.filter((lead) => {
         if (dayFilter === "All") return true;
-
         return lead.scheduledCalls.some((call) => {
           const callDate = new Date(call.callDate).toDateString();
           const today = new Date().toDateString();
@@ -52,6 +48,13 @@ const Schedule = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getInitials = (name) => {
+    const parts = name.trim().split(" ");
+    return parts.length >= 2
+      ? parts[0][0] + parts[1][0]
+      : name.slice(0, 2).toUpperCase();
   };
 
   return (
@@ -71,17 +74,30 @@ const Schedule = () => {
           <p className={styles.message}>No scheduled calls found.</p>
         ) : (
           <div className={styles.cardList}>
-            {leads.map((lead) => (
-              <div className={styles.card} key={lead._id}>
-                <h4>{lead.name}</h4>
-                {lead.scheduledCalls.map((call, index) => (
-                  <div key={index} className={styles.callInfo}>
-                    <p><strong>{call.callType}</strong></p>
-                    <p>{new Date(call.callDate).toLocaleString()}</p>
+            {leads.map((lead) =>
+              lead.scheduledCalls.map((call, index) => (
+                <div key={index} className={styles.card}>
+                  <div className={styles.left}>
+                    <div className={styles.callType}>{call.callType || "Cold Call"}</div>
+                    {lead.phone && <div className={styles.phone}>{lead.phone}</div>}
+                    <div className={styles.avatar}>{getInitials(lead.name)}</div>
                   </div>
-                ))}
-              </div>
-            ))}
+
+                  <div className={styles.right}>
+                    <div className={styles.date}>
+                      {new Date(call.callDate).toLocaleDateString("en-IN", {
+                        weekday: "short",
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
       </div>

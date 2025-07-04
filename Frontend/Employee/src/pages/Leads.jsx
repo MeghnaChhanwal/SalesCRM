@@ -7,14 +7,13 @@ import { useAuth } from "../contexts/AuthContext";
 import styles from "../styles/Leads.module.css";
 
 const Leads = () => {
-  const { employee } = useAuth(); // Logged-in employee
+  const { employee } = useAuth();
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterOption, setFilterOption] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch assigned leads
   useEffect(() => {
     if (!employee?._id) {
       setLeads([]);
@@ -50,7 +49,6 @@ const Leads = () => {
     fetchLeads();
   }, [searchTerm, filterOption, employee]);
 
-  // Update lead type (Hot/Warm/Cold)
   const handleTypeChange = async (id, newType) => {
     try {
       await API.patch(`/api/leads/${id}/type`, { type: newType });
@@ -62,7 +60,6 @@ const Leads = () => {
     }
   };
 
-  // Update lead status (Ongoing/Closed)
   const handleStatusChange = async (id, newStatus) => {
     try {
       await API.patch(`/api/leads/${id}/status`, { status: newStatus });
@@ -76,13 +73,9 @@ const Leads = () => {
     }
   };
 
-  // Schedule call popup trigger (custom modal logic)
-  const handleScheduleCall = async (lead) => {
-    const callDate = prompt("Enter call date and time (e.g., 2025-07-04T14:30):");
-    if (!callDate) return;
-
+  const handleScheduleCall = async (leadId, callDate) => {
     try {
-      await API.post(`/api/leads/${lead._id}/schedule`, { callDate });
+      await API.post(`/api/leads/${leadId}/schedule`, { callDate });
       alert("Call scheduled!");
     } catch (err) {
       alert(err?.response?.data?.error || "Failed to schedule call.");
@@ -92,9 +85,7 @@ const Leads = () => {
   return (
     <Layout>
       <div className={styles.container}>
-        <header className={styles.header}>
-          <h2>Lead Management</h2>
-        </header>
+        {/* Header Removed */}
 
         <SearchFilter
           searchTerm={searchTerm}
@@ -118,7 +109,7 @@ const Leads = () => {
                 lead={lead}
                 onTypeChange={handleTypeChange}
                 onStatusChange={handleStatusChange}
-                onScheduleCall={handleScheduleCall}
+                onSchedule={handleScheduleCall}
               />
             ))}
         </section>

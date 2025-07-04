@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "../styles/LeadCard.module.css";
 
 const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
@@ -7,11 +7,33 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [scheduleData, setScheduleData] = useState({ date: "", time: "" });
 
+  const typeRef = useRef();
+  const scheduleRef = useRef();
+  const statusRef = useRef();
+
+  // Detect outside clicks for popups
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        typeRef.current && !typeRef.current.contains(e.target) &&
+        scheduleRef.current && !scheduleRef.current.contains(e.target) &&
+        statusRef.current && !statusRef.current.contains(e.target)
+      ) {
+        setShowTypePopup(false);
+        setShowSchedulePopup(false);
+        setShowStatusPopup(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const getColor = () => {
     if (lead.type === "Hot") return "#ff4d4f";
     if (lead.type === "Warm") return "#fbbf24";
     if (lead.type === "Cold") return "#22d3ee";
-    return "#fb923c"; // default
+    return "#ccc";
   };
 
   const handleScheduleSave = () => {
@@ -24,66 +46,78 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
 
   return (
     <div className={styles.card}>
-      {/* Colored strip based on type */}
-      <div className={styles.leftBar} style={{ backgroundColor: getColor() }}></div>
+      <div className={styles.leftBar} style={{ backgroundColor: getColor() }} />
 
-      {/* Lead Info */}
-      <div className={styles.details}>
-        <h4 className={styles.name}>{lead.name}</h4>
-        <p className={styles.email}>@{lead.email}</p>
+      <div className={styles.mainContent}>
+        {/* Top: Name + Circle */}
+        <div className={styles.topRow}>
+          <div className={styles.nameEmail}>
+            <h4 className={styles.name}>{lead.name}</h4>
+            <p className={styles.email}>{lead.email}</p>
+          </div>
+          <div className={styles.statusCircle} style={{ borderColor: getColor() }}>
+            {lead.status}
+          </div>
+        </div>
+
+        {/* Date + Icons */}
         <p className={styles.label}>date</p>
-        <div className={styles.dateRow}>
-          <img src="/image/calendar.png" alt="calendar" />
-          <span>
-            {new Date(lead.receivedDate).toLocaleDateString("en-IN", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}
-          </span>
-        </div>
-      </div>
+        <div className={styles.dateAndIconsRow}>
+          <div className={styles.dateRow}>
+            <img src="/images/schedule.png" alt="schedule" />
+            <span>
+              {new Date(lead.receivedDate).toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
+          </div>
 
-      {/* Status & Action Buttons */}
-      <div className={styles.rightArea}>
-        <div
-          className={styles.statusCircle}
-          style={{ borderColor: getColor() }}
-        >
-          {lead.status}
-        </div>
-
-        <div className={styles.actions}>
-          <img
-            src="/images/type.png"
-            alt="Edit Type"
-            onClick={() => setShowTypePopup(!showTypePopup)}
-          />
-          <img
-            src="/images/schedule.png"
-            alt="Schedule"
-            onClick={() => setShowSchedulePopup(!showSchedulePopup)}
-          />
-          <img
-            src="/images/status.png"
-            alt="Status"
-            onClick={() => setShowStatusPopup(!showStatusPopup)}
-          />
+          <div className={styles.actionsRowRight}>
+            <img
+              src="/images/type.png"
+              alt="Edit Type"
+              onClick={() => {
+                setShowTypePopup(!showTypePopup);
+                setShowSchedulePopup(false);
+                setShowStatusPopup(false);
+              }}
+            />
+            <img
+              src="/images/calendar.png"
+              alt="calendar"
+              onClick={() => {
+                setShowSchedulePopup(!showSchedulePopup);
+                setShowTypePopup(false);
+                setShowStatusPopup(false);
+              }}
+            />
+            <img
+              src="/images/status.png"
+              alt="Status"
+              onClick={() => {
+                setShowStatusPopup(!showStatusPopup);
+                setShowTypePopup(false);
+                setShowSchedulePopup(false);
+              }}
+            />
+          </div>
         </div>
 
         {/* Type Popup */}
         {showTypePopup && (
-          <div className={styles.popup}>
-            {["Hot", "Warm", "Cold"].map((t) => (
+          <div className={styles.popup} ref={typeRef}>
+            {["Hot", "Warm", "Cold"].map((type) => (
               <div
-                key={t}
-                className={`${styles.option} ${styles[t.toLowerCase()]}`}
+                key={type}
+                className={`${styles.option} ${styles[type.toLowerCase()]}`}
                 onClick={() => {
-                  onTypeChange(lead._id, t);
+                  onTypeChange(lead._id, type);
                   setShowTypePopup(false);
                 }}
               >
-                {t}
+                {type}
               </div>
             ))}
           </div>
@@ -91,22 +125,18 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
 
         {/* Schedule Popup */}
         {showSchedulePopup && (
-          <div className={styles.popup}>
+          <div className={styles.popup} ref={scheduleRef}>
             <label>Date</label>
             <input
               type="date"
               value={scheduleData.date}
-              onChange={(e) =>
-                setScheduleData({ ...scheduleData, date: e.target.value })
-              }
+              onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
             />
             <label>Time</label>
             <input
               type="time"
               value={scheduleData.time}
-              onChange={(e) =>
-                setScheduleData({ ...scheduleData, time: e.target.value })
-              }
+              onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
             />
             <button onClick={handleScheduleSave}>Save</button>
           </div>
@@ -114,7 +144,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
 
         {/* Status Popup */}
         {showStatusPopup && (
-          <div className={styles.popup}>
+          <div className={styles.popup} ref={statusRef}>
             {["Ongoing", "Closed"].map((status) => (
               <div
                 key={status}
