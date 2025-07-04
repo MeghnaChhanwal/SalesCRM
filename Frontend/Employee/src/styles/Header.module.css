@@ -30,6 +30,9 @@
 /* 📌 Sub-header (greeting + name + page title) */
 .subHeader {
   margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 /* 👋 "Hi" text */
@@ -37,6 +40,7 @@
   font-size: 13px;
   margin: 0;
   opacity: 0.9;
+  line-height: 1.3;
 }
 
 /* 🙍‍♀️ User name */
@@ -44,6 +48,7 @@
   font-size: 16px;
   font-weight: 600;
   margin: 0;
+  line-height: 1.4;
 }
 
 /* 📄 Dynamic page title (clickable) */
@@ -56,6 +61,7 @@
   cursor: pointer;
   padding: 0;
   margin-top: 6px;
+  text-align: left;
 }
 
 /* ✅ Safe area support for iOS (PWA fullscreen, notch) */
@@ -81,5 +87,25 @@
 
   .pageTitle {
     font-size: 14px;
+  }
+}
+
+/* 📱 Extra-tight layout for very small screens (e.g., 320px) */
+@media (max-width: 360px) {
+  .logo {
+    font-size: 18.5px;
+  }
+
+  .name {
+    font-size: 14px;
+  }
+
+  .greeting,
+  .pageTitle {
+    font-size: 12.5px;
+  }
+
+  .subHeader {
+    gap: 1px;
   }
 }

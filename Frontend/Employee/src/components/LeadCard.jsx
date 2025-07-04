@@ -1,43 +1,39 @@
 import React, { useState } from "react";
 import styles from "../styles/LeadCard.module.css";
 
-const LeadCard = ({ lead, onTypeChange, onStatusChange, onScheduleCall }) => {
-  const [showTypeOptions, setShowTypeOptions] = useState(false);
-  const [showStatusLock, setShowStatusLock] = useState(false);
+const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
+  const [showTypePopup, setShowTypePopup] = useState(false);
+  const [showSchedulePopup, setShowSchedulePopup] = useState(false);
+  const [showStatusPopup, setShowStatusPopup] = useState(false);
+  const [scheduleData, setScheduleData] = useState({ date: "", time: "" });
 
-  const getRingColor = () => {
-    if (lead.status === "Closed") return "#c4c4c4";
+  const getColor = () => {
     if (lead.type === "Hot") return "#ff4d4f";
     if (lead.type === "Warm") return "#fbbf24";
     if (lead.type === "Cold") return "#22d3ee";
-    return "#d1d5db";
+    return "#fb923c"; // default
   };
 
-  const handleStatusClick = () => {
-    // Ongoing → Closed
-    if (lead.status === "Closed") return; // Already closed
-    if (lead.scheduledCalls?.some((c) => new Date(c.callDate) > new Date())) {
-      setShowStatusLock(true);
-      setTimeout(() => setShowStatusLock(false), 2000);
-    } else {
-      onStatusChange(lead._id, "Closed");
+  const handleScheduleSave = () => {
+    if (scheduleData.date && scheduleData.time) {
+      const isoString = new Date(`${scheduleData.date}T${scheduleData.time}`).toISOString();
+      onSchedule(lead._id, isoString);
+      setShowSchedulePopup(false);
     }
   };
 
   return (
     <div className={styles.card}>
-      <div className={styles.leftBar} style={{ backgroundColor: getRingColor() }} />
+      {/* Colored strip based on type */}
+      <div className={styles.leftBar} style={{ backgroundColor: getColor() }}></div>
 
-      <div className={styles.content}>
+      {/* Lead Info */}
+      <div className={styles.details}>
         <h4 className={styles.name}>{lead.name}</h4>
-        <p className={styles.email}>@{lead.email || "no-email"}</p>
-
-        <div className={styles.date}>
-          <img
-            src="/image/calendar.png"
-            alt="calendar"
-            style={{ width: 16, height: 16, marginRight: 6 }}
-          />
+        <p className={styles.email}>@{lead.email}</p>
+        <p className={styles.label}>date</p>
+        <div className={styles.dateRow}>
+          <img src="/image/calendar.png" alt="calendar" />
           <span>
             {new Date(lead.receivedDate).toLocaleDateString("en-IN", {
               day: "2-digit",
@@ -48,57 +44,43 @@ const LeadCard = ({ lead, onTypeChange, onStatusChange, onScheduleCall }) => {
         </div>
       </div>
 
-      <div className={styles.right}>
-        {/* Status Circle */}
+      {/* Status & Action Buttons */}
+      <div className={styles.rightArea}>
         <div
-          className={`${styles.typeCircle} ${
-            lead.status === "Closed"
-              ? styles.closed
-              : lead.type === "Hot"
-              ? styles.hot
-              : lead.type === "Warm"
-              ? styles.warm
-              : styles.cold
-          }`}
-          onClick={handleStatusClick}
+          className={styles.statusCircle}
+          style={{ borderColor: getColor() }}
         >
           {lead.status}
         </div>
 
-        {/* Action Icons */}
-        <div className={styles.icons}>
-          {/* Edit Type */}
-          {lead.status !== "Closed" && (
-            <button
-              className={styles.iconBtn}
-              onClick={() => setShowTypeOptions(!showTypeOptions)}
-            >
-              <img src="/image/pencil.png" alt="edit" width={16} height={16} />
-            </button>
-          )}
-
-          {/* Schedule Call */}
-          <button className={styles.iconBtn} onClick={() => onScheduleCall(lead)}>
-            <img src="/image/phone.png" alt="call" width={16} height={16} />
-          </button>
+        <div className={styles.actions}>
+          <img
+            src="/images/type.png"
+            alt="Edit Type"
+            onClick={() => setShowTypePopup(!showTypePopup)}
+          />
+          <img
+            src="/images/schedule.png"
+            alt="Schedule"
+            onClick={() => setShowSchedulePopup(!showSchedulePopup)}
+          />
+          <img
+            src="/images/status.png"
+            alt="Status"
+            onClick={() => setShowStatusPopup(!showStatusPopup)}
+          />
         </div>
 
-        {/* Type Dropdown */}
-        {showTypeOptions && lead.status !== "Closed" && (
-          <div className={styles.typeDropdown}>
+        {/* Type Popup */}
+        {showTypePopup && (
+          <div className={styles.popup}>
             {["Hot", "Warm", "Cold"].map((t) => (
               <div
                 key={t}
-                className={`${styles.typeOption} ${
-                  t === "Hot"
-                    ? styles.hotOption
-                    : t === "Warm"
-                    ? styles.warmOption
-                    : styles.coldOption
-                }`}
+                className={`${styles.option} ${styles[t.toLowerCase()]}`}
                 onClick={() => {
                   onTypeChange(lead._id, t);
-                  setShowTypeOptions(false);
+                  setShowTypePopup(false);
                 }}
               >
                 {t}
@@ -107,10 +89,44 @@ const LeadCard = ({ lead, onTypeChange, onStatusChange, onScheduleCall }) => {
           </div>
         )}
 
-        {/* Status lock popup (if future call exists) */}
-        {showStatusLock && (
-          <div className={styles.statusLockPopup}>
-            Lead cannot be closed — future call scheduled.
+        {/* Schedule Popup */}
+        {showSchedulePopup && (
+          <div className={styles.popup}>
+            <label>Date</label>
+            <input
+              type="date"
+              value={scheduleData.date}
+              onChange={(e) =>
+                setScheduleData({ ...scheduleData, date: e.target.value })
+              }
+            />
+            <label>Time</label>
+            <input
+              type="time"
+              value={scheduleData.time}
+              onChange={(e) =>
+                setScheduleData({ ...scheduleData, time: e.target.value })
+              }
+            />
+            <button onClick={handleScheduleSave}>Save</button>
+          </div>
+        )}
+
+        {/* Status Popup */}
+        {showStatusPopup && (
+          <div className={styles.popup}>
+            {["Ongoing", "Closed"].map((status) => (
+              <div
+                key={status}
+                className={styles.option}
+                onClick={() => {
+                  onStatusChange(lead._id, status);
+                  setShowStatusPopup(false);
+                }}
+              >
+                {status}
+              </div>
+            ))}
           </div>
         )}
       </div>

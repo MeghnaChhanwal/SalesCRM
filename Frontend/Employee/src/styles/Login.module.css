@@ -1,3 +1,11 @@
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container card */
 .card {
   max-width: 400px;
   margin: 80px auto;
@@ -8,7 +16,7 @@
   text-align: center;
 }
 
-/* Card title */
+/* Title */
 .title {
   font-size: 1.8rem;
   font-weight: bold;
@@ -33,12 +41,12 @@
   outline: none;
 }
 
-/* Wrapper to position the show/hide password toggle */
+/* Password input wrapper */
 .passwordWrapper {
   position: relative;
 }
 
-/* Toggle button for password visibility */
+/* Toggle password button */
 .togglePassword {
   position: absolute;
   top: 50%;
@@ -76,14 +84,14 @@
   background-color: #0056b3;
 }
 
-/* Error message text */
+/* Error message */
 .error {
   color: red;
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
 
-/* ✅ Mobile responsiveness */
+/* Responsive for mobile phones */
 @media (max-width: 480px) {
   .card {
     margin: 60px 16px;
@@ -94,11 +102,46 @@
     font-size: 1.5rem;
   }
 
-  .input {
-    font-size: 0.95rem;
-  }
-
+  .input,
   .button {
     font-size: 0.95rem;
+  }
+}
+
+/* Responsive for tablets */
+@media (max-width: 768px) {
+  .card {
+    margin: 60px 24px;
+    padding: 1.75rem;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .input,
+  .button {
+    font-size: 1rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .card {
+    margin: 40px 12px;
+    padding: 1.25rem;
+  }
+
+  .title {
+    font-size: 1.4rem;
+  }
+
+  .input,
+  .button {
+    font-size: 0.9rem;
+  }
+
+  .togglePassword {
+    font-size: 0.8rem;
   }
 }

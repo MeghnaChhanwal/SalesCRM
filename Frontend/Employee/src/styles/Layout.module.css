@@ -6,6 +6,7 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
+/* Main content area excluding fixed header/footer */
 .content {
   flex: 1;
   padding: 16px;
@@ -15,7 +16,7 @@
   overflow-y: auto;
 }
 
-/* ✅ Safe area support for iPhone Notch and PWA swipe bar */
+/* ✅ Safe-area support for iOS notch, PWA swipe, etc. */
 @supports (padding: max(0px)) {
   .content {
     padding-top: max(110px, env(safe-area-inset-top));
@@ -23,11 +24,20 @@
   }
 }
 
-/* ✅ Optional: smaller device handling */
+/* ✅ Extra safety for very small devices */
 @media (max-width: 400px) {
   .content {
     padding: 12px;
     padding-top: 90px;
     padding-bottom: 70px;
+  }
+}
+
+/* Optional: Even tighter layout for very narrow screens */
+@media (max-width: 320px) {
+  .content {
+    padding: 10px;
+    padding-top: 80px;
+    padding-bottom: 60px;
   }
 }

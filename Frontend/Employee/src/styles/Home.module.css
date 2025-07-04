@@ -18,6 +18,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .label {
@@ -52,6 +54,7 @@
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
 }
 
 .breakRow {
@@ -89,4 +92,92 @@
 
 .activityCard li {
   margin-bottom: 0.5rem;
+}
+
+/* 🔽 Tablet screens */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .card,
+  .breakHistory,
+  .activityCard {
+    padding: 0.875rem;
+  }
+
+  .time {
+    font-size: 0.95rem;
+  }
+
+  .activityCard h4 {
+    font-size: 1rem;
+  }
+
+  .activityCard ul {
+    font-size: 0.9rem;
+  }
+
+  .breakRow {
+    font-size: 0.9rem;
+  }
+}
+
+/* 🔽 Mobile screens */
+@media (max-width: 480px) {
+  .container {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .card,
+  .breakHistory,
+  .activityCard {
+    padding: 0.75rem;
+    border-radius: 10px;
+  }
+
+  .label {
+    font-size: 0.8rem;
+  }
+
+  .time {
+    font-size: 0.9rem;
+  }
+
+  .breakRow {
+    font-size: 0.85rem;
+  }
+
+  .activityCard h4 {
+    font-size: 0.95rem;
+  }
+
+  .activityCard ul {
+    font-size: 0.85rem;
+    padding-left: 1rem;
+  }
+
+  .greenBar,
+  .redBar {
+    height: 36px;
+  }
+}
+
+/* 🔽 Very small devices */
+@media (max-width: 360px) {
+  .time {
+    font-size: 0.85rem;
+  }
+
+  .label {
+    font-size: 0.75rem;
+  }
+
+  .activityCard ul {
+    font-size: 0.8rem;
+  }
+
+  .breakRow {
+    font-size: 0.8rem;
+  }
 }

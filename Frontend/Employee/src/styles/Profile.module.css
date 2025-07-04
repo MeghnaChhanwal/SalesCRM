@@ -1,18 +1,38 @@
-/* src/styles/Profile.module.css */
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Profile Card Container */
 .card {
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-top: 12px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+/* Optional Title */
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 8px;
+}
+
+/* Label Styling */
 label {
   font-size: 14px;
   margin-bottom: 4px;
   color: #333;
 }
 
+/* Input Styling */
 input {
   width: 100%;
   padding: 10px 12px;
@@ -20,12 +40,15 @@ input {
   border: 1px solid #ccc;
   border-radius: 8px;
   outline: none;
+  background-color: #fefefe;
+  transition: border-color 0.3s ease;
 }
 
 input:focus {
   border-color: #1a4be1;
 }
 
+/* Save Button */
 .saveButton {
   background-color: #1a4be1;
   color: white;
@@ -34,15 +57,38 @@ input:focus {
   border-radius: 8px;
   font-size: 14px;
   margin-top: 10px;
-  align-self: flex-start; /* 👈 aligns button to left */
+  align-self: flex-start;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 .saveButton:hover {
   background-color: #003ecb;
 }
+
+/* Responsive - small screens */
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+  }
+
+  input {
+    font-size: 13.5px;
+    padding: 9px 11px;
+  }
+
+  .saveButton {
+    font-size: 13.5px;
+    padding: 9px 22px;
+  }
+}
+
+/* Responsive - very small devices */
 @media (max-width: 400px) {
+  .card {
+    padding: 14px;
+  }
+
   input {
     font-size: 13px;
     padding: 8px 10px;

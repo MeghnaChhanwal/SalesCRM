@@ -1,35 +1,147 @@
-/* src/styles/Leads.module.css */
-
-.container {
-  padding: 16px;
-  min-height: 100vh;
-  background-color: #f9f9f9;
+.card {
+  display: flex;
+  align-items: center;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  gap: 20px;
+  position: relative;
 }
 
-.cardList {
+.leftBar {
+  width: 4px;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.details {
+  flex: 1;
+}
+
+.name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.email {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 4px 0;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 4px 0 2px;
+}
+
+.dateRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.dateRow img {
+  width: 16px;
+  height: 16px;
+}
+
+.rightArea {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 16px;
+  align-items: center;
+  gap: 10px;
+  position: relative;
 }
 
-.message {
-  text-align: center;
-  color: #666;
-  margin-top: 32px;
-  font-size: 16px;
+.statusCircle {
+  width: 64px;
+  height: 64px;
+  border: 6px solid #fb923c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #111827;
 }
 
-@media (max-width: 400px) {
-  .container {
-    padding: 12px;
-  }
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
 
-  .cardList {
-    gap: 12px;
-  }
+.actions img {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
 
-  .message {
-    font-size: 14px;
-  }
+.popup {
+  position: absolute;
+  top: 80px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  z-index: 999;
+}
+
+.popup label {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+.popup input {
+  width: 100%;
+  margin: 4px 0;
+  padding: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+}
+
+.popup button {
+  margin-top: 8px;
+  background-color: #3b82f6;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.option {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.option:hover {
+  background-color: #f3f4f6;
+}
+
+.hot {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.warm {
+  background-color: #fef9c3;
+  color: #92400e;
+}
+
+.cold {
+  background-color: #cffafe;
+  color: #0369a1;
 }

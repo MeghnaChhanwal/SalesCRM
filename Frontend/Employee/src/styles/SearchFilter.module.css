@@ -1,3 +1,4 @@
+/* Container */
 .container {
   display: flex;
   justify-content: space-between;
@@ -8,7 +9,7 @@
   position: relative;
 }
 
-/* Search bar */
+/* Search bar wrapper */
 .searchWrapper {
   flex: 1;
   display: flex;
@@ -18,12 +19,14 @@
   padding: 6px 12px;
 }
 
+/* Search icon */
 .searchIcon {
   width: 20px;
   height: 20px;
   margin-right: 8px;
 }
 
+/* Input */
 .searchInput {
   border: none;
   background: transparent;
@@ -33,11 +36,12 @@
   color: #333;
 }
 
-/* Filter icon */
+/* Filter icon wrapper */
 .filterWrapper {
   position: relative;
 }
 
+/* Circle-style filter button */
 .filterCircle {
   background-color: #e0e0e0;
   border-radius: 50%;
@@ -48,12 +52,13 @@
   justify-content: center;
 }
 
+/* Filter icon */
 .filterIcon {
   width: 18px;
   height: 18px;
 }
 
-/* Popup Card */
+/* Dropdown popup card */
 .popupCard {
   position: absolute;
   top: 48px;
@@ -69,14 +74,14 @@
   gap: 10px;
 }
 
-/* Dropdown Label */
+/* Popup label text */
 .popupLabel {
   font-size: 14px;
   color: #555;
   font-weight: 500;
 }
 
-/* Dropdown */
+/* Dropdown select */
 .popupSelect {
   width: 100%;
   padding: 8px;
@@ -86,7 +91,7 @@
   color: #333;
 }
 
-/* Save Button */
+/* Save button inside popup */
 .saveBtn {
   background-color: #007bff;
   color: white;
@@ -103,16 +108,39 @@
   background-color: #0056b3;
 }
 
-/* Mobile Responsive */
-@media (max-width: 480px) {
+/* 📱 Mobile responsiveness */
+@media (max-width: 768px) {
   .container {
-    flex-direction: row;
-    padding: 10px 12px;
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 10px;
   }
 
   .popupCard {
     width: 170px;
-    right: 0;
+    top: 44px;
+  }
+
+  .searchInput {
+    font-size: 13.5px;
+  }
+
+  .popupSelect,
+  .saveBtn {
+    font-size: 13.5px;
+    padding: 7px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    flex-direction: row;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .popupCard {
+    width: 160px;
   }
 
   .searchInput {
@@ -122,6 +150,27 @@
   .popupSelect,
   .saveBtn {
     font-size: 13px;
-    padding: 6px 10px;
+    padding: 6px 9px;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    gap: 6px;
+    padding: 6px 8px;
+  }
+
+  .popupCard {
+    width: 150px;
+  }
+
+  .popupLabel {
+    font-size: 13px;
+  }
+
+  .popupSelect,
+  .saveBtn {
+    font-size: 12.5px;
+    padding: 5px 8px;
   }
 }
