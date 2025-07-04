@@ -75,9 +75,13 @@ const Leads = () => {
 
   const handleScheduleCall = async (leadId, callDate) => {
     try {
-      await API.post(`/api/leads/${leadId}/schedule`, { callDate });
+      await API.post(`/api/leads/${leadId}/schedule`, {
+        callDate,
+        callType: "Cold Call", // ✅ Default call type passed
+      });
       alert("Call scheduled!");
     } catch (err) {
+      console.error("Schedule error:", err?.response?.data);
       alert(err?.response?.data?.error || "Failed to schedule call.");
     }
   };
@@ -85,8 +89,6 @@ const Leads = () => {
   return (
     <Layout>
       <div className={styles.container}>
-        {/* Header Removed */}
-
         <SearchFilter
           searchTerm={searchTerm}
           onSearch={setSearchTerm}

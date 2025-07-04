@@ -1,3 +1,4 @@
+// src/pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import API from "../utils/axios";
@@ -7,9 +8,13 @@ import styles from "../styles/Home.module.css";
 const Home = () => {
   const { employee } = useAuth();
   const [timing, setTiming] = useState(null);
+  const [activities, setActivities] = useState([]);
 
   useEffect(() => {
-    if (employee) fetchTiming();
+    if (employee) {
+      fetchTiming();
+      fetchActivity();
+    }
   }, [employee]);
 
   const fetchTiming = async () => {
@@ -25,22 +30,27 @@ const Home = () => {
     }
   };
 
-  // Format time strings like "05:38 am" to display format
+  const fetchActivity = async () => {
+    try {
+      const res = await API.get(`/api/activity/${employee._id}`);
+      if (res.data) {
+        setActivities(res.data.slice(0, 10));
+      }
+    } catch (err) {
+      console.error("Fetch activity error:", err);
+    }
+  };
+
   const formatTime = (timeStr) => {
     if (!timeStr) return "--:--";
-
-    const normalized = timeStr.trim().toUpperCase(); // "05:38 AM"
+    const normalized = timeStr.trim().toUpperCase();
     const [time, meridian] = normalized.split(" ");
     if (!time || !meridian) return "--:--";
-
     let [hours, minutes] = time.split(":").map(Number);
-
     if (meridian === "PM" && hours < 12) hours += 12;
     if (meridian === "AM" && hours === 12) hours = 0;
-
     const date = new Date();
     date.setHours(hours, minutes, 0, 0);
-
     return date.toLocaleTimeString("en-IN", {
       hour: "2-digit",
       minute: "2-digit",
@@ -58,11 +68,12 @@ const Home = () => {
     });
   };
 
+  const todayDate = new Date().toISOString().split("T")[0];
+
   return (
     <Layout>
       <div className={styles.container}>
-        <h3 className={styles.welcome}>Good Morning, {employee?.firstName}</h3>
-
+        {/* ✅ Check In / Out */}
         <div className={styles.card}>
           <div className={styles.headerRow}>
             <div>
@@ -83,7 +94,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Break History */}
+        {/* ✅ Break History (Last 7 Days) */}
         {timing?.breaks?.length > 0 && (
           <div className={styles.breakCard}>
             <div className={styles.breakHeader}>
@@ -92,10 +103,17 @@ const Home = () => {
               <strong>Date</strong>
             </div>
 
-            {timing.breaks
+            {[...timing.breaks]
               .filter((b) => b.start && b.end)
+              .slice(-7)
+              .reverse()
               .map((brk, i) => (
-                <div key={i} className={styles.breakRow}>
+                <div
+                  key={i}
+                  className={`${styles.breakRow} ${
+                    i === 0 ? styles.activeBreak : ""
+                  }`}
+                >
                   <span>{formatTime(brk.start)}</span>
                   <span>{formatTime(brk.end)}</span>
                   <span>{formatDate(timing.date)}</span>
@@ -104,12 +122,18 @@ const Home = () => {
           </div>
         )}
 
-        {/* Recent Activity (Mock) */}
+        {/* ✅ Recent Activity */}
         <div className={styles.activityCard}>
           <h4>Recent Activity</h4>
           <ul>
-            <li>You were assigned 3 more new leads – 1 hour ago</li>
-            <li>You closed a deal today – 2 hours ago</li>
+            {activities.length > 0 ? (
+              activities.map((item, idx) => <li key={idx}>{item}</li>)
+            ) : (
+              <>
+                <li>You were assigned 3 more new leads – 1 hour ago</li>
+                <li>You closed a deal today – 2 hours ago</li>
+              </>
+            )}
           </ul>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "../styles/SearchFilter.module.css";
 
 const SearchFilter = ({
@@ -12,9 +12,8 @@ const SearchFilter = ({
   const [tempOption, setTempOption] = useState(filterOption || "");
   const popupRef = useRef(null);
 
-  // Determine filter options based on page type
   const dropdownOptions =
-    pageType === "schedule" ? ["All Day", "Today"] : ["Ongoing", "Closed"];
+    pageType === "schedule" ? ["Today", "All Day"] : ["Ongoing", "Closed"];
 
   const togglePopup = () => {
     setShowPopup(true);
@@ -26,7 +25,6 @@ const SearchFilter = ({
     setShowPopup(false);
   };
 
-  // Close popup if clicked outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (popupRef.current && !popupRef.current.contains(e.target)) {
@@ -45,7 +43,7 @@ const SearchFilter = ({
 
   return (
     <div className={styles.container}>
-      {/* 🔍 Search Bar */}
+      {/* 🔍 Search Input */}
       <div className={styles.searchWrapper}>
         <img
           src="/images/search.png"
@@ -71,7 +69,7 @@ const SearchFilter = ({
           />
         </div>
 
-        {/* Filter Popup Card */}
+        {/* 📋 Filter Popup */}
         {showPopup && (
           <div className={styles.popupCard} ref={popupRef}>
             <label className={styles.popupLabel}>Filter By</label>

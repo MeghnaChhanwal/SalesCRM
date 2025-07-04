@@ -1,183 +1,59 @@
 .container {
   padding: 1rem;
-  background-color: #f5f7fa;
-  min-height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
-  overflow-x: hidden;
+  padding-bottom: 80px;
 }
 
-.card {
-  background-color: #1f6feb;
-  color: white;
+.welcome {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.card, .breakCard, .activityCard {
+  background: white;
   border-radius: 12px;
   padding: 1rem;
-  margin-bottom: 1rem;
+  margin-top: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.timingHeader {
+.headerRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
 }
 
-.label {
-  font-size: 0.85rem;
-  color: #d8e1f0;
-}
-
-.time {
-  font-size: 1rem;
-  font-weight: bold;
-  margin-top: 4px;
-}
-
-.greenBar,
-.redBar {
-  width: 6px;
-  height: 45px;
-  border-radius: 4px;
-  margin-left: 8px;
-}
-
-.greenBar {
-  background-color: #00c853;
-}
-
-.redBar {
-  background-color: #d50000;
-}
-
-.breakHistory {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  margin-top: 1rem;
-}
-
-.breakRow {
+.status {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.95rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eaeaea;
-  color: #333;
+  align-items: center;
 }
 
-.breakRow:last-child {
-  border-bottom: none;
+.greenDot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: green;
 }
 
-.activityCard {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  margin-top: 1rem;
+.redDot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: red;
 }
 
-.activityCard h4 {
-  margin-bottom: 0.75rem;
-  font-size: 1.05rem;
+.breakHeader, .breakRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 5px 0;
+}
+
+.activeBreak {
+  background: #e0edff;
+  border-left: 4px solid #007bff;
+  border-radius: 6px;
 }
 
 .activityCard ul {
   list-style: disc;
-  padding-left: 1.25rem;
-  color: #333;
-  font-size: 0.95rem;
-}
-
-.activityCard li {
-  margin-bottom: 0.5rem;
-}
-
-/* 🔽 Tablet screens */
-@media (max-width: 768px) {
-  .container {
-    padding: 0.75rem;
-  }
-
-  .card,
-  .breakHistory,
-  .activityCard {
-    padding: 0.875rem;
-  }
-
-  .time {
-    font-size: 0.95rem;
-  }
-
-  .activityCard h4 {
-    font-size: 1rem;
-  }
-
-  .activityCard ul {
-    font-size: 0.9rem;
-  }
-
-  .breakRow {
-    font-size: 0.9rem;
-  }
-}
-
-/* 🔽 Mobile screens */
-@media (max-width: 480px) {
-  .container {
-    padding: 0.75rem 0.5rem;
-  }
-
-  .card,
-  .breakHistory,
-  .activityCard {
-    padding: 0.75rem;
-    border-radius: 10px;
-  }
-
-  .label {
-    font-size: 0.8rem;
-  }
-
-  .time {
-    font-size: 0.9rem;
-  }
-
-  .breakRow {
-    font-size: 0.85rem;
-  }
-
-  .activityCard h4 {
-    font-size: 0.95rem;
-  }
-
-  .activityCard ul {
-    font-size: 0.85rem;
-    padding-left: 1rem;
-  }
-
-  .greenBar,
-  .redBar {
-    height: 36px;
-  }
-}
-
-/* 🔽 Very small devices */
-@media (max-width: 360px) {
-  .time {
-    font-size: 0.85rem;
-  }
-
-  .label {
-    font-size: 0.75rem;
-  }
-
-  .activityCard ul {
-    font-size: 0.8rem;
-  }
-
-  .breakRow {
-    font-size: 0.8rem;
-  }
+  padding-left: 20px;
 }
