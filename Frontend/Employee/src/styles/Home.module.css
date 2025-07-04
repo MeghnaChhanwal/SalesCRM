@@ -1,114 +1,84 @@
-.homeContainer {
-  padding: 1.2rem;
+.container {
+  padding: 1rem;
+  background: #f5f7fa;
   font-family: "Segoe UI", sans-serif;
-  background-color: #f9fafb;
-  min-height: 100vh;
 }
 
-/* Greeting */
-.homeContainer h2 {
-  font-size: 1.5rem;
+.welcome {
+  font-size: 1.3rem;
+  font-weight: 500;
   margin-bottom: 1rem;
-  font-weight: 600;
 }
 
-/* Timing box */
-.timingBox {
-  background-color: #1e57d1;
-  color: white;
+.card {
+  background: #ffffff;
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.headerRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.2rem;
 }
 
-.checkIn,
-.checkOut {
+.status {
   display: flex;
-  flex-direction: column;
-  font-size: 0.95rem;
+  align-items: center;
 }
 
-.checkOut span,
-.checkIn span {
-  margin-top: 4px;
-  font-size: 1.2rem;
-  font-weight: 500;
-}
-
-/* Status indicators */
-.checkOut::after {
-  content: "";
-  display: inline-block;
-  margin-top: 8px;
-  width: 10px;
-  height: 10px;
+.greenDot,
+.redDot {
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background-color: #28c76f; /* Green */
 }
 
-.checkOut[data-status="break"]::after {
-  background-color: #ff4d4f; /* Red */
+.greenDot {
+  background-color: #1abc9c;
+}
+
+.redDot {
+  background-color: #e74c3c;
 }
 
 /* Break Section */
-.breakSection {
-  background-color: white;
+.breakCard {
+  background: #ffffff;
+  border-radius: 12px;
   padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.breakHeader,
+.breakRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 6px 0;
+  font-size: 0.95rem;
+}
+
+.breakHeader {
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+}
+
+.activityCard {
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  margin-bottom: 1.2rem;
+  padding: 1rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-.breakSection h4 {
-  font-size: 1rem;
-  margin-bottom: 0.8rem;
-  color: #333;
-  font-weight: 600;
-}
-
-.breakItem {
-  background-color: #f0f4ff;
-  border-radius: 8px;
-  padding: 0.75rem;
-  margin-bottom: 0.6rem;
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-}
-
-.breakItem p {
-  margin: 0;
-  font-weight: 500;
-}
-
-/* Recent Activity */
-.recentActivity {
-  background-color: #f0f0f0;
-  padding: 0.9rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.recentActivity ul {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-}
-
-.recentActivity li {
-  margin-bottom: 0.5rem;
-  position: relative;
+.activityCard ul {
   padding-left: 1rem;
+  margin: 0.5rem 0 0;
 }
 
-.recentActivity li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: #888;
+.activityCard li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
 }

@@ -19,3 +19,4 @@ const timingSchema = new mongoose.Schema(
 );
 
 export default mongoose.model("Timing", timingSchema);
+
