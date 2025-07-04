@@ -1,7 +1,7 @@
+// controllers/timingController.js
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
-// Get today's timing (for employee)
 export const getTodayTiming = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -9,15 +9,12 @@ export const getTodayTiming = async (req, res) => {
   try {
     const timing = await Timing.findOne({ employee: employeeId, date });
     if (!timing) return res.status(404).json({ error: "No timing found" });
-
-    res.status(200).json([timing]); // array for frontend compatibility
+    res.status(200).json([timing]); // Keep it array
   } catch (error) {
-    console.error("Get timing error:", error);
     res.status(500).json({ error: "Failed to fetch timing" });
   }
 };
 
-// Get all breaks history (for employee)
 export const getBreakHistory = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -40,7 +37,6 @@ export const getBreakHistory = async (req, res) => {
 
     res.status(200).json(breakData);
   } catch (error) {
-    console.error("Break fetch error:", error);
     res.status(500).json({ error: "Failed to fetch break history" });
   }
 };

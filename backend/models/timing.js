@@ -8,15 +8,14 @@ const breakSchema = new mongoose.Schema({
 const timingSchema = new mongoose.Schema(
   {
     employee: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
-    date: String, // YYYY-MM-DD
+    date: String, // Format: YYYY-MM-DD
     checkIn: String,
     checkOut: String,
-    status: { type: String, default: "Inactive" },
-    breakStatus: { type: String, default: "OffBreak" },
+    status: { type: String, default: "Inactive" },     // "Active" / "Inactive"
+    breakStatus: { type: String, default: "OffBreak" }, // "OnBreak" / "OffBreak"
     breaks: [breakSchema],
   },
   { timestamps: true }
 );
 
 export default mongoose.model("Timing", timingSchema);
-
