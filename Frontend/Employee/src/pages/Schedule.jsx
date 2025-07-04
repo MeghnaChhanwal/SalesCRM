@@ -9,7 +9,7 @@ const Schedule = () => {
   const { employee } = useAuth();
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [dayFilter, setDayFilter] = useState("Today"); // "Today" or "All"
+  const [dayFilter, setDayFilter] = useState("Today");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,13 +19,13 @@ const Schedule = () => {
   const fetchScheduledLeads = async () => {
     setLoading(true);
     try {
-      const res = await API.get("/api/leads", {
-        params: { search: searchTerm },
+      const res = await API.get("/api/leads/scheduled", {
+        params: {
+          filter: dayFilter.toLowerCase(),
+        },
       });
 
-      let allLeads = res.data.leads.filter(
-        (lead) => lead.scheduledCalls && lead.scheduledCalls.length > 0
-      );
+      let allLeads = res.data.leads || [];
 
       if (employee?._id) {
         allLeads = allLeads.filter(
@@ -33,14 +33,14 @@ const Schedule = () => {
         );
       }
 
-      const filtered = allLeads.filter((lead) => {
-        if (dayFilter === "All") return true;
-        return lead.scheduledCalls.some((call) => {
-          const callDate = new Date(call.callDate).toDateString();
-          const today = new Date().toDateString();
-          return callDate === today;
-        });
-      });
+      // Optional: filter by search
+      const search = searchTerm.trim().toLowerCase();
+      const filtered = allLeads.filter(
+        (lead) =>
+          lead.name.toLowerCase().includes(search) ||
+          lead.email?.toLowerCase().includes(search) ||
+          lead.phone?.includes(search)
+      );
 
       setLeads(filtered);
     } catch (err) {
@@ -75,28 +75,33 @@ const Schedule = () => {
         ) : (
           <div className={styles.cardList}>
             {leads.map((lead) =>
-              lead.scheduledCalls.map((call, index) => (
-                <div key={index} className={styles.card}>
-                  <div className={styles.left}>
-                    <div className={styles.callType}>{call.callType || "Cold Call"}</div>
-                    {lead.phone && <div className={styles.phone}>{lead.phone}</div>}
-                    <div className={styles.avatar}>{getInitials(lead.name)}</div>
-                  </div>
-
-                  <div className={styles.right}>
-                    <div className={styles.date}>
-                      {new Date(call.callDate).toLocaleDateString("en-IN", {
-                        weekday: "short",
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+              lead.scheduledCalls
+                .filter((call) => new Date(call.callDate) >= new Date())
+                .map((call, index) => (
+                  <div key={index} className={styles.card}>
+                    <div className={styles.left}>
+                      <div className={styles.callType}>
+                        {call.callType || "Cold Call"}
+                      </div>
+                      {lead.phone && (
+                        <div className={styles.phone}>{lead.phone}</div>
+                      )}
+                      <div className={styles.avatar}>{getInitials(lead.name)}</div>
+                    </div>
+                    <div className={styles.right}>
+                      <div className={styles.date}>
+                        {new Date(call.callDate).toLocaleString("en-IN", {
+                          weekday: "short",
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))
             )}
           </div>
         )}
