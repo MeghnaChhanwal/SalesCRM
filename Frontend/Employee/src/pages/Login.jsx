@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -7,22 +6,21 @@ import styles from "../styles/Login.module.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // Last name as password
+  const [password, setPassword] = useState(""); // last name used as password
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // 🔐 Handle login form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      await login(email, password); // ✅ From AuthContext
-      navigate("/dashboard");       // Redirect only on successful login
+      await login(email, password);
+      navigate("/home");
     } catch (err) {
       setError("Login failed. Please check your credentials.");
     } finally {
@@ -38,34 +36,23 @@ const Login = () => {
         {error && <p className={styles.error}>{error}</p>}
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          <label htmlFor="email" className={styles.label}>
-            Email
-          </label>
+          <label htmlFor="email" className={styles.label}>Email</label>
           <input
             type="email"
             id="email"
-            name="email"
-            autoComplete="email"
-            placeholder="Enter your email"
+            className={styles.input}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={styles.input}
             required
-            autoFocus
           />
 
-          <label htmlFor="password" className={styles.label}>
-            Last Name
-          </label>
+          <label htmlFor="password" className={styles.label}>Last Name</label>
           <input
             type="password"
             id="password"
-            name="password"
-            autoComplete="current-password"
-            placeholder="Enter your last name"
+            className={styles.input}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className={styles.input}
             required
           />
 

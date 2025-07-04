@@ -5,11 +5,9 @@ import { useAuth } from "../contexts/AuthContext";
 const ProtectedRoute = ({ children }) => {
   const { employee, loading } = useAuth();
 
-  if (loading) return null; // ⏳ Wait until session restored
+  if (loading) return null; // ⏳ Wait until AuthContext loads
 
-  if (!employee) return <Navigate to="/login" replace />;
-
-  return children;
+  return employee ? children : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;

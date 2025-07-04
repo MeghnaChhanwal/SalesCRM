@@ -41,14 +41,13 @@ export const AuthProvider = ({ children }) => {
           const { _id } = JSON.parse(emp);
           if (_id) {
             navigator.sendBeacon(
-              `${import.meta.env.VITE_API_BASE}/api/timing/auto-checkout/${_id}`
+              `${import.meta.env.VITE_API_BASE}/api/employees/logout/${_id}?auto=true`
             );
           }
         } catch (e) {
           console.error("❌ Auto-checkout beacon error", e);
         }
 
-        // ❌ Don't clear all session storage
         sessionStorage.removeItem("employee");
       }
     };
@@ -73,9 +72,9 @@ export const AuthProvider = ({ children }) => {
     if (!response.ok) throw new Error("Login failed");
 
     const data = await response.json();
-    setEmployee(data.employee);
-    sessionStorage.setItem("employee", JSON.stringify(data.employee));
-    return data.employee;
+    setEmployee(data);
+    sessionStorage.setItem("employee", JSON.stringify(data));
+    return data;
   };
 
   return (

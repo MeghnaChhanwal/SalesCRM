@@ -2,11 +2,9 @@ import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// LOGIN
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).json({ error: "Email and password are required" });
+  if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
 
   try {
     const employee = await Employee.findOne({ email });
@@ -25,7 +23,6 @@ export const loginEmployee = async (req, res) => {
     const time = timeIST();
 
     let timing = await Timing.findOne({ employee: employee._id, date });
-
     if (!timing) {
       timing = new Timing({
         employee: employee._id,
@@ -36,9 +33,7 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      timing.checkIn = time;
       timing.status = "Active";
-
       const lastBreak = timing.breaks[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
         lastBreak.end = time;
@@ -47,27 +42,20 @@ export const loginEmployee = async (req, res) => {
     }
 
     await timing.save();
-
-    res.status(200).json({
-      message: "Login successful",
-      employeeId: employee._id,
-      email: employee.email,
-      firstName: employee.firstName,
-      lastName: employee.lastName,
-      status: employee.status,
-    });
-  } catch (error) {
-    console.error("Login Error:", error);
+    const { password: pwd, ...empData } = employee.toObject();
+    res.status(200).json(empData);
+  } catch (err) {
+    console.error("Login Error:", err);
     res.status(500).json({ error: "Login failed" });
   }
 };
 
-// LOGOUT (Auto Checkout)
 export const logoutEmployee = async (req, res) => {
-  const { id: employeeId } = req.params;
+  const { id } = req.params;
+  const isAuto = req.query.auto === "true";
 
   try {
-    const employee = await Employee.findById(employeeId);
+    const employee = await Employee.findById(id);
     if (!employee) return res.status(404).json({ error: "Employee not found" });
 
     employee.status = "Inactive";
@@ -76,20 +64,23 @@ export const logoutEmployee = async (req, res) => {
     const date = todayIST();
     const time = timeIST();
 
+    const update = {
+      checkOut: time,
+      status: "Inactive",
+      breakStatus: isAuto ? "OnBreak" : "OffBreak",
+    };
+
+    if (isAuto) update.$push = { breaks: { start: time } };
+
     const timing = await Timing.findOneAndUpdate(
-      { employee: employeeId, date, checkOut: { $exists: false } },
-      {
-        checkOut: time,
-        status: "Inactive",
-        breakStatus: "OnBreak",
-        $push: { breaks: { start: time } },
-      },
+      { employee: id, date, checkOut: { $exists: false } },
+      update,
       { new: true }
     );
 
     res.status(200).json({ message: "Logged out", timing });
-  } catch (error) {
-    console.error("Logout Error:", error);
+  } catch (err) {
+    console.error("Logout Error:", err);
     res.status(500).json({ error: "Logout failed" });
   }
 };
