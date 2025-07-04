@@ -2,111 +2,90 @@ import React, { useState } from "react";
 import styles from "../styles/LeadCard.module.css";
 
 const LeadCard = ({ lead, onStatusChange, onTypeChange }) => {
-  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
-  const [showDateTime, setShowDateTime] = useState(false);
-  const [showStatus, setShowStatus] = useState(false);
-  const [scheduleDate, setScheduleDate] = useState("");
-  const [scheduleTime, setScheduleTime] = useState("");
+  const [showTypeOptions, setShowTypeOptions] = useState(false);
 
-  const typeColor = {
-    Hot: styles.hot,
-    Warm: styles.warm,
-    Cold: styles.cold,
-  };
-
-  const handleSchedule = () => {
-    if (scheduleDate && scheduleTime) {
-      alert(`Scheduled for ${scheduleDate} at ${scheduleTime}`);
-    }
-    setShowDateTime(false);
-  };
-
-  const handleClose = () => {
-    if (lead.hasFutureCall) {
-      alert("Lead cannot be closed due to upcoming call");
-      return;
-    }
-    onStatusChange(lead._id, "Closed");
-    setShowStatus(false);
+  const getRingColor = () => {
+    if (lead.status === "Closed") return "#c4c4c4";
+    if (lead.type === "Hot") return "#ff4d4f";
+    if (lead.type === "Warm") return "#fbbf24";
+    if (lead.type === "Cold") return "#22d3ee";
+    return "#d1d5db";
   };
 
   return (
-    <div className={`${styles.card}`}>
-      <div className={styles.leftSection}>
+    <div className={styles.card}>
+      <div className={styles.leftBar} style={{ backgroundColor: getRingColor() }} />
+
+      <div className={styles.content}>
         <h4 className={styles.name}>{lead.name}</h4>
-        <p className={styles.email}>@{lead.email}</p>
-        <p className={styles.date}>
-          Date: {new Date(lead.receivedDate).toLocaleDateString()}
-        </p>
+        <p className={styles.email}>@{lead.email || "no-email"}</p>
+
+        <div className={styles.date}>
+          <img
+            src="/image/calendar.png"
+            alt="calendar"
+            style={{ width: 16, height: 16, marginRight: 6 }}
+          />
+          <span>
+            {new Date(lead.receivedDate).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
+        </div>
       </div>
 
-      <div className={styles.rightSection}>
-        <div className={`${styles.statusText} ${typeColor[lead.type] || ""}`}>
+      <div className={styles.right}>
+        <div
+          className={`${styles.typeCircle} ${
+            lead.status === "Closed"
+              ? styles.closed
+              : lead.type === "Hot"
+              ? styles.hot
+              : lead.type === "Warm"
+              ? styles.warm
+              : styles.cold
+          }`}
+        >
           {lead.status}
         </div>
 
-        <div className={styles.actions}>
-          {/* Type Icon */}
-          <div className={styles.iconWrapper} onClick={(e) => {
-            e.stopPropagation();
-            setShowTypeDropdown(!showTypeDropdown);
-            setShowDateTime(false);
-            setShowStatus(false);
-          }}>
-            <img src="/images/type.png" alt="Type" />
-            {showTypeDropdown && (
-              <div className={styles.dropdown}>
-                <div onClick={() => onTypeChange(lead._id, "Hot")}>Hot</div>
-                <div onClick={() => onTypeChange(lead._id, "Warm")}>Warm</div>
-                <div onClick={() => onTypeChange(lead._id, "Cold")}>Cold</div>
-              </div>
-            )}
-          </div>
+        <div className={styles.icons}>
+          <button
+            className={styles.iconBtn}
+            onClick={() => setShowTypeOptions(!showTypeOptions)}
+          >
+            <img src="/image/pencil.png" alt="edit" width={16} height={16} />
+          </button>
 
-          {/* Calendar Icon */}
-          <div className={styles.iconWrapper} onClick={(e) => {
-            e.stopPropagation();
-            setShowDateTime(!showDateTime);
-            setShowTypeDropdown(false);
-            setShowStatus(false);
-          }}>
-            <img src="/images/calender.png" alt="Calendar" />
-            {showDateTime && (
-              <div className={styles.datetimeBox}>
-                <input
-                  type="date"
-                  value={scheduleDate}
-                  onChange={(e) => setScheduleDate(e.target.value)}
-                />
-                <input
-                  type="time"
-                  value={scheduleTime}
-                  onChange={(e) => setScheduleTime(e.target.value)}
-                />
-                <button onClick={handleSchedule}>Save</button>
-              </div>
-            )}
-          </div>
-
-          {/* Status Icon */}
-          <div className={styles.iconWrapper} onClick={(e) => {
-            e.stopPropagation();
-            setShowStatus(!showStatus);
-            setShowTypeDropdown(false);
-            setShowDateTime(false);
-          }}>
-            <img src="/images/status.png" alt="Status" />
-            {showStatus && (
-              <div className={styles.statusBox}>
-                <button disabled={lead.hasFutureCall}>Ongoing</button>
-                <button onClick={handleClose} disabled={lead.hasFutureCall}>
-                  Close
-                </button>
-                {lead.hasFutureCall && <p className={styles.warnText}>Lead cannot be closed</p>}
-              </div>
-            )}
-          </div>
+          <button className={styles.iconBtn}>
+            <img src="/image/phone.png" alt="call" width={16} height={16} />
+          </button>
         </div>
+
+        {showTypeOptions && lead.status !== "Closed" && (
+          <div className={styles.typeDropdown}>
+            {["Hot", "Warm", "Cold"].map((t) => (
+              <div
+                key={t}
+                className={`${styles.typeOption} ${
+                  t === "Hot"
+                    ? styles.hotOption
+                    : t === "Warm"
+                    ? styles.warmOption
+                    : styles.coldOption
+                }`}
+                onClick={() => {
+                  onTypeChange(lead._id, t);
+                  setShowTypeOptions(false);
+                }}
+              >
+                {t}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -9,32 +9,41 @@ const Home = () => {
   const [timing, setTiming] = useState(null);
 
   useEffect(() => {
-    if (employee) fetchTiming();
+    if (employee && employee._id) {
+      fetchTiming();
+    }
   }, [employee]);
 
   const fetchTiming = async () => {
     try {
       const res = await API.get(`/api/timing/${employee._id}`);
-      if (res.data && res.data.length > 0) {
-        setTiming(res.data[0]);
-      } else {
-        setTiming(null);
-      }
+      const timingData = Array.isArray(res.data) ? res.data[0] : res.data;
+      setTiming(timingData || null);
     } catch (err) {
-      console.error("Fetch timing error:", err);
+      console.error("Fetch timing error:", err.response?.data || err.message);
+      setTiming(null);
     }
   };
 
-  // Format time strings like "05:38 am" to display format
+  // 🕒 Format time (supports both ISO and "hh:mm AM/PM")
   const formatTime = (timeStr) => {
     if (!timeStr) return "--:--";
 
-    const normalized = timeStr.trim().toUpperCase(); // "05:38 AM"
+    const iso = new Date(timeStr);
+    if (!isNaN(iso.getTime())) {
+      return iso.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Kolkata",
+      });
+    }
+
+    const normalized = timeStr.trim().toUpperCase();
     const [time, meridian] = normalized.split(" ");
     if (!time || !meridian) return "--:--";
 
     let [hours, minutes] = time.split(":").map(Number);
-
     if (meridian === "PM" && hours < 12) hours += 12;
     if (meridian === "AM" && hours === 12) hours = 0;
 
@@ -48,6 +57,7 @@ const Home = () => {
     });
   };
 
+  // 📅 Format date
   const formatDate = (isoDate) => {
     if (!isoDate) return "--/--/----";
     const d = new Date(isoDate);
@@ -55,47 +65,71 @@ const Home = () => {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
+      timeZone: "Asia/Kolkata",
     });
   };
+
+  if (!timing) {
+    return (
+      <Layout>
+        <div className={styles.container}>Loading...</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
       <div className={styles.container}>
-        <h3 className={styles.welcome}>Good Morning, {employee?.firstName}</h3>
-
+        {/* Main Timing Card */}
         <div className={styles.card}>
-          <div className={styles.headerRow}>
+          <div className={styles.timingHeader}>
             <div>
-              <strong>Checked-In</strong>
-              <p>{formatTime(timing?.checkIn)}</p>
+              <p className={styles.label}>Checked-In</p>
+              <p className={styles.time}>{formatTime(timing?.checkIn)}</p>
             </div>
             <div>
-              <strong>Check Out</strong>
-              <p>{formatTime(timing?.checkOut)}</p>
+              <p className={styles.label}>Check Out</p>
+              <p className={styles.time}>--:--</p>
             </div>
-            <div className={styles.status}>
-              <div
-                className={
-                  timing?.status === "Active" ? styles.greenDot : styles.redDot
-                }
-              ></div>
-            </div>
+            <div
+              className={
+                timing?.breakStatus === "OnBreak"
+                  ? styles.redBar
+                  : styles.greenBar
+              }
+            />
           </div>
         </div>
 
-        {/* Break History */}
+        {/* Latest Break Card */}
         {timing?.breaks?.length > 0 && (
-          <div className={styles.breakCard}>
-            <div className={styles.breakHeader}>
-              <strong>Break</strong>
-              <strong>Ended</strong>
-              <strong>Date</strong>
+          <div className={styles.card}>
+            <div className={styles.timingHeader}>
+              <div>
+                <p className={styles.label}>Break</p>
+                <p className={styles.time}>
+                  {formatTime(timing.breaks[timing.breaks.length - 1]?.start)}
+                </p>
+              </div>
+              <div>
+                <p className={styles.label}>Ended</p>
+                <p className={styles.time}>
+                  {formatTime(timing.breaks[timing.breaks.length - 1]?.end)}
+                </p>
+              </div>
+              <div className={styles.redBar} />
             </div>
+          </div>
+        )}
 
+        {/* Break History */}
+        {timing?.breaks?.filter((b) => b.start && b.end)?.length > 0 && (
+          <div className={styles.breakHistory}>
             {timing.breaks
               .filter((b) => b.start && b.end)
-              .map((brk, i) => (
-                <div key={i} className={styles.breakRow}>
+              .reverse()
+              .map((brk, index) => (
+                <div key={index} className={styles.breakRow}>
                   <span>{formatTime(brk.start)}</span>
                   <span>{formatTime(brk.end)}</span>
                   <span>{formatDate(timing.date)}</span>
@@ -104,7 +138,7 @@ const Home = () => {
           </div>
         )}
 
-        {/* Recent Activity (Mock) */}
+        {/* Recent Activity */}
         <div className={styles.activityCard}>
           <h4>Recent Activity</h4>
           <ul>

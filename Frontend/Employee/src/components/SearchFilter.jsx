@@ -1,3 +1,4 @@
+// src/components/SearchFilter.jsx
 import React, { useEffect, useRef, useState } from "react";
 import styles from "../styles/SearchFilter.module.css";
 
@@ -6,12 +7,13 @@ const SearchFilter = ({
   onSearch,
   filterOption,
   onFilterChange,
-  pageType = "lead", // "lead" or "schedule"
+  pageType = "lead", // "lead" किंवा "schedule"
 }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [tempOption, setTempOption] = useState(filterOption || "");
   const popupRef = useRef(null);
 
+  // Filter options based on pageType
   const dropdownOptions =
     pageType === "schedule" ? ["All Day", "Today"] : ["Ongoing", "Closed"];
 
@@ -25,7 +27,7 @@ const SearchFilter = ({
     setShowPopup(false);
   };
 
-  // Close popup when clicked outside
+  // Popup बाहेर क्लिक केल्यावर बंद करणे
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (popupRef.current && !popupRef.current.contains(e.target)) {

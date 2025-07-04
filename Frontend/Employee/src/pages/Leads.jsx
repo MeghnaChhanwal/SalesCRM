@@ -1,94 +1,82 @@
-import React, { useEffect, useState } from "react";
-import Layout from "../components/Layout";
-import SearchFilter from "../components/SearchFilter";
+// src/pages/Leads.jsx
+import React, { useState, useEffect } from "react";
 import LeadCard from "../components/LeadCard";
-import styles from "../styles/Leads.module.css";
+import SearchFilter from "../components/SearchFilter";
+import Layout from "../components/Layout";
 import API from "../utils/axios";
 import { useAuth } from "../contexts/AuthContext";
+import styles from "../styles/Leads.module.css";
 
 const Leads = () => {
-  const { employee } = useAuth();
+  const { employee } = useAuth(); // logged in employee context पासून मिळवा
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterOption, setFilterOption] = useState(""); // "Ongoing", "Closed"
-  const [loading, setLoading] = useState(true);
+  const [filterOption, setFilterOption] = useState(""); // "" | "Ongoing" | "Closed"
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchLeads();
-  }, [searchTerm, filterOption]);
+    // logged in employee info available असेल तरच fetch करा
+    if (!employee?._id) {
+      setLeads([]);
+      return;
+    }
 
-  const fetchLeads = async () => {
-    setLoading(true);
-    try {
-      const res = await API.get("/api/leads", {
-        params: {
-          search: searchTerm,
-          filter: filterOption,
-        },
-      });
+    const fetchLeads = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await API.get("/api/leads", {
+          params: {
+            assignedEmployee: employee._id,  // logged in employee नुसार filter
+            search: searchTerm.trim(),
+            filter: filterOption,
+            page: 1,
+            limit: 20,
+            sortBy: "receivedDate",
+            order: "desc",
+          },
+        });
 
-      let data = res.data.leads;
-
-      // Filter by employee
-      if (employee?._id) {
-        data = data.filter(
-          (lead) => lead.assignedEmployee?._id === employee._id
-        );
+        // Backend मध्ये response.data.leads मध्ये leads असतील
+        setLeads(response.data.leads || []);
+      } catch (err) {
+        console.error("Failed to fetch leads:", err);
+        setError("Failed to load leads. Please try again.");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setLeads(data);
-    } catch (err) {
-      console.error("Failed to fetch leads:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (leadId, newStatus) => {
-    try {
-      await API.patch(`/api/leads/${leadId}/status`, { status: newStatus });
-      fetchLeads();
-    } catch (err) {
-      alert(err?.response?.data?.error || "Failed to update status.");
-    }
-  };
-
-  const handleTypeChange = async (leadId, newType) => {
-    try {
-      await API.patch(`/api/leads/${leadId}/type`, { type: newType });
-      fetchLeads();
-    } catch (err) {
-      console.error("Type update failed:", err);
-    }
-  };
+    fetchLeads();
+  }, [searchTerm, filterOption, employee]);
 
   return (
     <Layout>
       <div className={styles.container}>
+        <header className={styles.header}>
+          <h2>Lead Management</h2>
+        </header>
+
         <SearchFilter
           searchTerm={searchTerm}
           onSearch={setSearchTerm}
           filterOption={filterOption}
           onFilterChange={setFilterOption}
-          pageType="lead" // Enables "Ongoing" / "Closed"
+          pageType="lead"
         />
 
-        {loading ? (
-          <p className={styles.message}>Loading leads...</p>
-        ) : leads.length === 0 ? (
-          <p className={styles.message}>No leads found.</p>
-        ) : (
-          <div className={styles.cardList}>
-            {leads.map((lead) => (
-              <LeadCard
-                key={lead._id}
-                lead={lead}
-                onStatusChange={handleStatusChange}
-                onTypeChange={handleTypeChange}
-              />
-            ))}
-          </div>
-        )}
+        <section className={styles.body}>
+          {loading && <p>Loading leads...</p>}
+          {error && <p className={styles.errorMsg}>{error}</p>}
+          {!loading && !error && leads.length === 0 && (
+            <p className={styles.emptyMsg}>No leads found.</p>
+          )}
+          {!loading &&
+            !error &&
+            leads.length > 0 &&
+            leads.map((lead) => <LeadCard key={lead._id} lead={lead} />)}
+        </section>
       </div>
     </Layout>
   );

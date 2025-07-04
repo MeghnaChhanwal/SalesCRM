@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
@@ -7,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Mark page refresh before unload
+  // ✅ Set refreshing flag on hard reload
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -16,13 +15,14 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // Restore session on load
+  // ✅ Restore session after reload
   useEffect(() => {
     const stored = sessionStorage.getItem("employee");
     if (stored && stored !== "undefined" && stored !== "null") {
       setEmployee(JSON.parse(stored));
     }
 
+    // Clear refresh flag
     setTimeout(() => {
       sessionStorage.removeItem("refreshing");
     }, 100);
@@ -30,31 +30,32 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Auto-checkout on tab close or page unload
+  // ✅ Logout only if NOT refreshing (pure tab close)
   useEffect(() => {
     const handleBeforeUnload = (event) => {
+      const isRefreshing = sessionStorage.getItem("refreshing") === "true";
       const emp = sessionStorage.getItem("employee");
-      if (emp) {
+
+      if (!isRefreshing && emp) {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
             const url = `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`;
-            const sent = navigator.sendBeacon(url);
-            console.log("Logout beacon sent:", sent);
+            navigator.sendBeacon(url);
           }
         } catch (err) {
           console.error("Auto-checkout error", err);
         }
-        // Don't remove employee here to avoid race condition
+        // employee remove only on frontend load
       }
-      // No need to call event.preventDefault(), just sendBeacon
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    return () =>
+      window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // Login function
+  // ✅ Login
   const login = async (email, password) => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
       method: "POST",
