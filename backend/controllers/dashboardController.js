@@ -1,17 +1,15 @@
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 
+// 🔹 GET: Full dashboard overview
 export const getDashboardOverview = async (req, res) => {
   try {
     const totalLeads = await Lead.countDocuments();
-    const unassignedLeads = await Lead.countDocuments({
-      assignedEmployee: null,
-    });
+    const unassignedLeads = await Lead.countDocuments({ assignedEmployee: null });
     const closedLeads = await Lead.countDocuments({ status: "Closed" });
-    const activeSalespeople = await Employee.countDocuments({
-      status: "Active",
-    });
+    const activeSalespeople = await Employee.countDocuments({ status: "Active" });
 
+    // 🔹 Assigned leads this week
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
@@ -21,15 +19,16 @@ export const getDashboardOverview = async (req, res) => {
       receivedDate: { $gte: startOfWeek },
     });
 
-    const conversionRate =
-      totalLeads > 0 ? Math.round((closedLeads / totalLeads) * 100) : 0;
+    // 🔹 Conversion Rate
+    const conversionRate = totalLeads > 0 ? Math.round((closedLeads / totalLeads) * 100) : 0;
 
-    const recentLeads = await Lead.find({})
+    // 🔹 Recent Activity (Leads + Employees)
+    const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
       .populate("assignedEmployee", "firstName lastName");
 
-    const recentEmployees = await Employee.find({})
+    const recentEmployees = await Employee.find()
       .sort({ createdAt: -1 })
       .limit(10);
 
@@ -60,12 +59,11 @@ export const getDashboardOverview = async (req, res) => {
         });
       }
 
+      // 🔹 Call Scheduled
       if (lead.scheduledCalls?.length > 0) {
         const latestCall = lead.scheduledCalls[lead.scheduledCalls.length - 1];
         activity.push({
-          message: `${
-            lead.assignedEmployee?.firstName || "Someone"
-          } scheduled call for ${lead.name}`,
+          message: `${lead.assignedEmployee?.firstName || "Someone"} scheduled call for ${lead.name}`,
           time: latestCall.callDate,
         });
       }
@@ -75,7 +73,7 @@ export const getDashboardOverview = async (req, res) => {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
 
-    // 👉 Graph data
+    // 🔹 Graph Data: Last 10 days
     const today = new Date();
     const graphData = [];
 
@@ -102,6 +100,24 @@ export const getDashboardOverview = async (req, res) => {
       });
     }
 
+    // 🔹 Employees with assigned & closed lead counts
+    const enrichedEmployees = await Promise.all(
+      (await Employee.find()).map(async (emp) => {
+        const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
+        const closed = await Lead.countDocuments({
+          assignedEmployee: emp._id,
+          status: "Closed",
+        });
+
+        return {
+          ...emp.toObject(),
+          assignedLeads,
+          closedLeads: closed,
+        };
+      })
+    );
+
+    // 🔹 Send all dashboard data
     res.status(200).json({
       unassignedLeads,
       assignedThisWeek,
@@ -109,7 +125,7 @@ export const getDashboardOverview = async (req, res) => {
       conversionRate,
       recentActivities,
       graphData,
-      employees: await Employee.find({}),
+      employees: enrichedEmployees,
     });
   } catch (err) {
     console.error("❌ Dashboard overview error:", err);
@@ -117,6 +133,7 @@ export const getDashboardOverview = async (req, res) => {
   }
 };
 
+// 🔹 (Optional) GET: Chart-only API (filtered by days)
 export const getChartData = async (req, res) => {
   try {
     const { days = 10 } = req.query;

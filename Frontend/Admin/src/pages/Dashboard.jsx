@@ -3,7 +3,6 @@ import MainLayout from "../components/Layout";
 import styles from "../styles/Dashboard.module.css";
 import { Bar } from "react-chartjs-2";
 import API from "../utils/axios";
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,13 +15,12 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
 
-// ✅ Utility to show "x hours ago", "x days ago"
+// Utility: time ago format
 const getTimeAgo = (dateStr) => {
   const now = new Date();
   const past = new Date(dateStr);
   const diffMs = now - past;
 
- 
   const minutes = Math.floor(diffMs / (1000 * 60));
   const hours = Math.floor(diffMs / (1000 * 60 * 60));
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -43,6 +41,7 @@ const Dashboard = () => {
     recentActivities: [],
     graphData: [],
   });
+
   const [clickedDayInfo, setClickedDayInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -131,7 +130,7 @@ const Dashboard = () => {
     <MainLayout showSearch={false}>
       <div className={styles.pageWrapper}>
         <div className={styles.dashboardContainer}>
-          {/* ✅ Top Stats */}
+          {/* 🔹 Stats Overview */}
           <div className={styles.cardGrid}>
             <div className={styles.card}><h4>Unassigned Leads</h4><p>{stats.unassignedLeads}</p></div>
             <div className={styles.card}><h4>Assigned This Week</h4><p>{stats.assignedThisWeek}</p></div>
@@ -139,7 +138,7 @@ const Dashboard = () => {
             <div className={styles.card}><h4>Conversion Rate</h4><p>{stats.conversionRate}%</p></div>
           </div>
 
-          {/* ✅ Analytics Chart + Activity */}
+          {/* 🔹 Analytics Chart & Recent Activity */}
           <div className={styles.analyticsRow}>
             <div className={styles.chartBox}>
               <h4>Sales Analytics</h4>
@@ -169,7 +168,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* ✅ Employee Overview Table */}
+          {/* 🔹 Employee Table */}
           <div className={styles.tableWrapper}>
             <h4>Employee Overview</h4>
             <div className={styles.tableScroll}>
