@@ -8,16 +8,14 @@ import {
   scheduleCall,
   getScheduledCalls,
 } from "../controllers/leadController.js";
-import { upload } from "../middlewares/upload.js"; // ✅ import the middleware
+
+import { upload } from "../middleware/uploadMiddleware.js"; // ✅ Correct path
 
 const router = express.Router();
 
 router.get("/", getLeads);
 router.post("/", addLeadManually);
-
-// ✅ CSV Upload with Multer middleware
-router.post("/upload", upload.single("file"), uploadCSV);
-
+router.post("/upload", upload.single("file"), uploadCSV); // ✅ Attach middleware here
 router.patch("/:id/type", updateLeadType);
 router.patch("/:id/status", updateLeadStatus);
 router.post("/:id/schedule", scheduleCall);
