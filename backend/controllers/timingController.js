@@ -1,7 +1,7 @@
 import Timing from "../models/timing.js";
-import { todayIST, timeIST } from "../utils/time.js";
+import { todayIST } from "../utils/time.js";
 
-// ✅ Get Today's Timing
+// ✅ Get today’s check-in/check-out/break data
 export const getTodayTiming = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -10,14 +10,14 @@ export const getTodayTiming = async (req, res) => {
     const timing = await Timing.findOne({ employee: employeeId, date });
     if (!timing) return res.status(404).json({ error: "No timing found" });
 
-    res.status(200).json({ timing });
+    res.status(200).json([timing]); // send as array for frontend compatibility
   } catch (error) {
     console.error("Get timing error:", error);
     res.status(500).json({ error: "Failed to fetch timing" });
   }
 };
 
-// ✅ Get All Breaks (Optional use)
+// ✅ Get full break history across all days
 export const getBreakHistory = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -31,9 +31,9 @@ export const getBreakHistory = async (req, res) => {
         t.breaks
           .filter((b) => b.start && b.end)
           .map((brk) => ({
+            date: t.date,
             start: brk.start,
             end: brk.end,
-            date: t.date,
           }))
       )
       .flat();
@@ -42,19 +42,5 @@ export const getBreakHistory = async (req, res) => {
   } catch (error) {
     console.error("Break fetch error:", error);
     res.status(500).json({ error: "Failed to fetch break history" });
-  }
-};
-
-// ✅ Admin Only: Fetch all timings
-export const getAllTimings = async (req, res) => {
-  try {
-    const timings = await Timing.find()
-      .populate("employee", "firstName lastName email")
-      .sort({ date: -1 });
-
-    res.status(200).json(timings);
-  } catch (error) {
-    console.error("Fetch all timings error:", error);
-    res.status(500).json({ error: "Failed to fetch timings" });
   }
 };

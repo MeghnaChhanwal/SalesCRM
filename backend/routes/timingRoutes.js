@@ -2,13 +2,11 @@ import express from "express";
 import {
   getTodayTiming,
   getBreakHistory,
-  getAllTimings,
 } from "../controllers/timingController.js";
 
 const router = express.Router();
 
-router.get("/today/:id", getTodayTiming);
-router.get("/breaks/:id", getBreakHistory);
-router.get("/", getAllTimings); // admin only
+router.get("/:id", getTodayTiming);             // GET /api/timing/:id
+router.get("/breaks/:id", getBreakHistory);     // GET /api/timing/breaks/:id
 
 export default router;

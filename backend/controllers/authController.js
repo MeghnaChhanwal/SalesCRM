@@ -1,64 +1,96 @@
-import Timing from "../models/timing.js";
 import Employee from "../models/employee.js";
+import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
+// ✅ Login Controller (check-in + active + break end if open)
 export const loginEmployee = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password)
+    return res.status(400).json({ error: "Email and password are required" });
+
   try {
-    const { email, password } = req.body;
-    const emp = await Employee.findOne({ email });
+    const employee = await Employee.findOne({ email });
+    if (!employee)
+      return res.status(404).json({ error: "Employee not found" });
 
-    if (!emp || emp.lastName !== password) {
+    if (employee.lastName.toLowerCase() !== password.toLowerCase())
       return res.status(401).json({ error: "Invalid credentials" });
-    }
 
-    const today = todayIST();
-    let timing = await Timing.findOne({ employee: emp._id, date: today });
+    if (employee.status === "Active")
+      return res.status(403).json({ error: "Already logged in" });
+
+    // Mark employee active
+    employee.status = "Active";
+    await employee.save();
+
+    const date = todayIST();
+    const time = timeIST();
+
+    let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
-      timing = await Timing.create({
-        employee: emp._id,
-        date: today,
-        checkIn: timeIST(),
+      // New timing record with check-in
+      timing = new Timing({
+        employee: employee._id,
+        date,
+        checkIn: time,
         status: "Active",
         breakStatus: "OffBreak",
         breaks: [],
       });
-    } else if (!timing.checkOut) {
+    } else {
+      // Resume previous timing, end open break if any
       timing.status = "Active";
-      await timing.save();
+      timing.breakStatus = "OffBreak";
+
+      const lastBreak = timing.breaks[timing.breaks.length - 1];
+      if (lastBreak && !lastBreak.end) {
+        lastBreak.end = time; // auto-end break
+      }
     }
 
-    emp.status = "Active";
-    await emp.save();
+    await timing.save();
 
-    res.status(200).json(emp);
-  } catch (err) {
-    console.error("Login error:", err);
+    // Return employee data without password
+    const { password: pwd, ...empData } = employee.toObject();
+    res.status(200).json(empData);
+  } catch (error) {
+    console.error("Login Error:", error);
     res.status(500).json({ error: "Login failed" });
   }
 };
 
+// ✅ Logout Controller (check-out + break + inactive)
 export const logoutEmployee = async (req, res) => {
+  const { id: employeeId } = req.params;
+
   try {
-    const { id } = req.params;
-    const today = todayIST();
+    const employee = await Employee.findById(employeeId);
+    if (!employee)
+      return res.status(404).json({ error: "Employee not found" });
 
-    const emp = await Employee.findById(id);
-    if (!emp) return res.status(404).json({ error: "Employee not found" });
+    employee.status = "Inactive";
+    await employee.save();
 
-    emp.status = "Inactive";
-    await emp.save();
+    const date = todayIST();
+    const time = timeIST();
 
-    const timing = await Timing.findOne({ employee: id, date: today });
-    if (timing && !timing.checkOut) {
-      timing.checkOut = timeIST();
+    const timing = await Timing.findOne({ employee: employeeId, date });
+
+    if (timing) {
+      timing.checkOut = time;
       timing.status = "Inactive";
+      timing.breakStatus = "OnBreak";
+      timing.breaks.push({ start: time }); // idle break started
       await timing.save();
-    }
 
-    res.status(200).json({ message: "Logout successful" });
-  } catch (err) {
-    console.error("Logout error:", err);
+      res.status(200).json({ message: "Logged out", timing });
+    } else {
+      res.status(404).json({ error: "Timing record not found for logout" });
+    }
+  } catch (error) {
+    console.error("Logout Error:", error);
     res.status(500).json({ error: "Logout failed" });
   }
 };

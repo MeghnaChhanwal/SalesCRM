@@ -6,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 1️⃣ Save "refreshing" flag before reload
+  // ✅ 1. Mark tab as refreshing (for session restore vs tab close)
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,21 +15,26 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // 2️⃣ Restore session after reload
+  // ✅ 2. Restore session from sessionStorage
   useEffect(() => {
-    const stored = sessionStorage.getItem("employee");
-    if (stored && stored !== "undefined" && stored !== "null") {
-      setEmployee(JSON.parse(stored));
+    try {
+      const stored = sessionStorage.getItem("employee");
+      const isRefreshing = sessionStorage.getItem("refreshing") === "true";
+
+      if (stored && stored !== "undefined" && stored !== "null") {
+        setEmployee(JSON.parse(stored));
+      }
+
+      sessionStorage.removeItem("refreshing"); // Always clear
+    } catch (err) {
+      console.error("❌ Session restore error:", err);
+      sessionStorage.removeItem("employee");
+    } finally {
+      setLoading(false);
     }
-
-    setTimeout(() => {
-      sessionStorage.removeItem("refreshing"); // clear after restoring
-    }, 100);
-
-    setLoading(false);
   }, []);
 
-  // 3️⃣ Auto logout on tab close (not on refresh)
+  // ✅ 3. Auto logout on tab close (not refresh)
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
@@ -39,13 +44,14 @@ export const AuthProvider = ({ children }) => {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
-            navigator.sendBeacon(`${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`);
+            navigator.sendBeacon(
+              `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`
+            );
           }
         } catch (e) {
-          console.error("Beacon logout failed:", e);
+          console.error("❌ Logout beacon error:", e);
         }
-
-        sessionStorage.removeItem("employee");
+        sessionStorage.clear();
       }
     };
 
@@ -54,26 +60,31 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // 4️⃣ Login function
+  // ✅ 4. Manual login
   const login = async (email, password) => {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE}/api/auth/login`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      }
+    );
 
-    if (!res.ok) throw new Error("Login failed");
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || "Login failed");
+    }
 
-    const employeeData = await res.json();
-    sessionStorage.setItem("refreshing", "false");
-    sessionStorage.setItem("employee", JSON.stringify(employeeData));
-    setEmployee(employeeData);
-    return employeeData;
+    const data = await response.json();
+    setEmployee(data);
+    sessionStorage.setItem("employee", JSON.stringify(data));
+    return data;
   };
 
   return (
-    <AuthContext.Provider value={{ employee, setEmployee, login, loading }}>
+    <AuthContext.Provider value={{ employee, login, loading }}>
       {children}
     </AuthContext.Provider>
   );

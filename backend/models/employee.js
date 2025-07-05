@@ -1,5 +1,3 @@
-// models/employee.js
-
 import mongoose from "mongoose";
 
 const employeeSchema = new mongoose.Schema(
@@ -50,24 +48,25 @@ const employeeSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Adds createdAt and updatedAt
     toJSON: {
       virtuals: true,
       versionKey: false,
       transform: (_, ret) => {
-        delete ret._id;
+        delete ret._id; // Hide internal MongoDB ID
         return ret;
       },
+    },
+    toObject: {
+      virtuals: true,
     },
   }
 );
 
-// Optional: Full name virtual
+// ✅ Virtual: Full Name
 employeeSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
-
-
 
 const Employee = mongoose.model("Employee", employeeSchema);
 export default Employee;
