@@ -1,90 +1,46 @@
-import Lead from "../models/lead.js";
-import Employee from "../models/employee.js";
+import Timing from "../models/timing.js";
+import { todayIST } from "../utils/time.js";
 
-export const getDashboardOverview = async (req, res) => {
+// Get today's timing (for employee)
+export const getTodayTiming = async (req, res) => {
+  const { id: employeeId } = req.params;
+  const date = todayIST();
+
   try {
-    const totalLeads = await Lead.countDocuments();
-    const unassignedLeads = await Lead.countDocuments({ assignedEmployee: null });
-    const closedLeads = await Lead.countDocuments({ status: "Closed" });
-    const activeSalespeople = await Employee.countDocuments({ status: "Active" });
+    const timing = await Timing.findOne({ employee: employeeId, date });
+    if (!timing) return res.status(404).json({ error: "No timing found" });
 
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const assignedThisWeek = await Lead.countDocuments({
-      assignedEmployee: { $ne: null },
-      receivedDate: { $gte: startOfWeek }
-    });
-
-    const conversionRate = totalLeads > 0
-      ? Math.round((closedLeads / totalLeads) * 100)
-      : 0;
-
-    // 👉 Lead related activities
-    const recentLeads = await Lead.find({})
-      .sort({ updatedAt: -1 })
-      .limit(20)
-      .populate("assignedEmployee", "firstName lastName");
-
-    const activities = [];
-
-    for (const lead of recentLeads) {
-      if (!lead.assignedEmployee) {
-        activities.push({
-          text: `Lead added: ${lead.name}`,
-          timestamp: lead.receivedDate
-        });
-      } else if (lead.status === "Closed") {
-        activities.push({
-          text: `${lead.assignedEmployee.firstName} closed lead: ${lead.name}`,
-          timestamp: lead.updatedAt
-        });
-      } else {
-        activities.push({
-          text: `Lead assigned to ${lead.assignedEmployee.firstName}: ${lead.name}`,
-          timestamp: lead.updatedAt
-        });
-      }
-
-      // 👉 optional: scheduled call activity (if you want)
-      if (lead.scheduledCalls?.length > 0) {
-        const latestCall = lead.scheduledCalls[lead.scheduledCalls.length - 1];
-        activities.push({
-          text: `Call scheduled for ${lead.name}`,
-          timestamp: latestCall.callDate
-        });
-      }
-    }
-
-    // 👉 Sort and limit to latest 10 activities
-    const recentActivities = activities
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .slice(0, 10)
-      .map((act) => ({
-        ...act,
-        ago: timeAgo(act.timestamp)
-      }));
-
-    res.status(200).json({
-      unassignedLeads,
-      assignedThisWeek,
-      activeSalespeople,
-      conversionRate,
-      recentActivities
-    });
-
-  } catch (err) {
-    console.error("Dashboard overview error:", err);
-    res.status(500).json({ error: "Failed to fetch dashboard stats" });
+    res.status(200).json([timing]); // array for frontend compatibility
+  } catch (error) {
+    console.error("Get timing error:", error);
+    res.status(500).json({ error: "Failed to fetch timing" });
   }
 };
 
-// Helper to format timestamp
-function timeAgo(timestamp) {
-  const diffMs = Date.now() - new Date(timestamp).getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 60) return `${diffMins} min ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  return `${diffHours} hr ago`;
-}
+// Get all breaks history (for employee)
+export const getBreakHistory = async (req, res) => {
+  const { id: employeeId } = req.params;
+
+  try {
+    const timings = await Timing.find({ employee: employeeId })
+      .sort({ date: -1 })
+      .select("date breaks");
+
+    const breakData = timings
+      .map((t) =>
+        t.breaks
+          .filter((b) => b.start && b.end)
+          .map((brk) => ({
+            start: brk.start,
+            end: brk.end,
+            date: t.date,
+          }))
+      )
+      .flat();
+
+    res.status(200).json(breakData);
+  } catch (error) {
+    console.error("Break fetch error:", error);
+    res.status(500).json({ error: "Failed to fetch break history" });
+  }
+};
