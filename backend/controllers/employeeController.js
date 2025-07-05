@@ -1,6 +1,6 @@
 import Employee from "../models/employee.js";
 import Lead from "../models/lead.js";
-import Timing from "../models/timing.js";
+import { Timing } from "../models/timing.js"; // ✅ named import
 import { buildQueryOptions } from "../utils/query.js";
 import { todayIST } from "../utils/time.js";
 
