@@ -17,43 +17,53 @@ const Profile = () => {
     confirmPassword: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   useEffect(() => {
     if (employee) {
       setForm({
         firstName: employee.firstName || "",
         lastName: employee.lastName || "",
         email: employee.email || "",
-        password: employee.password || "",
-        confirmPassword: employee.password || "",
+        password: "",
+        confirmPassword: "",
       });
     }
   }, [employee]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
+    if (!form.firstName || !form.lastName || !form.email) {
+      return alert("Please fill in all required fields.");
+    }
+
     if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match");
-      return;
+      return alert("Passwords do not match.");
     }
 
     try {
-      const res = await axios.put(`${API_BASE}/api/employees/${employee._id}`, form);
-      setEmployee(res.data);
-      localStorage.setItem("employee", JSON.stringify(res.data));
-      alert("Profile updated successfully");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to update profile");
+      const { data } = await axios.put(
+        `${API_BASE}/api/employees/${employee._id}`,
+        form
+      );
+      setEmployee(data);
+      localStorage.setItem("employee", JSON.stringify(data));
+      alert("Profile updated successfully.");
+    } catch (err) {
+      console.error(err);
+      alert("Error updating profile.");
     }
   };
 
   return (
     <PageLayout>
       <div className={styles.card}>
-        <label>First name</label>
+        <label>First Name</label>
         <input
           name="firstName"
           value={form.firstName}
@@ -61,7 +71,7 @@ const Profile = () => {
           placeholder="Enter first name"
         />
 
-        <label>Last name</label>
+        <label>Last Name</label>
         <input
           name="lastName"
           value={form.lastName}
@@ -72,28 +82,39 @@ const Profile = () => {
         <label>Email</label>
         <input
           name="email"
+          type="email"
           value={form.email}
           onChange={handleChange}
           placeholder="Enter email"
         />
 
-        <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          placeholder="Enter new password"
-        />
+        <label>New Password</label>
+        <div className={styles.passwordWrapper}>
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            placeholder="Enter new password"
+          />
+          <span onClick={() => setShowPassword((prev) => !prev)}>
+            {showPassword ? "Show" : "hide"}
+          </span>
+        </div>
 
-        <label>Confirm Password</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          value={form.confirmPassword}
-          onChange={handleChange}
-          placeholder="Confirm new password"
-        />
+        <label>Confirm New Password</label>
+        <div className={styles.passwordWrapper}>
+          <input
+            type={showConfirm ? "text" : "password"}
+            name="confirmPassword"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm new password"
+          />
+          <span onClick={() => setShowConfirm((prev) => !prev)}>
+            {showConfirm ? "Show" : "hide"}
+          </span>
+        </div>
 
         <button className={styles.saveButton} onClick={handleSubmit}>
           Save

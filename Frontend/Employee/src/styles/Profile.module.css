@@ -1,64 +1,78 @@
-/* Global Reset */
+/* Reset */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* Profile Card Container */
+/* Profile Card */
 .card {
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-top: 12px;
+  margin: 15px auto;
+  max-width: 400px;
   background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-/* Optional Title */
-.title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 8px;
-}
-
-/* Label Styling */
+/* Label Style */
 label {
   font-size: 14px;
-  margin-bottom: 4px;
+  font-weight: 500;
   color: #333;
 }
 
-/* Input Styling */
+/* Input Style */
 input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px 14px;
   font-size: 14px;
   border: 1px solid #ccc;
-  border-radius: 8px;
-  outline: none;
+  border-radius: 10px;
   background-color: #fefefe;
   transition: border-color 0.3s ease;
 }
 
 input:focus {
   border-color: #1a4be1;
+  outline: none;
+}
+
+/* Password Input Wrapper */
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordWrapper input {
+  flex: 1;
+  padding-right: 40px;
+}
+
+.passwordWrapper span {
+  position: absolute;
+  right: 12px;
+  font-size: 18px;
+  color: #555;
+  cursor: pointer;
+  user-select: none;
 }
 
 /* Save Button */
 .saveButton {
   background-color: #1a4be1;
-  color: white;
-  padding: 10px 24px;
+  color: #fff;
+  padding: 12px 20px;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-top: 10px;
-  align-self: flex-start;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
+  margin-top: 8px;
   transition: background-color 0.3s ease;
 }
 
@@ -66,36 +80,24 @@ input:focus {
   background-color: #003ecb;
 }
 
-/* Responsive - small screens */
+/* Responsive */
 @media (max-width: 768px) {
   .card {
-    padding: 16px;
+    margin: 16px;
+    padding: 18px;
   }
 
   input {
     font-size: 13.5px;
-    padding: 9px 11px;
+    padding: 9px 12px;
   }
 
   .saveButton {
     font-size: 13.5px;
-    padding: 9px 22px;
-  }
-}
-
-/* Responsive - very small devices */
-@media (max-width: 400px) {
-  .card {
-    padding: 14px;
+    padding: 10px 18px;
   }
 
-  input {
-    font-size: 13px;
-    padding: 8px 10px;
-  }
-
-  .saveButton {
-    font-size: 13px;
-    padding: 8px 20px;
+  .passwordWrapper span {
+    font-size: 16px;
   }
 }

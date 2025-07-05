@@ -1,26 +1,49 @@
 import Employee from "../models/employee.js";
 import Lead from "../models/lead.js";
 import { buildQueryOptions } from "../utils/query.js";
+import {
+  assignUnassignedLeads,
+  redistributeLeadsOfDeletedEmployee,
+} from "../utils/assign.js";
 
-// 🔹 GET /api/employees - Paginated, searchable, sortable list with dynamic lead counts
+// 🔹 Utility: Add lead stats to each employee
+const addLeadStatsToEmployees = async (employees) => {
+  const enriched = await Promise.all(
+    employees.map(async (emp) => {
+      const [assignedLeads, closedLeads] = await Promise.all([
+        Lead.countDocuments({ assignedEmployee: emp._id }),
+        Lead.countDocuments({ assignedEmployee: emp._id, status: "Closed" }),
+      ]);
+      return {
+        ...emp.toObject(),
+        assignedLeads,
+        closedLeads,
+      };
+    })
+  );
+  return enriched;
+};
+
+// 🔹 GET /api/employees - Paginated, searchable, sortable
 export const getEmployees = async (req, res) => {
   try {
     const { search, sortBy, order, page, limit, skip, regex } = buildQueryOptions(req);
-
     const allowedSortFields = ["firstName", "lastName", "email", "employeeId", "createdAt"];
-    const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const customFields = ["assignedLeads", "closedLeads"];
+    const isSimpleSort = allowedSortFields.includes(sortBy);
 
     const query = {
       $or: [
-        { firstName: { $regex: regex } },
-        { lastName: { $regex: regex } },
-        { email: { $regex: regex } },
-        { employeeId: { $regex: regex } },
+        { firstName: { $regex: regex, $options: "i" } },
+        { lastName: { $regex: regex, $options: "i" } },
+        { email: { $regex: regex, $options: "i" } },
+        { employeeId: { $regex: regex, $options: "i" } },
         {
           $expr: {
             $regexMatch: {
               input: { $concat: ["$firstName", " ", "$lastName"] },
               regex: regex,
+              options: "i",
             },
           },
         },
@@ -32,23 +55,15 @@ export const getEmployees = async (req, res) => {
     const employees = await Employee.find(query)
       .skip(skip)
       .limit(limit)
-      .sort({ [sortField]: order });
+      .sort(isSimpleSort ? { [sortBy]: order } : { createdAt: -1 });
 
-    const enrichedEmployees = await Promise.all(
-      employees.map(async (emp) => {
-        const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
-        const closedLeads = await Lead.countDocuments({
-          assignedEmployee: emp._id,
-          status: "Closed",
-        });
+    let enrichedEmployees = await addLeadStatsToEmployees(employees);
 
-        return {
-          ...emp.toObject(),
-          assignedLeads,
-          closedLeads,
-        };
-      })
-    );
+    if (customFields.includes(sortBy)) {
+      enrichedEmployees.sort((a, b) =>
+        order === 1 ? a[sortBy] - b[sortBy] : b[sortBy] - a[sortBy]
+      );
+    }
 
     res.status(200).json({
       employees: enrichedEmployees,
@@ -58,31 +73,15 @@ export const getEmployees = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching employees:", err);
-    res.status(500).json({ error: "Failed to fetch employees" });
+    res.status(500).json({ error: "Failed to fetch employees list" });
   }
 };
 
-// 🔹 GET /api/employees/all - All employees for dashboard (no pagination)
+// 🔹 GET /api/employees/all - Non-paginated (for dropdowns, analytics)
 export const getAllEmployees = async (req, res) => {
   try {
     const employees = await Employee.find().sort({ createdAt: -1 });
-
-    const enriched = await Promise.all(
-      employees.map(async (emp) => {
-        const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
-        const closedLeads = await Lead.countDocuments({
-          assignedEmployee: emp._id,
-          status: "Closed",
-        });
-
-        return {
-          ...emp.toObject(),
-          assignedLeads,
-          closedLeads,
-        };
-      })
-    );
-
+    const enriched = await addLeadStatsToEmployees(employees);
     res.status(200).json(enriched);
   } catch (err) {
     console.error("Error fetching all employees:", err);
@@ -90,25 +89,29 @@ export const getAllEmployees = async (req, res) => {
   }
 };
 
-// 🔹 POST /api/employees - Create new employee
+// 🔹 POST /api/employees - Add new employee and assign unassigned leads
 export const createEmployee = async (req, res) => {
   try {
     const newEmp = new Employee(req.body);
     await newEmp.save();
+
+    await assignUnassignedLeads(); // Assign unassigned leads to new employee
+
     res.status(201).json(newEmp);
   } catch (err) {
     if (err.name === "ValidationError") {
-      res.status(400).json({ error: err.message });
-    } else if (err.code === 11000) {
-      res.status(400).json({ error: "Email or Employee ID already exists" });
-    } else {
-      console.error("Create employee error:", err);
-      res.status(500).json({ error: "Failed to create employee" });
+      return res.status(400).json({ error: err.message });
     }
+    if (err.code === 11000) {
+      return res.status(400).json({ error: "Email or Employee ID already exists" });
+    }
+
+    console.error("Create employee error:", err);
+    res.status(500).json({ error: "Failed to create employee" });
   }
 };
 
-// 🔹 PUT /api/employees/:id - Update employee
+// 🔹 PUT /api/employees/:id - Update employee data
 export const updateEmployee = async (req, res) => {
   try {
     const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, {
@@ -123,22 +126,26 @@ export const updateEmployee = async (req, res) => {
     res.status(200).json(updated);
   } catch (err) {
     if (err.name === "ValidationError") {
-      res.status(400).json({ error: err.message });
-    } else {
-      console.error("Update employee error:", err);
-      res.status(500).json({ error: "Failed to update employee" });
+      return res.status(400).json({ error: err.message });
     }
+
+    console.error("Update employee error:", err);
+    res.status(500).json({ error: "Failed to update employee" });
   }
 };
 
-// 🔹 DELETE /api/employees/:id - Delete employee
+// 🔹 DELETE /api/employees/:id - Delete and reassign open leads
 export const deleteEmployee = async (req, res) => {
   try {
     const deleted = await Employee.findByIdAndDelete(req.params.id);
+
     if (!deleted) {
       return res.status(404).json({ error: "Employee not found" });
     }
-    res.status(200).json({ message: "Employee deleted successfully" });
+
+    await redistributeLeadsOfDeletedEmployee(req.params.id);
+
+    res.status(200).json({ message: "Employee deleted and open leads reassigned" });
   } catch (err) {
     console.error("Delete employee error:", err);
     res.status(500).json({ error: "Failed to delete employee" });

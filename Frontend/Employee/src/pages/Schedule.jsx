@@ -9,27 +9,21 @@ const Schedule = () => {
   const { employee } = useAuth();
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterOption, setFilterOption] = useState(""); // "Today" / "All Day"
+  const [filterOption, setFilterOption] = useState(""); // "Today" / "All"
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchLeads = async () => {
       if (!employee?._id) return;
-
       try {
         setLoading(true);
-        setError("");
-
-        const response = await API.get("/api/leads", {
-          params: {
-            assignedEmployee: employee._id,
-          },
+        const res = await API.get("/api/leads", {
+          params: { assignedEmployee: employee._id },
         });
-
-        setLeads(response.data.leads || []);
+        setLeads(res.data.leads || []);
       } catch (err) {
-        console.error("Error fetching leads", err);
+        console.error(err);
         setError("Failed to fetch scheduled calls.");
       } finally {
         setLoading(false);
@@ -39,24 +33,26 @@ const Schedule = () => {
     fetchLeads();
   }, [employee]);
 
-  const filterCalls = (lead) => {
-    // Match search
+  const getLatestValidCall = (lead) => {
+    const sorted = (lead.scheduledCalls || [])
+      .filter((call) => call.callDate)
+      .sort((a, b) => new Date(b.callDate) - new Date(a.callDate));
+
+    const latestCall = sorted[0];
+
+    if (!latestCall) return null;
+
+    if (filterOption === "Today") {
+      const callDate = new Date(latestCall.callDate).toDateString();
+      const today = new Date().toDateString();
+      if (callDate !== today) return null;
+    }
+
     const matchesSearch =
       lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    if (!matchesSearch) return [];
-
-    // Filter calls based on selected filterOption
-    const todayStr = new Date().toDateString();
-
-    return (lead.scheduledCalls || []).filter((call) => {
-      if (filterOption === "Today") {
-        const callDateStr = new Date(call.callDate).toDateString();
-        return callDateStr === todayStr;
-      }
-      return true; // All Day (show all)
-    });
+    return matchesSearch ? latestCall : null;
   };
 
   return (
@@ -73,36 +69,45 @@ const Schedule = () => {
         {loading && <p>Loading scheduled calls...</p>}
         {error && <p className={styles.errorMsg}>{error}</p>}
 
-        {!loading && !error && leads.length === 0 && (
-          <p className={styles.emptyMsg}>No scheduled calls.</p>
-        )}
-
-        <section className={styles.body}>
+        <div className={styles.body}>
           {leads.map((lead) => {
-            const filteredCalls = filterCalls(lead);
-            if (filteredCalls.length === 0) return null;
+            const latestCall = getLatestValidCall(lead);
+            if (!latestCall) return null;
 
             return (
               <div key={lead._id} className={styles.card}>
-                <h4 className={styles.name}>{lead.name}</h4>
-                <p className={styles.email}>{lead.email}</p>
-                <ul className={styles.callList}>
-                  {filteredCalls.map((call, idx) => (
-                    <li key={idx} className={styles.callItem}>
-                      <span className={styles.callType}>{call.callType}</span>
-                      <span className={styles.callDate}>
-                        {new Date(call.callDate).toLocaleString("en-IN", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                <div className={styles.cardHeader}>
+                  <span className={styles.cardTitle}>
+                    {latestCall.callType || "Call"}
+                  </span>
+                  <span className={styles.date}>
+                    {new Date(latestCall.callDate).toLocaleDateString("en-IN")}
+                  </span>
+                </div>
+
+                <div className={styles.phone}>{lead.phone || "—"}</div>
+
+                <div className={styles.callDetails}>
+                  <img
+                    src="/icons/phone.svg"
+                    alt="Phone Icon"
+                    className={styles.icon}
+                  />
+                  <span>Call</span>
+                  <div className={styles.user}>
+                    <div className={styles.avatar}>
+                      {lead.name
+                        ?.split(" ")
+                        .map((n) => n[0]?.toUpperCase())
+                        .join("")}
+                    </div>
+                    <span>{lead.name}</span>
+                  </div>
+                </div>
               </div>
             );
           })}
-        </section>
+        </div>
       </div>
     </Layout>
   );

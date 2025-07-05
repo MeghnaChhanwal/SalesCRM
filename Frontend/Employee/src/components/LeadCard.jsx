@@ -29,7 +29,6 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Color bar based on type
   const getColor = () => {
     if (lead.type === "Hot") return "#ff4d4f";
     if (lead.type === "Warm") return "#fbbf24";
@@ -47,12 +46,9 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
 
   return (
     <div className={styles.card}>
-      {/* Left vertical bar */}
       <div className={styles.leftBar} style={{ backgroundColor: getColor() }} />
 
-      {/* Main card content */}
       <div className={styles.mainContent}>
-        {/* Top Row - Name + Email + Status */}
         <div className={styles.topRow}>
           <div className={styles.nameEmail}>
             <h4 className={styles.name}>{lead.name}</h4>
@@ -63,7 +59,6 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
           </div>
         </div>
 
-        {/* Received Date Row */}
         <p className={styles.label}>date</p>
         <div className={styles.dateAndIconsRow}>
           <div className={styles.dateRow}>
@@ -77,7 +72,6 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
             </span>
           </div>
 
-          {/* Action icons */}
           <div className={styles.actionsRowRight}>
             <img
               src="/images/type.png"

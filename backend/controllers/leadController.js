@@ -53,6 +53,7 @@ export const getLeads = async (req, res) => {
       totalLeads: total,
     });
   } catch (err) {
+    console.error("Error fetching leads:", err);
     res.status(500).json({ error: "Failed to fetch leads" });
   }
 };
@@ -66,16 +67,18 @@ export const addLeadManually = async (req, res) => {
       return res.status(400).json({ error: "Name, language, and location are required" });
     }
 
-    const { maxPerEmployee } = await prepareLeadDistribution(1);
+    const { employees, maxPerEmployee, tempLeadMap } = await prepareLeadDistribution(1);
     const assignedEmployee = await assignEmployeeByConditions(
       { language, location },
-      maxPerEmployee
+      maxPerEmployee,
+      employees,
+      tempLeadMap
     );
 
     const newLead = new Lead({
-      name,
-      email: email || null,
-      phone: phone || null,
+      name: name.trim(),
+      email: email?.trim() || null,
+      phone: phone?.trim() || null,
       language,
       location,
       status: status || "Ongoing",
@@ -87,11 +90,12 @@ export const addLeadManually = async (req, res) => {
     await newLead.save();
     res.status(201).json({ message: "Lead added successfully", lead: newLead });
   } catch (error) {
+    console.error("Add Lead Error:", error);
     res.status(500).json({ error: "Failed to add lead" });
   }
 };
 
-// ✅ POST: Upload leads via CSV (only 5 required fields check)
+// ✅ POST: Upload leads via CSV
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
@@ -107,19 +111,33 @@ export const uploadCSV = async (req, res) => {
         .on("error", reject);
     });
 
+    // Clean and validate rows
     const validRows = allRows.filter((row) =>
       requiredFields.every((f) => row[f] && row[f].trim() !== "")
     );
 
     const invalidRows = allRows.length - validRows.length;
-    const { maxPerEmployee } = await prepareLeadDistribution(validRows.length);
+
+    const { employees, maxPerEmployee, tempLeadMap } = await prepareLeadDistribution(validRows.length);
 
     for (const row of validRows) {
-      const assignedEmployee = await assignEmployeeByConditions(row, maxPerEmployee);
+      // Optional: avoid duplicate by email or phone
+      const existing = await Lead.findOne({
+        $or: [{ email: row.email }, { phone: row.phone }],
+      });
+      if (existing) continue;
+
+      const assignedEmployee = await assignEmployeeByConditions(
+        row,
+        maxPerEmployee,
+        employees,
+        tempLeadMap
+      );
+
       leads.push({
-        name: row.name,
-        email: row.email || null,
-        phone: row.phone || null,
+        name: row.name.trim(),
+        email: row.email?.trim() || null,
+        phone: row.phone?.trim() || null,
         receivedDate: row.receivedDate ? new Date(row.receivedDate) : new Date(),
         status: row.status || "Ongoing",
         type: row.type || "Warm",
@@ -138,11 +156,12 @@ export const uploadCSV = async (req, res) => {
       invalidRows,
     });
   } catch (error) {
+    console.error("Upload CSV Error:", error);
     res.status(500).json({ error: "Error uploading leads" });
   }
 };
 
-// ✅ PATCH: Update type (Hot, Warm, Cold)
+// ✅ PATCH: Update type
 export const updateLeadType = async (req, res) => {
   try {
     const { id } = req.params;
@@ -156,12 +175,13 @@ export const updateLeadType = async (req, res) => {
     if (!lead) return res.status(404).json({ error: "Lead not found" });
 
     res.status(200).json({ message: "Lead type updated", lead });
-  } catch {
+  } catch (error) {
+    console.error("Update Lead Type Error:", error);
     res.status(500).json({ error: "Failed to update lead type" });
   }
 };
 
-// ✅ PATCH: Update lead status (Ongoing, Closed) with delete future calls
+// ✅ PATCH: Update status
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -176,7 +196,6 @@ export const updateLeadStatus = async (req, res) => {
 
     const now = new Date();
 
-    // ❌ Block closing if future call exists
     const hasFutureCall = lead.scheduledCalls?.some(
       (call) => new Date(call.callDate) > now
     );
@@ -187,7 +206,6 @@ export const updateLeadStatus = async (req, res) => {
         .json({ error: "Cannot close lead with upcoming scheduled call" });
     }
 
-    // ✅ Optional: Delete only future scheduled calls
     if (status === "Closed") {
       lead.scheduledCalls = lead.scheduledCalls.filter(
         (call) => new Date(call.callDate) <= now
@@ -204,7 +222,7 @@ export const updateLeadStatus = async (req, res) => {
   }
 };
 
-// ✅ POST: Schedule call (block if lead is closed)
+// ✅ POST: Schedule call
 export const scheduleCall = async (req, res) => {
   try {
     const { id } = req.params;
@@ -213,13 +231,15 @@ export const scheduleCall = async (req, res) => {
     const lead = await Lead.findById(id);
     if (!lead) return res.status(404).json({ error: "Lead not found" });
 
-    // ❌ Block scheduling if lead is closed
     if (lead.status === "Closed") {
       return res.status(400).json({ error: "Cannot schedule call for closed lead" });
     }
 
+    const parsedDate = new Date(callDate);
+    parsedDate.setSeconds(0, 0); // normalize
+
     const existing = await Lead.findOne({
-      "scheduledCalls.callDate": new Date(callDate),
+      "scheduledCalls.callDate": parsedDate,
     });
 
     if (existing) {
@@ -230,18 +250,19 @@ export const scheduleCall = async (req, res) => {
 
     lead.scheduledCalls = lead.scheduledCalls || [];
     lead.scheduledCalls.push({
-      callDate: new Date(callDate),
+      callDate: parsedDate,
       callType: autoCallType,
     });
 
     await lead.save();
     res.status(200).json({ message: "Call scheduled", lead });
-  } catch {
+  } catch (error) {
+    console.error("Schedule Call Error:", error);
     res.status(500).json({ error: "Failed to schedule call" });
   }
 };
 
-// ✅ GET: Scheduled Calls (today or upcoming)
+// ✅ GET: Scheduled calls
 export const getScheduledCalls = async (req, res) => {
   try {
     const { filter = "all" } = req.query;
@@ -271,7 +292,8 @@ export const getScheduledCalls = async (req, res) => {
     }
 
     res.status(200).json({ leads });
-  } catch {
+  } catch (error) {
+    console.error("Get Scheduled Calls Error:", error);
     res.status(500).json({ error: "Failed to fetch scheduled calls" });
   }
 };
