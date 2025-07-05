@@ -130,8 +130,8 @@ const Dashboard = () => {
                 {stats.recentActivities.length === 0 ? (
                   <li>No recent activities.</li>
                 ) : (
-                  stats.recentActivities.map((activity, i) => (
-                    <li key={i}>• {activity}</li>
+                  stats.recentActivities.map((activity, index) => (
+                    <li key={`${activity}-${index}`}>• {activity}</li>
                   ))
                 )}
               </ul>
@@ -164,10 +164,12 @@ const Dashboard = () => {
                         <td>{emp.firstName} {emp.lastName}</td>
                         <td>{emp.email}</td>
                         <td>{emp.employeeId}</td>
-                        <td style={{
-                          color: emp.status === "Active" ? "#2ecc71" : "#e74c3c",
-                          fontWeight: "bold",
-                        }}>
+                        <td
+                          style={{
+                            color: emp.status === "Active" ? "#2ecc71" : "#e74c3c",
+                            fontWeight: "bold",
+                          }}
+                        >
                           {emp.status}
                         </td>
                         <td>{emp.assignedLeads}</td>

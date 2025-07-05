@@ -5,6 +5,7 @@
   min-height: 100vh;
   font-family: 'Segoe UI', sans-serif;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Add Button */
@@ -38,14 +39,20 @@
   border-radius: 14px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   margin-top: 1rem;
-  overflow-x: hidden;
+  overflow-x: auto; /* Allow scroll if content is too wide */
+
+  /* Hide scrollbar visually */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+.tableContainer::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }
 
 /* Table Styles */
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 900px;
 }
 
 .table th,
