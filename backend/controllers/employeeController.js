@@ -7,22 +7,23 @@ import { todayIST } from "../utils/time.js";
 // 🔹 GET: Paginated employee list with search, sorting & lead counts
 export const getEmployees = async (req, res) => {
   try {
-    const { search, sortBy, order, page, limit, skip, regex } = buildQueryOptions(req);
+    const { search, sortBy, order, page, limit, skip } = buildQueryOptions(req);
 
     const allowedSortFields = ["firstName", "lastName", "email", "employeeId", "createdAt"];
     const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
 
     const query = {
       $or: [
-        { firstName: { $regex: regex } },
-        { lastName: { $regex: regex } },
-        { email: { $regex: regex } },
-        { employeeId: { $regex: regex } },
+        { firstName: { $regex: search, $options: "i" } },
+        { lastName: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { employeeId: { $regex: search, $options: "i" } },
         {
           $expr: {
             $regexMatch: {
               input: { $concat: ["$firstName", " ", "$lastName"] },
-              regex: regex,
+              regex: search,
+              options: "i",
             },
           },
         },
