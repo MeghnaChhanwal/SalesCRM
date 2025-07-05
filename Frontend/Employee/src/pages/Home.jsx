@@ -14,13 +14,21 @@ const Home = () => {
       fetchTiming();
       fetchActivity();
     }
+
+    // Refetch on tab focus (e.g., after logout via beacon)
+    const handleFocus = () => {
+      if (employee) fetchTiming();
+    };
+
+    window.addEventListener("visibilitychange", handleFocus);
+    return () => window.removeEventListener("visibilitychange", handleFocus);
   }, [employee]);
 
   const fetchTiming = async () => {
     try {
       const res = await API.get(`/api/timing/${employee._id}`);
-      if (res.data && res.data.length > 0) {
-        setTiming(res.data[0]);
+      if (res.data?.timing) {
+        setTiming(res.data.timing);
       } else {
         setTiming(null);
       }
@@ -100,7 +108,9 @@ const Home = () => {
             <div className={styles.status}>
               <div
                 className={
-                  timing?.status === "Active" ? styles.greenDot : styles.redDot
+                  timing?.status === "Active"
+                    ? styles.greenDot
+                    : styles.redDot
                 }
               ></div>
             </div>

@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -7,7 +6,7 @@ import styles from "../styles/Login.module.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // Last name
+  const [password, setPassword] = useState(""); // last name as password
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 

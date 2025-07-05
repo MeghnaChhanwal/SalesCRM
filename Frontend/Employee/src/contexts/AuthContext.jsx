@@ -6,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Set refresh flag on reload (not on tab close)
+  // Set refresh flag on reload
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,14 +15,13 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // ✅ Restore session after reload
+  // Restore session after reload
   useEffect(() => {
     const stored = sessionStorage.getItem("employee");
     if (stored && stored !== "undefined" && stored !== "null") {
       setEmployee(JSON.parse(stored));
     }
 
-    // Clear refresh flag
     setTimeout(() => {
       sessionStorage.removeItem("refreshing");
     }, 100);
@@ -30,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // ✅ Auto-logout on tab close (not on refresh)
+  // Auto logout on tab close
   useEffect(() => {
     const handleVisibilityChange = () => {
       const refreshing = sessionStorage.getItem("refreshing") === "true";
@@ -55,7 +54,7 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // ✅ Login function
+  // Login function
   const login = async (email, password) => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
       method: "POST",

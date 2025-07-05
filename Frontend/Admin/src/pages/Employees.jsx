@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import MainLayout from "../components/Layout";
 import Pagination from "../components/Pagination";
 import API from "../utils/axios";
@@ -10,17 +10,30 @@ const Employee = () => {
   const [employees, setEmployees] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: "createdAt", direction: "desc" });
   const [currentPage, setCurrentPage] = useState(1);
-  const employeesPerPage =6;
+  const employeesPerPage = 6;
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState("add");
   const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", location: "", language: "" });
   const [errorMessage, setErrorMessage] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     fetchEmployees();
   }, [searchTerm, currentPage, sortConfig]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const fetchEmployees = async () => {
     try {
@@ -58,6 +71,7 @@ const Employee = () => {
     setFormMode("edit");
     setFormData({ ...employee });
     setShowForm(true);
+    setOpenMenuId(null); // Close menu on edit
   };
 
   const handleDelete = async (id) => {
@@ -66,6 +80,7 @@ const Employee = () => {
     try {
       await API.delete(`/api/employees/${id}`);
       fetchEmployees();
+      setOpenMenuId(null); // Close menu on delete
     } catch {
       setErrorMessage("Failed to delete employee.");
     }
@@ -99,8 +114,9 @@ const Employee = () => {
     if (!validateForm()) return;
 
     const isDuplicate = employees.some(
-      (emp) => emp.email.toLowerCase() === formData.email.toLowerCase() &&
-      (formMode === "add" || emp._id !== formData._id)
+      (emp) =>
+        emp.email.toLowerCase() === formData.email.toLowerCase() &&
+        (formMode === "add" || emp._id !== formData._id)
     );
 
     if (isDuplicate) {
@@ -145,7 +161,7 @@ const Employee = () => {
               <th onClick={() => handleSort("status")}>Status</th>
               <th onClick={() => handleSort("assignedLeads")}>Assigned</th>
               <th onClick={() => handleSort("closedLeads")}>Closed</th>
-             
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -168,9 +184,14 @@ const Employee = () => {
                   </td>
                   <td>{emp.assignedLeads}</td>
                   <td>{emp.closedLeads}</td>
-                  <td>
-                    <div className={styles.dropdown}>
-                      <button className={styles.menuBtn}>⋮</button>
+                  <td ref={menuRef} className={styles.dropdown}>
+                    <button
+                      className={styles.menuBtn}
+                      onClick={() => setOpenMenuId(openMenuId === emp._id ? null : emp._id)}
+                    >
+                      ⋮
+                    </button>
+                    {openMenuId === emp._id && (
                       <div className={styles.menuContent}>
                         <button onClick={() => handleEditClick(emp)}>
                           <img src="/edit.png" alt="Edit" height={14} style={{ marginRight: 6 }} />
@@ -181,7 +202,7 @@ const Employee = () => {
                           Delete
                         </button>
                       </div>
-                    </div>
+                    )}
                   </td>
                 </tr>
               ))
