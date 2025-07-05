@@ -9,9 +9,10 @@ const Schedule = () => {
   const { employee } = useAuth();
   const [leads, setLeads] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterOption, setFilterOption] = useState(""); // "Today" / "All"
+  const [filterOption, setFilterOption] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedCardId, setSelectedCardId] = useState(null);
 
   useEffect(() => {
     const fetchLeads = async () => {
@@ -75,9 +76,15 @@ const Schedule = () => {
             if (!latestCall) return null;
 
             return (
-              <div key={lead._id} className={styles.card}>
+              <div
+                key={lead._id}
+                className={`${styles.card} ${
+                  selectedCardId === lead._id ? styles.activeCard : ""
+                }`}
+                onClick={() => setSelectedCardId(lead._id)}
+              >
                 <div className={styles.cardHeader}>
-                  <span className={styles.cardTitle}>
+                  <span className={styles.callType}>
                     {latestCall.callType || "Call"}
                   </span>
                   <span className={styles.date}>
@@ -101,7 +108,7 @@ const Schedule = () => {
                         .map((n) => n[0]?.toUpperCase())
                         .join("")}
                     </div>
-                    <span>{lead.name}</span>
+                    <span className={styles.leadName}>{lead.name}</span>
                   </div>
                 </div>
               </div>
