@@ -1,7 +1,6 @@
-// controllers/authController.js
 import Timing from "../models/timing.js";
 import Employee from "../models/employee.js";
-import { todayIST, getCurrentISTTime } from "../utils/time.js";
+import { todayIST, timeIST } from "../utils/time.js";
 
 export const loginEmployee = async (req, res) => {
   try {
@@ -19,7 +18,7 @@ export const loginEmployee = async (req, res) => {
       timing = await Timing.create({
         employee: emp._id,
         date: today,
-        checkIn: getCurrentISTTime(),
+        checkIn: timeIST(),
         status: "Active",
         breakStatus: "OffBreak",
         breaks: [],
@@ -52,7 +51,7 @@ export const logoutEmployee = async (req, res) => {
 
     const timing = await Timing.findOne({ employee: id, date: today });
     if (timing && !timing.checkOut) {
-      timing.checkOut = getCurrentISTTime();
+      timing.checkOut = timeIST();
       timing.status = "Inactive";
       await timing.save();
     }

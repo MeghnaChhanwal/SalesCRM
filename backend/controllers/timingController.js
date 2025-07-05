@@ -1,64 +1,60 @@
 import Timing from "../models/timing.js";
-import Employee from "../models/employee.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-export const loginEmployee = async (req, res) => {
+// ✅ Get Today's Timing
+export const getTodayTiming = async (req, res) => {
+  const { id: employeeId } = req.params;
+  const date = todayIST();
+
   try {
-    const { email, password } = req.body;
-    const emp = await Employee.findOne({ email });
+    const timing = await Timing.findOne({ employee: employeeId, date });
+    if (!timing) return res.status(404).json({ error: "No timing found" });
 
-    if (!emp || emp.lastName !== password) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    const today = todayIST();
-    let timing = await Timing.findOne({ employee: emp._id, date: today });
-
-    if (!timing) {
-      timing = await Timing.create({
-        employee: emp._id,
-        date: today,
-        checkIn: timeIST(),
-        status: "Active",
-        breakStatus: "OffBreak",
-        breaks: [],
-      });
-    } else if (!timing.checkOut) {
-      timing.status = "Active";
-      await timing.save();
-    }
-
-    emp.status = "Active";
-    await emp.save();
-
-    res.status(200).json(emp);
-  } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ error: "Login failed" });
+    res.status(200).json({ timing });
+  } catch (error) {
+    console.error("Get timing error:", error);
+    res.status(500).json({ error: "Failed to fetch timing" });
   }
 };
 
-export const logoutEmployee = async (req, res) => {
+// ✅ Get All Breaks (Optional use)
+export const getBreakHistory = async (req, res) => {
+  const { id: employeeId } = req.params;
+
   try {
-    const { id } = req.params;
-    const today = todayIST();
+    const timings = await Timing.find({ employee: employeeId })
+      .sort({ date: -1 })
+      .select("date breaks");
 
-    const emp = await Employee.findById(id);
-    if (!emp) return res.status(404).json({ error: "Employee not found" });
+    const breakData = timings
+      .map((t) =>
+        t.breaks
+          .filter((b) => b.start && b.end)
+          .map((brk) => ({
+            start: brk.start,
+            end: brk.end,
+            date: t.date,
+          }))
+      )
+      .flat();
 
-    emp.status = "Inactive";
-    await emp.save();
+    res.status(200).json(breakData);
+  } catch (error) {
+    console.error("Break fetch error:", error);
+    res.status(500).json({ error: "Failed to fetch break history" });
+  }
+};
 
-    const timing = await Timing.findOne({ employee: id, date: today });
-    if (timing && !timing.checkOut) {
-      timing.checkOut = timeIST();
-      timing.status = "Inactive";
-      await timing.save();
-    }
+// ✅ Admin Only: Fetch all timings
+export const getAllTimings = async (req, res) => {
+  try {
+    const timings = await Timing.find()
+      .populate("employee", "firstName lastName email")
+      .sort({ date: -1 });
 
-    res.status(200).json({ message: "Logout successful" });
-  } catch (err) {
-    console.error("Logout error:", err);
-    res.status(500).json({ error: "Logout failed" });
+    res.status(200).json(timings);
+  } catch (error) {
+    console.error("Fetch all timings error:", error);
+    res.status(500).json({ error: "Failed to fetch timings" });
   }
 };
