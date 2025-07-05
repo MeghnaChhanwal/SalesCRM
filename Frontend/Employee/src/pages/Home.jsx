@@ -31,9 +31,10 @@ const Home = () => {
 
   const fetchActivity = async () => {
     try {
-      const res = await API.get(`/api/activity/${employee._id}`);
+      // ✅ Updated path based on activityRoutes.js
+      const res = await API.get(`/api/activity/employee/${employee._id}`);
       if (res.data) {
-        setActivities(res.data.slice(0, 10)); // Get top 10 activities
+        setActivities(res.data.slice(0, 10));
       }
     } catch (err) {
       console.error("Fetch activity error:", err);
@@ -125,8 +126,8 @@ const Home = () => {
             {activities.length > 0 ? (
               activities.map((item, idx) => (
                 <li key={idx}>
-                  {item.text} —{" "}
-                  {new Date(item.timestamp).toLocaleString("en-IN", {
+                  {item.message} —{" "}
+                  {new Date(item.time).toLocaleString("en-IN", {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",

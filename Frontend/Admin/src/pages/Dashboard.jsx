@@ -3,7 +3,6 @@ import MainLayout from "../components/Layout";
 import styles from "../styles/Dashboard.module.css";
 import { Bar } from "react-chartjs-2";
 import API from "../utils/axios";
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -34,7 +33,7 @@ const Dashboard = () => {
       try {
         const res = await API.get("/api/dashboard/overview");
         setStats(res.data);
-        setEmployees(res.data.employees || []);
+        setEmployees(res.data.employees || []); // ✅ Ensure backend sends `employees` array
       } catch (err) {
         console.error("Dashboard error:", err);
       } finally {
@@ -84,7 +83,7 @@ const Dashboard = () => {
 
       setClickedDayInfo({
         day: dayName,
-        closedLeads: selected.closedLeads,
+        closedLeads: selected.closedLeads || 0, // ✅ Access safely
       });
     },
     scales: {
@@ -113,6 +112,7 @@ const Dashboard = () => {
     <MainLayout showSearch={false}>
       <div className={styles.pageWrapper}>
         <div className={styles.dashboardContainer}>
+          {/* Summary Cards */}
           <div className={styles.cardGrid}>
             <div className={styles.card}><h4>Unassigned Leads</h4><p>{stats.unassignedLeads}</p></div>
             <div className={styles.card}><h4>Assigned This Week</h4><p>{stats.assignedThisWeek}</p></div>
@@ -120,6 +120,7 @@ const Dashboard = () => {
             <div className={styles.card}><h4>Conversion Rate</h4><p>{stats.conversionRate}%</p></div>
           </div>
 
+          {/* Chart and Recent Activity */}
           <div className={styles.analyticsRow}>
             <div className={styles.chartBox}>
               <h4>Sales Analytics</h4>
@@ -141,8 +142,8 @@ const Dashboard = () => {
                 ) : (
                   stats.recentActivities.map((activity, index) => (
                     <li key={index}>
-                      • {activity.message} —{" "}
-                      {new Date(activity.time).toLocaleString("en-IN", {
+                      • {activity.message || activity.text} —{" "}
+                      {new Date(activity.time || activity.timestamp).toLocaleString("en-IN", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
@@ -157,6 +158,7 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Employee Table */}
           <div className={styles.tableWrapper}>
             <h4>Employee Overview</h4>
             <div className={styles.tableScroll}>

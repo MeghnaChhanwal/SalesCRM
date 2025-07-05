@@ -14,17 +14,17 @@ export const getAdminRecentActivities = async (req, res) => {
       if (!lead.assignedEmployee) {
         return {
           message: `Lead added: ${lead.name}`,
-          time: lead.createdAt
+          time: lead.createdAt,
         };
       } else if (lead.status === "Closed") {
         return {
           message: `${lead.assignedEmployee.firstName} closed lead: ${lead.name}`,
-          time: lead.updatedAt
+          time: lead.updatedAt,
         };
       } else {
         return {
           message: `Lead assigned to ${lead.assignedEmployee.firstName}: ${lead.name}`,
-          time: lead.updatedAt
+          time: lead.updatedAt,
         };
       }
     });
@@ -42,34 +42,35 @@ export const getEmployeeActivity = async (req, res) => {
 
   try {
     const leads = await Lead.find({
-      assignedEmployee: id
+      assignedEmployee: id,
     })
       .sort({ updatedAt: -1 })
       .limit(10);
 
-    const leadActivities = leads.map(lead => ({
-      message: lead.status === "Closed"
-        ? `You closed lead: ${lead.name}`
-        : `Working on lead: ${lead.name}`,
-      time: lead.updatedAt
+    const leadActivities = leads.map((lead) => ({
+      message:
+        lead.status === "Closed"
+          ? `You closed lead: ${lead.name}`
+          : `Working on lead: ${lead.name}`,
+      time: lead.updatedAt,
     }));
 
     const timing = await Timing.find({ employee: id })
       .sort({ createdAt: -1 })
       .limit(2);
 
-    const timingActivities = timing.flatMap(t => {
+    const timingActivities = timing.flatMap((t) => {
       const acts = [];
       if (t.checkIn) {
         acts.push({
           message: "Checked in",
-          time: t.createdAt
+          time: t.createdAt,
         });
       }
       if (t.checkOut) {
         acts.push({
           message: "Checked out",
-          time: t.updatedAt
+          time: t.updatedAt,
         });
       }
       return acts;
@@ -80,7 +81,6 @@ export const getEmployeeActivity = async (req, res) => {
       .slice(0, 10);
 
     res.status(200).json(allActivities);
-
   } catch (err) {
     console.error("Employee activity fetch error:", err);
     res.status(500).json({ error: "Failed to fetch employee activity" });

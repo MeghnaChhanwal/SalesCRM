@@ -1,15 +1,14 @@
 import express from "express";
 import {
   getDashboardOverview,
-  getChartData
+  getChartData,
 } from "../controllers/dashboardController.js";
+import { getAdminRecentActivities } from "../controllers/activityController.js";
 
 const router = express.Router();
 
-// 👉 Dashboard overview (admin + stats + recent activity)
 router.get("/overview", getDashboardOverview);
-
-// 👉 Conversion + lead chart data (optional frontend graph)
 router.get("/chart", getChartData);
+router.get("/activity/admin", getAdminRecentActivities);
 
 export default router;
