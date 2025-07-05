@@ -6,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Set refresh flag on reload
+  // 1️⃣ Refresh flag on reload (to prevent logout)
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,13 +15,14 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // Restore session after reload
+  // 2️⃣ Restore session on reload
   useEffect(() => {
     const stored = sessionStorage.getItem("employee");
     if (stored && stored !== "undefined" && stored !== "null") {
       setEmployee(JSON.parse(stored));
     }
 
+    // remove refresh flag after short delay
     setTimeout(() => {
       sessionStorage.removeItem("refreshing");
     }, 100);
@@ -29,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Auto logout on tab close
+  // 3️⃣ Auto logout on tab close (not on refresh)
   useEffect(() => {
     const handleVisibilityChange = () => {
       const refreshing = sessionStorage.getItem("refreshing") === "true";
@@ -39,7 +40,9 @@ export const AuthProvider = ({ children }) => {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
-            navigator.sendBeacon(`${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`);
+            navigator.sendBeacon(
+              `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`
+            );
           }
         } catch (e) {
           console.error("Beacon logout failed:", e);
@@ -54,7 +57,7 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // Login function
+  // 4️⃣ Login function
   const login = async (email, password) => {
     const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/auth/login`, {
       method: "POST",
@@ -66,8 +69,11 @@ export const AuthProvider = ({ children }) => {
     if (!res.ok) throw new Error("Login failed");
 
     const employeeData = await res.json();
-    setEmployee(employeeData);
+
+    sessionStorage.setItem("refreshing", "false");
     sessionStorage.setItem("employee", JSON.stringify(employeeData));
+    setEmployee(employeeData);
+
     return employeeData;
   };
 

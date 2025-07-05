@@ -2,7 +2,7 @@ import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ Login Controller (checkIn + status = Active + end break if open)
+// ✅ Login = Check In
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
 
@@ -16,12 +16,11 @@ export const loginEmployee = async (req, res) => {
       return res.status(404).json({ error: "Employee not found" });
     }
 
-    // Password check based on last name (case insensitive)
     if (employee.lastName.toLowerCase() !== password.toLowerCase()) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Mark employee Active
+    // Update employee status
     employee.status = "Active";
     await employee.save();
 
@@ -31,7 +30,7 @@ export const loginEmployee = async (req, res) => {
     let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
-      // First login of the day
+      // First login for today
       timing = new Timing({
         employee: employee._id,
         date,
@@ -41,29 +40,28 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      // Re-login: update checkIn & ensure any ongoing break is ended
+      // Re-login (update checkIn, end break if needed)
       timing.checkIn = time;
       timing.status = "Active";
       timing.breakStatus = "OffBreak";
 
       const lastBreak = timing.breaks[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
-        lastBreak.end = time; // close the open break
+        lastBreak.end = time; // end last break
       }
     }
 
     await timing.save();
 
-    // Clean response (remove password logic)
     const { password: _, ...empData } = employee.toObject();
     res.status(200).json(empData);
-  } catch (error) {
-    console.error("Login Error:", error);
+  } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ error: "Login failed" });
   }
 };
 
-// ✅ Logout Controller (checkOut + status = Inactive + start break)
+// ✅ Logout = Tab Close via Beacon
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -73,7 +71,6 @@ export const logoutEmployee = async (req, res) => {
       return res.status(404).json({ error: "Employee not found" });
     }
 
-    // Mark employee Inactive
     employee.status = "Inactive";
     await employee.save();
 
@@ -86,15 +83,16 @@ export const logoutEmployee = async (req, res) => {
       timing.checkOut = time;
       timing.status = "Inactive";
       timing.breakStatus = "OnBreak";
-      timing.breaks.push({ start: time }); // assume end of session is break
+      timing.breaks.push({ start: time });
+
       await timing.save();
 
       res.status(200).json({ message: "Logged out", timing });
     } else {
-      res.status(404).json({ error: "Timing record not found for logout" });
+      res.status(404).json({ error: "Timing record not found" });
     }
-  } catch (error) {
-    console.error("Logout Error:", error);
+  } catch (err) {
+    console.error("Logout error:", err);
     res.status(500).json({ error: "Logout failed" });
   }
 };

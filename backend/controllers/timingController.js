@@ -1,7 +1,7 @@
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ Get today's timing for employee
+// ✅ Get Today's Timing
 export const getTodayTiming = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -17,7 +17,7 @@ export const getTodayTiming = async (req, res) => {
   }
 };
 
-// ✅ Get full break history across all days
+// ✅ Get All Breaks (Optional use)
 export const getBreakHistory = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -45,56 +45,7 @@ export const getBreakHistory = async (req, res) => {
   }
 };
 
-// ✅ Manually start break
-export const startBreak = async (req, res) => {
-  const { id: employeeId } = req.params;
-  const date = todayIST();
-  const time = timeIST();
-
-  try {
-    const timing = await Timing.findOne({ employee: employeeId, date });
-    if (!timing) return res.status(404).json({ error: "Timing not found" });
-
-    timing.breakStatus = "OnBreak";
-    timing.status = "Inactive";
-    timing.breaks.push({ start: time });
-
-    await timing.save();
-    res.status(200).json({ message: "Break started", timing });
-  } catch (error) {
-    console.error("Start break error:", error);
-    res.status(500).json({ error: "Failed to start break" });
-  }
-};
-
-// ✅ Manually end break
-export const endBreak = async (req, res) => {
-  const { id: employeeId } = req.params;
-  const date = todayIST();
-  const time = timeIST();
-
-  try {
-    const timing = await Timing.findOne({ employee: employeeId, date });
-    if (!timing) return res.status(404).json({ error: "Timing not found" });
-
-    const lastBreak = timing.breaks[timing.breaks.length - 1];
-    if (!lastBreak || lastBreak.end) {
-      return res.status(400).json({ error: "No ongoing break to end" });
-    }
-
-    lastBreak.end = time;
-    timing.breakStatus = "OffBreak";
-    timing.status = "Active";
-
-    await timing.save();
-    res.status(200).json({ message: "Break ended", timing });
-  } catch (error) {
-    console.error("End break error:", error);
-    res.status(500).json({ error: "Failed to end break" });
-  }
-};
-
-// ✅ Get full timing history for admin dashboard
+// ✅ Admin Only: Fetch all timings
 export const getAllTimings = async (req, res) => {
   try {
     const timings = await Timing.find()

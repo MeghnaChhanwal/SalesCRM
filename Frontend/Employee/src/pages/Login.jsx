@@ -1,68 +1,51 @@
+// src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Layout from "../components/Layout";
 import { useAuth } from "../contexts/AuthContext";
 import styles from "../styles/Login.module.css";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // last name as password
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
+    setErr("");
     try {
       await login(email, password);
       navigate("/home");
-    } catch (err) {
-      setError("Login failed. Check credentials.");
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      setErr("Invalid credentials");
     }
   };
 
   return (
-    <Layout showBottomNav={false}>
-      <div className={styles.container}>
-        <h2 className={styles.heading}>Employee Login</h2>
-        {error && <p className={styles.error}>{error}</p>}
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <label>Email</label>
+    <div className={styles.loginWrapper}>
+      <div className={styles.loginBox}>
+        <h2>Employee Login</h2>
+        {err && <p className={styles.error}>{err}</p>}
+        <form onSubmit={handleSubmit}>
           <input
             type="email"
+            placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className={styles.input}
           />
-
-          <label>Last Name</label>
           <input
             type="password"
+            placeholder="Last name as password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className={styles.input}
           />
-
-          <button
-            type="submit"
-            className={styles.button}
-            disabled={loading || !email || !password}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
+          <button type="submit">Login & Check-In</button>
         </form>
       </div>
-    </Layout>
+    </div>
   );
 };
 
