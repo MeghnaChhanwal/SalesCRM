@@ -8,7 +8,7 @@ import {
   scheduleCall,
   getScheduledCalls,
 } from "../controllers/leadController.js";
-import { upload } from "../middlewares/uploadMiddleware.js"; // ✅ import the middleware
+import { upload } from "../middlewares/upload.js"; // ✅ import the middleware
 
 const router = express.Router();
 
