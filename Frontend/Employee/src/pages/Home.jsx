@@ -33,7 +33,7 @@ const Home = () => {
     try {
       const res = await API.get(`/api/activity/${employee._id}`);
       if (res.data) {
-        setActivities(res.data.slice(0, 10));
+        setActivities(res.data.slice(0, 10)); // Get top 10 activities
       }
     } catch (err) {
       console.error("Fetch activity error:", err);
@@ -124,7 +124,17 @@ const Home = () => {
           <ul>
             {activities.length > 0 ? (
               activities.map((item, idx) => (
-                <li key={idx}>{item}</li>
+                <li key={idx}>
+                  {item.text} —{" "}
+                  {new Date(item.timestamp).toLocaleString("en-IN", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                </li>
               ))
             ) : (
               <li>No recent activities</li>
