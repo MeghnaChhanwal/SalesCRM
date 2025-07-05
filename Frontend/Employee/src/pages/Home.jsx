@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import API from "../utils/axios";
@@ -68,12 +67,10 @@ const Home = () => {
     });
   };
 
-  const todayDate = new Date().toISOString().split("T")[0];
-
   return (
     <Layout>
       <div className={styles.container}>
-        {/* ✅ Check In / Out */}
+        {/* ✅ Check In / Out Card */}
         <div className={styles.card}>
           <div className={styles.headerRow}>
             <div>
@@ -94,15 +91,14 @@ const Home = () => {
           </div>
         </div>
 
-        {/* ✅ Break History (Last 7 Days) */}
+        {/* ✅ Break History */}
         {timing?.breaks?.length > 0 && (
           <div className={styles.breakCard}>
             <div className={styles.breakHeader}>
-              <strong>Break</strong>
-              <strong>Ended</strong>
+              <strong>Break Start</strong>
+              <strong>Break End</strong>
               <strong>Date</strong>
             </div>
-
             {[...timing.breaks]
               .filter((b) => b.start && b.end)
               .slice(-7)
@@ -127,12 +123,11 @@ const Home = () => {
           <h4>Recent Activity</h4>
           <ul>
             {activities.length > 0 ? (
-              activities.map((item, idx) => <li key={idx}>{item}</li>)
+              activities.map((item, idx) => (
+                <li key={idx}>{item}</li>
+              ))
             ) : (
-              <>
-                <li>You were assigned 3 more new leads – 1 hour ago</li>
-                <li>You closed a deal today – 2 hours ago</li>
-              </>
+              <li>No recent activities</li>
             )}
           </ul>
         </div>
