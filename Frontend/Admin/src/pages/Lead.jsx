@@ -13,6 +13,7 @@ const Lead = () => {
   const [file, setFile] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalType, setModalType] = useState(null);
+  const [uploadStep, setUploadStep] = useState("select");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,7 +25,7 @@ const Lead = () => {
   const [sortConfig, setSortConfig] = useState({ key: "receivedDate", direction: "desc" });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const leadsPerPage =6;
+  const leadsPerPage = 6;
 
   useEffect(() => {
     fetchLeads();
@@ -105,7 +106,8 @@ const Lead = () => {
         setUploadProgress(0);
         setFile(null);
         setModalType(null);
-        setCurrentPage(1); // ✅ Reset page after upload
+        setUploadStep("select");
+        setCurrentPage(1);
         fetchLeads();
       } catch (err) {
         console.error("Upload error:", err);
@@ -146,27 +148,31 @@ const Lead = () => {
       }}
       rightElement={
         <div className={styles.actionButtons}>
-          <button className={styles.addManual} onClick={() => setModalType("manual")}>
-            Add Manually
-          </button>
-          <button className={styles.addLeadButton} onClick={() => setModalType("upload")}>
-            Upload CSV
-          </button>
+          <button className={styles.addManual} onClick={() => setModalType("manual")}>Add Manually</button>
+          <button className={styles.addLeadButton} onClick={() => setModalType("upload")}>Upload CSV</button>
         </div>
       }
     >
-      {/* Upload Modal */}
       {modalType === "upload" && (
-        <div className={styles.modalOverlay} onClick={() => setModalType(null)}>
+        <div className={styles.modalOverlay} onClick={() => {
+          setModalType(null);
+          setUploadStep("select");
+          setFile(null);
+        }}>
           <form
             className={styles.modalForm}
             onClick={(e) => e.stopPropagation()}
             onSubmit={(e) => {
               e.preventDefault();
-              handleFileUpload();
+              if (uploadStep === "upload") handleFileUpload();
+              else setUploadStep("upload");
             }}
           >
-            <h3>Upload Lead CSV</h3>
+            <div className={styles.sampleHeader}>
+              <img src="/sample-icon.png" alt="Sample Icon" className={styles.sampleIconTop} />
+              <a href="/lead-sample.csv" download className={styles.sampleDownloadTop}>📥 Download Sample File</a>
+            </div>
+
             <div
               className={styles.dropzone}
               onDragOver={(e) => e.preventDefault()}
@@ -176,13 +182,17 @@ const Lead = () => {
               }}
             >
               {file ? <p>{file.name}</p> : <p>Drag & drop or click to browse</p>}
-              <input type="file" accept=".csv" hidden id="fileInput" onChange={(e) => setFile(e.target.files[0])} />
-              <label htmlFor="fileInput" className={styles.browseButton}>
-                Browse File
-              </label>
+              <input
+                type="file"
+                accept=".csv"
+                hidden
+                id="fileInput"
+                onChange={(e) => setFile(e.target.files[0])}
+              />
+              <label htmlFor="fileInput" className={styles.browseButton}>Browse File</label>
             </div>
 
-            {uploading && (
+            {uploadStep === "upload" && uploading && (
               <div className={styles.circularWrapper}>
                 <svg className={styles.circularProgress} viewBox="0 0 36 36">
                   <path className={styles.bg} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -191,52 +201,26 @@ const Lead = () => {
                     strokeDasharray={`${uploadProgress}, 100`}
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
-                  <text x="18" y="20.35" className={styles.percentage}>
-                    {uploadProgress}%
-                  </text>
+                  <text x="18" y="20.35" className={styles.percentage}>{uploadProgress}%</text>
                 </svg>
               </div>
             )}
 
             <div className={styles.formActions}>
-              <button type="submit" disabled={uploading || !file}>Upload</button>
-              <button type="button" onClick={() => { setFile(null); setModalType(null); }} disabled={uploading}>
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Manual Add Modal */}
-      {modalType === "manual" && (
-        <div className={styles.modalOverlay} onClick={() => setModalType(null)}>
-          <form className={styles.modalForm} onClick={(e) => e.stopPropagation()} onSubmit={handleManualSubmit}>
-            <h3>Add Lead Manually</h3>
-            <input name="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Full Name" required />
-            <input name="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="Email" type="email" />
-            <input name="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="Phone" />
-            <select name="location" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} required>
-              <option value="">Select Location</option>
-              <option value="Pune">Pune</option>
-              <option value="Mumbai">Mumbai</option>
-              <option value="Bangalore">Bangalore</option>
-              <option value="Hyderabad">Hyderabad</option>
-              <option value="Delhi">Delhi</option>
-              <option value="Chennai">Chennai</option>
-            </select>
-            <select name="language" value={formData.language} onChange={(e) => setFormData({ ...formData, language: e.target.value })} required>
-              <option value="">Select Language</option>
-              <option value="Hindi">Hindi</option>
-              <option value="English">English</option>
-              <option value="Telugu">Telugu</option>
-              <option value="Marathi">Marathi</option>
-              <option value="Kannada">Kannada</option>
-              <option value="Tamil">Tamil</option>
-            </select>
-            <div className={styles.formActions}>
-              <button type="submit">Save</button>
-              <button type="button" onClick={() => setModalType(null)}>Cancel</button>
+              {uploadStep === "select" ? (
+                <button type="submit" disabled={!file}>Next</button>
+              ) : (
+                <button type="submit" disabled={!file || uploading}>Upload</button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setModalType(null);
+                  setUploadStep("select");
+                  setFile(null);
+                }}
+                disabled={uploading}
+              >Cancel</button>
             </div>
           </form>
         </div>
@@ -271,11 +255,7 @@ const Lead = () => {
                       <td>{lead.email || "-"}</td>
                       <td>{lead.phone || "-"}</td>
                       <td>{lead.receivedDate ? new Date(lead.receivedDate).toLocaleDateString() : "-"}</td>
-                      <td>
-                        {lead.assignedEmployee
-                          ? `${lead.assignedEmployee.firstName} ${lead.assignedEmployee.lastName}`
-                          : "-"}
-                      </td>
+                      <td>{lead.assignedEmployee ? `${lead.assignedEmployee.firstName} ${lead.assignedEmployee.lastName}` : "-"}</td>
                     </tr>
                   );
                 })
