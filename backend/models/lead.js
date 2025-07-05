@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// 🔹 Scheduled call schema
 const scheduledCallSchema = new mongoose.Schema(
   {
     callDate: {
@@ -12,8 +13,9 @@ const scheduledCallSchema = new mongoose.Schema(
       required: [true, "Call type is required"],
     },
   },
-  { _id: false } // Prevent automatic _id for each subdocument
+  { _id: false }
 );
+
 
 const leadSchema = new mongoose.Schema(
   {
@@ -61,10 +63,10 @@ const leadSchema = new mongoose.Schema(
     scheduledCalls: {
       type: [scheduledCallSchema],
       default: [],
-    },
+    }
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields
+    timestamps: true // createdAt आणि updatedAt auto add होईल
   }
 );
 

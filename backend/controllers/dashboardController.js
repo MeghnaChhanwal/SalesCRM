@@ -1,11 +1,13 @@
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 
-
 export const getDashboardOverview = async (req, res) => {
   try {
+    // 👉 Counts
     const totalLeads = await Lead.countDocuments();
     const unassignedLeads = await Lead.countDocuments({ assignedEmployee: null });
+    const closedLeads = await Lead.countDocuments({ status: "Closed" });
+    const activeSalespeople = await Employee.countDocuments({ status: "Active" });
 
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
@@ -13,38 +15,70 @@ export const getDashboardOverview = async (req, res) => {
 
     const assignedThisWeek = await Lead.countDocuments({
       assignedEmployee: { $ne: null },
-      receivedDate: { $gte: startOfWeek },
+      receivedDate: { $gte: startOfWeek }
     });
 
-    const activeSalespeople = await Employee.countDocuments({ status: "Active" });
-    const employees = await Employee.find().sort({ createdAt: -1 });
+    const conversionRate = totalLeads > 0 
+      ? Math.round((closedLeads / totalLeads) * 100)
+      : 0;
 
-    const closedLeads = await Lead.countDocuments({ status: "Closed" });
-    const conversionRate = totalLeads > 0 ? Math.round((closedLeads / totalLeads) * 100) : 0;
-
-    // 🔸 Recent Activity
+    // 👉 Recent leads & employees
     const recentLeads = await Lead.find({})
-      .sort({ receivedDate: -1 })
-      .limit(20)
+      .sort({ updatedAt: -1 })
+      .limit(30)
       .populate("assignedEmployee", "firstName lastName");
 
+    const recentEmployees = await Employee.find({})
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    // 👉 Activity list
     const activity = [];
 
-    for (const lead of recentLeads) {
+    // Employee creation
+    recentEmployees.forEach(emp => {
+      activity.push({
+        text: `Employee added: ${emp.firstName} ${emp.lastName}`,
+        timestamp: emp.createdAt
+      });
+    });
+
+    // Lead actions
+    recentLeads.forEach(lead => {
       if (!lead.assignedEmployee) {
-        activity.push(` Lead added: ${lead.name}`);
+        activity.push({
+          text: `Lead added: ${lead.name}`,
+          timestamp: lead.receivedDate
+        });
       } else if (lead.status === "Closed") {
-        activity.push(`${lead.assignedEmployee.firstName} closed lead: ${lead.name}`);
+        activity.push({
+          text: `${lead.assignedEmployee.firstName} closed lead: ${lead.name}`,
+          timestamp: lead.updatedAt
+        });
       } else {
-        activity.push(`Lead assigned to ${lead.assignedEmployee.firstName}`);
+        activity.push({
+          text: `Lead assigned to ${lead.assignedEmployee.firstName}: ${lead.name}`,
+          timestamp: lead.updatedAt
+        });
       }
-    }
 
-    const recentActivities = activity.slice(0, 10);
+      if (lead.scheduledCalls?.length > 0) {
+        const latestCall = lead.scheduledCalls[lead.scheduledCalls.length - 1];
+        activity.push({
+          text: `${lead.assignedEmployee?.firstName || "Someone"} scheduled call for ${lead.name}`,
+          timestamp: latestCall.callDate
+        });
+      }
+    });
 
-   
+    // Sort + slice
+    const recentActivities = activity
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 10);
+
+    // 👉 Graph data
     const today = new Date();
-    const chartData = [];
+    const graphData = [];
 
     for (let i = 9; i >= 0; i--) {
       const date = new Date(today);
@@ -55,16 +89,16 @@ export const getDashboardOverview = async (req, res) => {
       nextDate.setDate(date.getDate() + 1);
 
       const dailyLeads = await Lead.find({
-        receivedDate: { $gte: date, $lt: nextDate },
+        receivedDate: { $gte: date, $lt: nextDate }
       });
 
-      const dailyTotal = dailyLeads.length;
-      const dailyClosed = dailyLeads.filter((l) => l.status === "Closed").length;
-      const dailyConversion = dailyTotal > 0 ? Math.round((dailyClosed / dailyTotal) * 100) : 0;
+      const total = dailyLeads.length;
+      const closed = dailyLeads.filter(l => l.status === "Closed").length;
+      const conversion = total > 0 ? Math.round((closed / total) * 100) : 0;
 
-      chartData.push({
+      graphData.push({
         date: date.toISOString().split("T")[0],
-        conversion: dailyConversion,
+        conversion
       });
     }
 
@@ -74,16 +108,16 @@ export const getDashboardOverview = async (req, res) => {
       activeSalespeople,
       conversionRate,
       recentActivities,
-      graphData: chartData,
-      employees,
+      graphData
     });
+
   } catch (err) {
-    console.error("Dashboard overview error:", err);
+    console.error("❌ Dashboard overview error:", err);
     res.status(500).json({ error: "Failed to fetch dashboard stats" });
   }
 };
 
-// 🔹 GET /api/dashboard/chart - sales chart data (7–14 days)
+// Optional: Chart data route (if needed separately)
 export const getChartData = async (req, res) => {
   try {
     const { days = 10 } = req.query;
@@ -100,25 +134,26 @@ export const getChartData = async (req, res) => {
       const nextDate = new Date(date);
       nextDate.setDate(date.getDate() + 1);
 
-      const dailyLeads = await Lead.find({
-        receivedDate: { $gte: date, $lt: nextDate },
+      const leads = await Lead.find({
+        receivedDate: { $gte: date, $lt: nextDate }
       });
 
-      const totalLeads = dailyLeads.length;
-      const closedLeads = dailyLeads.filter(l => l.status === "Closed").length;
-      const conversionRate = totalLeads > 0 ? Math.round((closedLeads / totalLeads) * 100) : 0;
+      const total = leads.length;
+      const closed = leads.filter(l => l.status === "Closed").length;
+      const conversion = total > 0 ? Math.round((closed / total) * 100) : 0;
 
       chartData.push({
         date: date.toISOString().split("T")[0],
-        totalLeads,
-        closedLeads,
-        conversionRate,
+        totalLeads: total,
+        closedLeads: closed,
+        conversionRate: conversion
       });
     }
 
     res.status(200).json(chartData);
+
   } catch (err) {
-    console.error("Chart data error:", err);
+    console.error("❌ Chart data error:", err);
     res.status(500).json({ error: "Failed to fetch chart data" });
   }
 };

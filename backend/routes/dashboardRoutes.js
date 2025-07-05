@@ -6,7 +6,10 @@ import {
 
 const router = express.Router();
 
+// 👉 Dashboard overview (admin + stats + recent activity)
 router.get("/overview", getDashboardOverview);
+
+// 👉 Conversion + lead chart data (optional frontend graph)
 router.get("/chart", getChartData);
 
 export default router;
