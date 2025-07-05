@@ -26,6 +26,7 @@ const Dashboard = () => {
     recentActivities: [],
     graphData: [],
   });
+  const [clickedDayInfo, setClickedDayInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,12 +44,16 @@ const Dashboard = () => {
     fetchDashboardStats();
   }, []);
 
+  const dayLabels = stats.graphData.map((d) =>
+    new Date(d.date).toLocaleDateString("en-US", { weekday: "short" })
+  );
+
   const chartData = {
-    labels: stats.graphData?.map((d) => d.date) || [],
+    labels: dayLabels,
     datasets: [
       {
         label: "Conversion Rate (%)",
-        data: stats.graphData?.map((d) => d.conversion) || [],
+        data: stats.graphData.map((d) => d.conversion),
         backgroundColor: "rgba(0, 123, 255, 0.7)",
         borderColor: "#007bff",
         borderWidth: 1,
@@ -68,6 +73,19 @@ const Dashboard = () => {
           label: (context) => `Conversion: ${context.raw}%`,
         },
       },
+    },
+    onClick: (event, elements) => {
+      if (!elements.length) return;
+      const index = elements[0].index;
+      const selected = stats.graphData[index];
+      const dayName = new Date(selected.date).toLocaleDateString("en-US", {
+        weekday: "long",
+      });
+
+      setClickedDayInfo({
+        day: dayName,
+        closedLeads: selected.closedLeads,
+      });
     },
     scales: {
       y: {
@@ -122,6 +140,11 @@ const Dashboard = () => {
               <div className={styles.chartWrapper}>
                 <Bar data={chartData} options={chartOptions} />
               </div>
+              {clickedDayInfo && (
+                <div className={styles.dayDetail}>
+                  📊 {clickedDayInfo.closedLeads} leads closed on {clickedDayInfo.day}
+                </div>
+              )}
             </div>
 
             <div className={styles.activityBox}>
@@ -131,7 +154,17 @@ const Dashboard = () => {
                   <li>No recent activities.</li>
                 ) : (
                   stats.recentActivities.map((activity, index) => (
-                    <li key={`${activity}-${index}`}>• {activity}</li>
+                    <li key={index}>
+                      • {activity.message} —{" "}
+                      {new Date(activity.time).toLocaleString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </li>
                   ))
                 )}
               </ul>
@@ -156,7 +189,9 @@ const Dashboard = () => {
                 <tbody>
                   {employees.length === 0 ? (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: "center" }}>No employees found</td>
+                      <td colSpan="6" style={{ textAlign: "center" }}>
+                        No employees found
+                      </td>
                     </tr>
                   ) : (
                     employees.map((emp) => (

@@ -113,3 +113,9 @@ th, td {
 th {
   background-color: #f2f2f2;
 }
+.dayDetail {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #007bff;
+  font-weight: bold;
+}
