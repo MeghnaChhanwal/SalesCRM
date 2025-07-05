@@ -6,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 1️⃣ Refresh flag on reload (to prevent logout)
+  // 1️⃣ Save "refreshing" flag before reload
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,16 +15,15 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // 2️⃣ Restore session on reload
+  // 2️⃣ Restore session after reload
   useEffect(() => {
     const stored = sessionStorage.getItem("employee");
     if (stored && stored !== "undefined" && stored !== "null") {
       setEmployee(JSON.parse(stored));
     }
 
-    // remove refresh flag after short delay
     setTimeout(() => {
-      sessionStorage.removeItem("refreshing");
+      sessionStorage.removeItem("refreshing"); // clear after restoring
     }, 100);
 
     setLoading(false);
@@ -33,16 +32,14 @@ export const AuthProvider = ({ children }) => {
   // 3️⃣ Auto logout on tab close (not on refresh)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      const refreshing = sessionStorage.getItem("refreshing") === "true";
+      const isRefreshing = sessionStorage.getItem("refreshing") === "true";
       const emp = sessionStorage.getItem("employee");
 
-      if (document.visibilityState === "hidden" && !refreshing && emp) {
+      if (document.visibilityState === "hidden" && !isRefreshing && emp) {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
-            navigator.sendBeacon(
-              `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`
-            );
+            navigator.sendBeacon(`${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`);
           }
         } catch (e) {
           console.error("Beacon logout failed:", e);
@@ -69,11 +66,9 @@ export const AuthProvider = ({ children }) => {
     if (!res.ok) throw new Error("Login failed");
 
     const employeeData = await res.json();
-
     sessionStorage.setItem("refreshing", "false");
     sessionStorage.setItem("employee", JSON.stringify(employeeData));
     setEmployee(employeeData);
-
     return employeeData;
   };
 
