@@ -1,6 +1,6 @@
 import Employee from "../models/employee.js";
 import Lead from "../models/lead.js";
-import { Timing } from "../models/timing.js"; // ✅ named import
+import Timing from "../models/timing.js"; // ✅ default import
 import { buildQueryOptions } from "../utils/query.js";
 import { todayIST } from "../utils/time.js";
 
@@ -65,7 +65,7 @@ export const getEmployees = async (req, res) => {
   }
 };
 
-// 🔹 GET: All employees without pagination (for dashboard dropdown etc.)
+// 🔹 GET: All employees (for dropdowns etc.)
 export const getAllEmployees = async (req, res) => {
   try {
     const employees = await Employee.find().sort({ createdAt: -1 });
@@ -100,18 +100,15 @@ export const createEmployee = async (req, res) => {
     await newEmp.save();
     res.status(201).json(newEmp);
   } catch (err) {
-    if (err.name === "ValidationError") {
-      res.status(400).json({ error: err.message });
-    } else if (err.code === 11000) {
-      res.status(400).json({ error: "Email or Employee ID already exists" });
-    } else {
-      console.error("Create employee error:", err);
-      res.status(500).json({ error: "Failed to create employee" });
+    if (err.code === 11000) {
+      return res.status(400).json({ error: "Email or Employee ID already exists" });
     }
+    console.error("Create employee error:", err);
+    res.status(500).json({ error: "Failed to create employee" });
   }
 };
 
-// 🔹 PUT: Update employee by ID
+// 🔹 PUT: Update employee
 export const updateEmployee = async (req, res) => {
   try {
     const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, {
@@ -119,28 +116,21 @@ export const updateEmployee = async (req, res) => {
       runValidators: true,
     });
 
-    if (!updated) {
-      return res.status(404).json({ error: "Employee not found" });
-    }
+    if (!updated) return res.status(404).json({ error: "Employee not found" });
 
     res.status(200).json(updated);
   } catch (err) {
-    if (err.name === "ValidationError") {
-      res.status(400).json({ error: err.message });
-    } else {
-      console.error("Update employee error:", err);
-      res.status(500).json({ error: "Failed to update employee" });
-    }
+    console.error("Update employee error:", err);
+    res.status(500).json({ error: "Failed to update employee" });
   }
 };
 
-// 🔹 DELETE: Remove employee by ID
+// 🔹 DELETE: Remove employee
 export const deleteEmployee = async (req, res) => {
   try {
     const deleted = await Employee.findByIdAndDelete(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ error: "Employee not found" });
-    }
+    if (!deleted) return res.status(404).json({ error: "Employee not found" });
+
     res.status(200).json({ message: "Employee deleted successfully" });
   } catch (err) {
     console.error("Delete employee error:", err);
@@ -148,7 +138,7 @@ export const deleteEmployee = async (req, res) => {
   }
 };
 
-// 🔹 PATCH: Auto update all employee statuses based on today's timing
+// 🔹 PATCH: Auto update statuses (Active / Inactive) based on timing
 export const autoUpdateEmployeeStatuses = async (req, res) => {
   const today = todayIST();
 
@@ -163,11 +153,9 @@ export const autoUpdateEmployeeStatuses = async (req, res) => {
           emp.status = "Inactive";
           await emp.save();
         }
-      } else {
-        if (timing.checkIn && emp.status !== "Active") {
-          emp.status = "Active";
-          await emp.save();
-        }
+      } else if (timing.checkIn && emp.status !== "Active") {
+        emp.status = "Active";
+        await emp.save();
       }
     }
 
