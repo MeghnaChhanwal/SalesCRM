@@ -113,27 +113,13 @@ const Dashboard = () => {
     <MainLayout showSearch={false}>
       <div className={styles.pageWrapper}>
         <div className={styles.dashboardContainer}>
-          {/* Summary Cards */}
           <div className={styles.cardGrid}>
-            <div className={styles.card}>
-              <h4>Unassigned Leads</h4>
-              <p>{stats.unassignedLeads}</p>
-            </div>
-            <div className={styles.card}>
-              <h4>Assigned This Week</h4>
-              <p>{stats.assignedThisWeek}</p>
-            </div>
-            <div className={styles.card}>
-              <h4>Active Salespeople</h4>
-              <p>{stats.activeSalespeople}</p>
-            </div>
-            <div className={styles.card}>
-              <h4>Conversion Rate</h4>
-              <p>{stats.conversionRate}%</p>
-            </div>
+            <div className={styles.card}><h4>Unassigned Leads</h4><p>{stats.unassignedLeads}</p></div>
+            <div className={styles.card}><h4>Assigned This Week</h4><p>{stats.assignedThisWeek}</p></div>
+            <div className={styles.card}><h4>Active Salespeople</h4><p>{stats.activeSalespeople}</p></div>
+            <div className={styles.card}><h4>Conversion Rate</h4><p>{stats.conversionRate}%</p></div>
           </div>
 
-          {/* Chart and Activity */}
           <div className={styles.analyticsRow}>
             <div className={styles.chartBox}>
               <h4>Sales Analytics</h4>
@@ -171,7 +157,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Employee Table */}
           <div className={styles.tableWrapper}>
             <h4>Employee Overview</h4>
             <div className={styles.tableScroll}>
@@ -189,9 +174,7 @@ const Dashboard = () => {
                 <tbody>
                   {employees.length === 0 ? (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: "center" }}>
-                        No employees found
-                      </td>
+                      <td colSpan="6" style={{ textAlign: "center" }}>No employees found</td>
                     </tr>
                   ) : (
                     employees.map((emp) => (
@@ -199,12 +182,7 @@ const Dashboard = () => {
                         <td>{emp.firstName} {emp.lastName}</td>
                         <td>{emp.email}</td>
                         <td>{emp.employeeId}</td>
-                        <td
-                          style={{
-                            color: emp.status === "Active" ? "#2ecc71" : "#e74c3c",
-                            fontWeight: "bold",
-                          }}
-                        >
+                        <td style={{ color: emp.status === "Active" ? "#2ecc71" : "#e74c3c", fontWeight: "bold" }}>
                           {emp.status}
                         </td>
                         <td>{emp.assignedLeads}</td>

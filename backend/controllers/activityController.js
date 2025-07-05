@@ -1,151 +1,88 @@
-import React, { useEffect, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import API from "../utils/axios";
-import Layout from "../components/Layout";
-import styles from "../styles/Home.module.css";
+import Lead from "../models/lead.js";
+import Timing from "../models/timing.js";
+import Employee from "../models/employee.js";
 
-const Home = () => {
-  const { employee } = useAuth();
-  const [timing, setTiming] = useState(null);
-  const [activities, setActivities] = useState([]);
+// ✅ Admin dashboard recent activities
+export const getAdminRecentActivities = async (req, res) => {
+  try {
+    const recentLeads = await Lead.find({})
+      .sort({ updatedAt: -1 })
+      .limit(20)
+      .populate("assignedEmployee", "firstName lastName");
 
-  useEffect(() => {
-    if (employee) {
-      fetchTiming();
-      fetchActivity();
-    }
-  }, [employee]);
-
-  const fetchTiming = async () => {
-    try {
-      const res = await API.get(`/api/timing/${employee._id}`);
-      if (res.data && res.data.length > 0) {
-        setTiming(res.data[0]);
+    const activities = recentLeads.map((lead) => {
+      if (!lead.assignedEmployee) {
+        return {
+          message: `Lead added: ${lead.name}`,
+          time: lead.createdAt
+        };
+      } else if (lead.status === "Closed") {
+        return {
+          message: `${lead.assignedEmployee.firstName} closed lead: ${lead.name}`,
+          time: lead.updatedAt
+        };
       } else {
-        setTiming(null);
+        return {
+          message: `Lead assigned to ${lead.assignedEmployee.firstName}: ${lead.name}`,
+          time: lead.updatedAt
+        };
       }
-    } catch (err) {
-      console.error("Fetch timing error:", err);
-    }
-  };
-
-  const fetchActivity = async () => {
-    try {
-      const res = await API.get(`/api/activity/${employee._id}`);
-      if (res.data) {
-        setActivities(res.data.slice(0, 10)); // Top 10 activities
-      }
-    } catch (err) {
-      console.error("Fetch activity error:", err);
-    }
-  };
-
-  const formatTime = (timeStr) => {
-    if (!timeStr) return "--:--";
-    const normalized = timeStr.trim().toUpperCase();
-    const [time, meridian] = normalized.split(" ");
-    if (!time || !meridian) return "--:--";
-    let [hours, minutes] = time.split(":").map(Number);
-    if (meridian === "PM" && hours < 12) hours += 12;
-    if (meridian === "AM" && hours === 12) hours = 0;
-    const date = new Date();
-    date.setHours(hours, minutes, 0, 0);
-    return date.toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
     });
-  };
 
-  const formatDate = (isoDate) => {
-    if (!isoDate) return "--/--/----";
-    const d = new Date(isoDate);
-    return d.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
-
-  return (
-    <Layout>
-      <div className={styles.container}>
-        {/* ✅ Check In / Out Card */}
-        <div className={styles.card}>
-          <div className={styles.headerRow}>
-            <div>
-              <strong>Checked-In</strong>
-              <p>{formatTime(timing?.checkIn)}</p>
-            </div>
-            <div>
-              <strong>Check Out</strong>
-              <p>{formatTime(timing?.checkOut)}</p>
-            </div>
-            <div className={styles.status}>
-              <div
-                className={
-                  timing?.status === "Active"
-                    ? styles.greenDot
-                    : styles.redDot
-                }
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        {/* ✅ Break History */}
-        {timing?.breaks?.length > 0 && (
-          <div className={styles.breakCard}>
-            <div className={styles.breakHeader}>
-              <strong>Break Start</strong>
-              <strong>Break End</strong>
-              <strong>Date</strong>
-            </div>
-            {[...timing.breaks]
-              .filter((b) => b.start && b.end)
-              .slice(-7)
-              .reverse()
-              .map((brk, i) => (
-                <div
-                  key={i}
-                  className={`${styles.breakRow} ${
-                    i === 0 ? styles.activeBreak : ""
-                  }`}
-                >
-                  <span>{formatTime(brk.start)}</span>
-                  <span>{formatTime(brk.end)}</span>
-                  <span>{formatDate(timing.date)}</span>
-                </div>
-              ))}
-          </div>
-        )}
-
-        {/* ✅ Recent Activity */}
-        <div className={styles.activityCard}>
-          <h4>Recent Activity</h4>
-          <ul>
-            {activities.length > 0 ? (
-              activities.map((item, idx) => (
-                <li key={idx}>
-                  {item.message} —{" "}
-                  {new Date(item.time).toLocaleString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
-                </li>
-              ))
-            ) : (
-              <li>No recent activities</li>
-            )}
-          </ul>
-        </div>
-      </div>
-    </Layout>
-  );
+    res.status(200).json(activities.slice(0, 10));
+  } catch (err) {
+    console.error("Admin recent activity error:", err);
+    res.status(500).json({ error: "Failed to fetch admin activity" });
+  }
 };
 
-export default Home;
+// ✅ Employee personal activity
+export const getEmployeeActivity = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const leads = await Lead.find({
+      assignedEmployee: id
+    })
+      .sort({ updatedAt: -1 })
+      .limit(10);
+
+    const leadActivities = leads.map(lead => ({
+      message: lead.status === "Closed"
+        ? `You closed lead: ${lead.name}`
+        : `Working on lead: ${lead.name}`,
+      time: lead.updatedAt
+    }));
+
+    const timing = await Timing.find({ employee: id })
+      .sort({ createdAt: -1 })
+      .limit(2);
+
+    const timingActivities = timing.flatMap(t => {
+      const acts = [];
+      if (t.checkIn) {
+        acts.push({
+          message: "Checked in",
+          time: t.createdAt
+        });
+      }
+      if (t.checkOut) {
+        acts.push({
+          message: "Checked out",
+          time: t.updatedAt
+        });
+      }
+      return acts;
+    });
+
+    const allActivities = [...leadActivities, ...timingActivities]
+      .sort((a, b) => new Date(b.time) - new Date(a.time))
+      .slice(0, 10);
+
+    res.status(200).json(allActivities);
+
+  } catch (err) {
+    console.error("Employee activity fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch employee activity" });
+  }
+};

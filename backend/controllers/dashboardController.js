@@ -1,202 +1,159 @@
-import React, { useEffect, useState } from "react";
-import MainLayout from "../components/Layout";
-import styles from "../styles/Dashboard.module.css";
-import { Bar } from "react-chartjs-2";
-import API from "../utils/axios";
+import Lead from "../models/lead.js";
+import Employee from "../models/employee.js";
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-  Title,
-} from "chart.js";
+export const getDashboardOverview = async (req, res) => {
+  try {
+    // 👉 Counts
+    const totalLeads = await Lead.countDocuments();
+    const unassignedLeads = await Lead.countDocuments({ assignedEmployee: null });
+    const closedLeads = await Lead.countDocuments({ status: "Closed" });
+    const activeSalespeople = await Employee.countDocuments({ status: "Active" });
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
 
-const Dashboard = () => {
-  const [employees, setEmployees] = useState([]);
-  const [stats, setStats] = useState({
-    unassignedLeads: 0,
-    assignedThisWeek: 0,
-    activeSalespeople: 0,
-    conversionRate: 0,
-    recentActivities: [],
-    graphData: [],
-  });
-  const [loading, setLoading] = useState(true);
+    const assignedThisWeek = await Lead.countDocuments({
+      assignedEmployee: { $ne: null },
+      receivedDate: { $gte: startOfWeek }
+    });
 
-  useEffect(() => {
-    const fetchDashboardStats = async () => {
-      try {
-        const res = await API.get("/api/dashboard/overview");
-        setStats(res.data);
-        setEmployees(res.data.employees || []);
-      } catch (err) {
-        console.error("Dashboard error:", err);
-      } finally {
-        setLoading(false);
+    const conversionRate = totalLeads > 0 
+      ? Math.round((closedLeads / totalLeads) * 100)
+      : 0;
+
+    // 👉 Recent leads & employees
+    const recentLeads = await Lead.find({})
+      .sort({ updatedAt: -1 })
+      .limit(30)
+      .populate("assignedEmployee", "firstName lastName");
+
+    const recentEmployees = await Employee.find({})
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    // 👉 Activity list
+    const activity = [];
+
+    // Employee creation
+    recentEmployees.forEach(emp => {
+      activity.push({
+        text: `Employee added: ${emp.firstName} ${emp.lastName}`,
+        timestamp: emp.createdAt
+      });
+    });
+
+    // Lead actions
+    recentLeads.forEach(lead => {
+      if (!lead.assignedEmployee) {
+        activity.push({
+          text: `Lead added: ${lead.name}`,
+          timestamp: lead.receivedDate
+        });
+      } else if (lead.status === "Closed") {
+        activity.push({
+          text: `${lead.assignedEmployee.firstName} closed lead: ${lead.name}`,
+          timestamp: lead.updatedAt
+        });
+      } else {
+        activity.push({
+          text: `Lead assigned to ${lead.assignedEmployee.firstName}: ${lead.name}`,
+          timestamp: lead.updatedAt
+        });
       }
-    };
-    fetchDashboardStats();
-  }, []);
 
-  const chartData = {
-    labels: stats.graphData?.map((d) => {
-      const date = new Date(d.date);
-      return date.toLocaleDateString("en-US", { weekday: "short" }); // Mon, Tue, etc.
-    }) || [],
-    datasets: [
-      {
-        label: "Conversion Rate (%)",
-        data: stats.graphData?.map((d) => d.conversion) || [],
-        backgroundColor: "rgba(0, 123, 255, 0.7)",
-        borderColor: "#007bff",
-        borderWidth: 1,
-        borderRadius: 8,
-        maxBarThickness: 40,
-      },
-    ],
-  };
+      if (lead.scheduledCalls?.length > 0) {
+        const latestCall = lead.scheduledCalls[lead.scheduledCalls.length - 1];
+        activity.push({
+          text: `${lead.assignedEmployee?.firstName || "Someone"} scheduled call for ${lead.name}`,
+          timestamp: latestCall.callDate
+        });
+      }
+    });
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (context) => `Conversion: ${context.raw}%`,
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-        ticks: {
-          stepSize: 20,
-          callback: (val) => `${val}%`,
-        },
-      },
-    },
-  };
+    // Sort + slice
+    const recentActivities = activity
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 10);
 
-  if (loading) {
-    return (
-      <MainLayout showSearch={false}>
-        <div className={styles.dashboardContainer}>
-          <h4>Loading dashboard...</h4>
-        </div>
-      </MainLayout>
-    );
+    // 👉 Graph data
+    const today = new Date();
+    const graphData = [];
+
+    for (let i = 9; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+
+      const nextDate = new Date(date);
+      nextDate.setDate(date.getDate() + 1);
+
+      const dailyLeads = await Lead.find({
+        receivedDate: { $gte: date, $lt: nextDate }
+      });
+
+      const total = dailyLeads.length;
+      const closed = dailyLeads.filter(l => l.status === "Closed").length;
+      const conversion = total > 0 ? Math.round((closed / total) * 100) : 0;
+
+      graphData.push({
+        date: date.toISOString().split("T")[0],
+        conversion
+      });
+    }
+
+    res.status(200).json({
+      unassignedLeads,
+      assignedThisWeek,
+      activeSalespeople,
+      conversionRate,
+      recentActivities,
+      graphData
+    });
+
+  } catch (err) {
+    console.error("❌ Dashboard overview error:", err);
+    res.status(500).json({ error: "Failed to fetch dashboard stats" });
   }
-
-  return (
-    <MainLayout showSearch={false}>
-      <div className={styles.pageWrapper}>
-        <div className={styles.dashboardContainer}>
-          {/* Summary Cards */}
-          <div className={styles.cardGrid}>
-            <div className={styles.card}>
-              <h4>Unassigned Leads</h4>
-              <p>{stats.unassignedLeads}</p>
-            </div>
-            <div className={styles.card}>
-              <h4>Assigned This Week</h4>
-              <p>{stats.assignedThisWeek}</p>
-            </div>
-            <div className={styles.card}>
-              <h4>Active Salespeople</h4>
-              <p>{stats.activeSalespeople}</p>
-            </div>
-            <div className={styles.card}>
-              <h4>Conversion Rate</h4>
-              <p>{stats.conversionRate}%</p>
-            </div>
-          </div>
-
-          {/* Chart and Activity */}
-          <div className={styles.analyticsRow}>
-            <div className={styles.chartBox}>
-              <h4>Sales Analytics</h4>
-              <div className={styles.chartWrapper}>
-                <Bar data={chartData} options={chartOptions} />
-              </div>
-            </div>
-
-            <div className={styles.activityBox}>
-              <h4>Recent Activity</h4>
-              <ul className={styles.activityList}>
-                {stats.recentActivities.length === 0 ? (
-                  <li>No recent activities.</li>
-                ) : (
-                  stats.recentActivities.map((activity, index) => (
-                    <li key={`${activity.message}-${index}`}>
-                      • {activity.message} —{" "}
-                      {new Date(activity.time).toLocaleString("en-IN", {
-                        day: "2-digit",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
-          </div>
-
-          {/* Employee Table */}
-          <div className={styles.tableWrapper}>
-            <h4>Employee Overview</h4>
-            <div className={styles.tableScroll}>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Employee ID</th>
-                    <th>Status</th>
-                    <th>Assigned</th>
-                    <th>Closed</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {employees.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" style={{ textAlign: "center" }}>No employees found</td>
-                    </tr>
-                  ) : (
-                    employees.map((emp) => (
-                      <tr key={emp._id}>
-                        <td>{emp.firstName} {emp.lastName}</td>
-                        <td>{emp.email}</td>
-                        <td>{emp.employeeId}</td>
-                        <td
-                          style={{
-                            color: emp.status === "Active" ? "#2ecc71" : "#e74c3c",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {emp.status}
-                        </td>
-                        <td>{emp.assignedLeads}</td>
-                        <td>{emp.closedLeads}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </MainLayout>
-  );
 };
 
-export default Dashboard;
+// Optional: Chart data route (if needed separately)
+export const getChartData = async (req, res) => {
+  try {
+    const { days = 10 } = req.query;
+    const numDays = Math.min(Math.max(Number(days), 7), 14);
+
+    const today = new Date();
+    const chartData = [];
+
+    for (let i = numDays - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+
+      const nextDate = new Date(date);
+      nextDate.setDate(date.getDate() + 1);
+
+      const leads = await Lead.find({
+        receivedDate: { $gte: date, $lt: nextDate }
+      });
+
+      const total = leads.length;
+      const closed = leads.filter(l => l.status === "Closed").length;
+      const conversion = total > 0 ? Math.round((closed / total) * 100) : 0;
+
+      chartData.push({
+        date: date.toISOString().split("T")[0],
+        totalLeads: total,
+        closedLeads: closed,
+        conversionRate: conversion
+      });
+    }
+
+    res.status(200).json(chartData);
+
+  } catch (err) {
+    console.error("❌ Chart data error:", err);
+    res.status(500).json({ error: "Failed to fetch chart data" });
+  }
+};
