@@ -60,3 +60,71 @@
 }
 
 
+/* ===== Pagination Container ===== */
+.paginationContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ===== Arrow Buttons (Prev/Next) ===== */
+.arrowBtn {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 6px;
+  color: #333333;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.arrowBtn:hover:not(:disabled) {
+  background-color: #f2f2f2;
+}
+
+.arrowBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== Page Number Buttons ===== */
+.pageNumbers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pageBtn {
+  padding: 6px 12px;
+  font-size: 0.88rem;
+  border-radius: 6px;
+  border: none;
+  background-color: transparent;
+  color: #4a5568;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pageBtn:hover {
+  background-color: #f0f0f0;
+}
+
+/* ===== Active Page ===== */
+.active {
+  background-color: #e2e8f0;
+  color: #111111;
+  font-weight: bold;
+  border: 1px solid #cbd5e0;
+}
+
+/* ===== Ellipsis (...) ===== */
+.ellipsis {
+  padding: 0 5px;
+  color: #718096;
+  font-size: 1rem;
+}

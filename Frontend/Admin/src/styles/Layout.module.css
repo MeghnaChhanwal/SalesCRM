@@ -12,7 +12,48 @@
   width: calc(100vw - 274px);
   padding: 2rem;
   background-color: #f9f9f9;
+  box-sizing: border-box;/* ======= Outer Layout Wrapper ======= */
+.container {
+  display: flex;
+  height: 100vh;
+  background-color: #f5f5f5;
+  overflow: hidden;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ======= Main Content Area ======= */
+.mainContent {
+  flex: 1;
+  margin-left: 274px;
+  width: calc(100vw - 274px);
+  padding: 2rem;
+  background-color: #f9f9f9;
   box-sizing: border-box;
+  overflow-y: auto;
+}
+
+/* ======= Header Row (Breadcrumb + Actions) ======= */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* ======= Breadcrumb Text ======= */
+.breadcrumbContainer {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+/* ======= Right-Side Element (Optional Button or Filter) ======= */
+.rightElementContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
   overflow: hidden; 
 }
 

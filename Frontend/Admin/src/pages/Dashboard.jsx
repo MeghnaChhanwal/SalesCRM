@@ -3,6 +3,7 @@ import MainLayout from "../components/Layout";
 import styles from "../styles/Dashboard.module.css";
 import { Bar } from "react-chartjs-2";
 import API from "../utils/axios";
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,6 +15,23 @@ import {
 } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
+
+// ✅ Utility to show "x hours ago", "x days ago"
+const getTimeAgo = (dateStr) => {
+  const now = new Date();
+  const past = new Date(dateStr);
+  const diffMs = now - past;
+
+ 
+  const minutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (days > 0) return `${days} day${days > 1 ? "s" : ""} ago`;
+  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  if (minutes > 0) return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
+  return "Just now";
+};
 
 const Dashboard = () => {
   const [employees, setEmployees] = useState([]);
@@ -33,7 +51,7 @@ const Dashboard = () => {
       try {
         const res = await API.get("/api/dashboard/overview");
         setStats(res.data);
-        setEmployees(res.data.employees || []); // ✅ Ensure backend sends `employees` array
+        setEmployees(res.data.employees || []);
       } catch (err) {
         console.error("Dashboard error:", err);
       } finally {
@@ -83,7 +101,8 @@ const Dashboard = () => {
 
       setClickedDayInfo({
         day: dayName,
-        closedLeads: selected.closedLeads || 0, // ✅ Access safely
+        closedLeads: selected.closedLeads,
+        conversion: selected.conversion,
       });
     },
     scales: {
@@ -112,7 +131,7 @@ const Dashboard = () => {
     <MainLayout showSearch={false}>
       <div className={styles.pageWrapper}>
         <div className={styles.dashboardContainer}>
-          {/* Summary Cards */}
+          {/* ✅ Top Stats */}
           <div className={styles.cardGrid}>
             <div className={styles.card}><h4>Unassigned Leads</h4><p>{stats.unassignedLeads}</p></div>
             <div className={styles.card}><h4>Assigned This Week</h4><p>{stats.assignedThisWeek}</p></div>
@@ -120,7 +139,7 @@ const Dashboard = () => {
             <div className={styles.card}><h4>Conversion Rate</h4><p>{stats.conversionRate}%</p></div>
           </div>
 
-          {/* Chart and Recent Activity */}
+          {/* ✅ Analytics Chart + Activity */}
           <div className={styles.analyticsRow}>
             <div className={styles.chartBox}>
               <h4>Sales Analytics</h4>
@@ -129,7 +148,7 @@ const Dashboard = () => {
               </div>
               {clickedDayInfo && (
                 <div className={styles.dayDetail}>
-                  📊 {clickedDayInfo.closedLeads} leads closed on {clickedDayInfo.day}
+                  📊 <strong>{clickedDayInfo.day}</strong> — {clickedDayInfo.closedLeads} leads closed, Conversion Rate: {clickedDayInfo.conversion}%
                 </div>
               )}
             </div>
@@ -142,15 +161,7 @@ const Dashboard = () => {
                 ) : (
                   stats.recentActivities.map((activity, index) => (
                     <li key={index}>
-                      • {activity.message || activity.text} —{" "}
-                      {new Date(activity.time || activity.timestamp).toLocaleString("en-IN", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: true,
-                      })}
+                      • {activity.message || activity.text} — {getTimeAgo(activity.time || activity.timestamp)}
                     </li>
                   ))
                 )}
@@ -158,7 +169,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Employee Table */}
+          {/* ✅ Employee Overview Table */}
           <div className={styles.tableWrapper}>
             <h4>Employee Overview</h4>
             <div className={styles.tableScroll}>

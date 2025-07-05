@@ -10,7 +10,7 @@ const Employee = () => {
   const [employees, setEmployees] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: "createdAt", direction: "desc" });
   const [currentPage, setCurrentPage] = useState(1);
-  const employeesPerPage = 7;
+  const employeesPerPage =6;
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);

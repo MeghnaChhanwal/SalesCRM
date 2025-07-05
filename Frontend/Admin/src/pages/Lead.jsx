@@ -24,7 +24,7 @@ const Lead = () => {
   const [sortConfig, setSortConfig] = useState({ key: "receivedDate", direction: "desc" });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const leadsPerPage = 7;
+  const leadsPerPage =6;
 
   useEffect(() => {
     fetchLeads();

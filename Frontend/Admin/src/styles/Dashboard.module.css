@@ -1,11 +1,10 @@
+
 .pageWrapper {
-  height: calc(100vh - 64px); /* Adjust if header is taller */
+  height: calc(100vh - 64px);
   overflow-y: auto;
   padding-right: 2px;
-
-  /* Scrollbar for full page scroll */
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
 }
 
 .pageWrapper::-webkit-scrollbar {
@@ -17,20 +16,17 @@
   border-radius: 10px;
 }
 
-.pageWrapper::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+/* === Dashboard Container === */
 .dashboardContainer {
-  padding: 1rem;
-  background: #f9fafb;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   min-height: 100%;
 }
 
-/* Summary cards */
+/* === Summary Cards === */
 .cardGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -38,54 +34,123 @@
 }
 
 .card {
-  background: white;
-  padding: 1rem;
+  background: #ffffff;
+  padding: 1rem 1.25rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
 }
 
-/* Analytics row */
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+.card h4 {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.card p {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #007bff;
+}
+
+/* === Analytics + Activity Row === */
 .analyticsRow {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
 }
 
+/* === Chart Box === */
 .chartBox {
   flex: 2;
-  background: white;
-  padding: 1rem;
+  background: #ffffff;
+  padding: 1.25rem;
   border-radius: 12px;
   min-width: 300px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.chartBox h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #222;
 }
 
 .chartWrapper {
   height: 280px;
 }
 
-/* No internal scroll inside activity box */
+.dayDetail {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  color: #007bff;
+  font-weight: 500;
+}
+
+/* === Activity Box === */
 .activityBox {
   flex: 1;
-  background: white;
-  padding: 1rem;
+  background: #ffffff;
+  padding: 1.25rem;
   border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.activityBox h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #222;
 }
 
 .activityList {
   list-style: none;
   padding-left: 0;
   margin: 0;
+  font-size: 0.95rem;
+  color: #444;
 }
 
-/* Employee table */
+.activityList li {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* === Table Wrapper === */
 .tableWrapper {
-  background: white;
-  padding: 1rem;
+  background: #ffffff;
+  padding: 1.25rem;
   border-radius: 12px;
-  overflow-x: auto;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  max-height: 320px;
+  overflow-y: auto;
 }
 
+.tableWrapper::-webkit-scrollbar {
+  width: 6px;
+}
+.tableWrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+.tableWrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tableWrapper h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #222;
+}
+
+/* === Table Scroll (for mobile) === */
 .tableScroll {
   overflow-x: auto;
 }
@@ -93,29 +158,55 @@
 .tableScroll::-webkit-scrollbar {
   height: 6px;
 }
-
 .tableScroll::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.1);
   border-radius: 10px;
 }
 
+/* === Table Styling === */
 table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.95rem;
 }
 
-th, td {
-  padding: 0.75rem;
+th,
+td {
+  padding: 0.75rem 0.75rem;
   text-align: left;
   border-bottom: 1px solid #eee;
+  white-space: nowrap;
 }
 
 th {
-  background-color: #f2f2f2;
+  background-color: #f1f1f1;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
-.dayDetail {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #007bff;
+
+td {
+  color: #555;
+}
+
+/* === Status Colors === */
+td span.active {
+  color: #28a745;
   font-weight: bold;
+}
+
+td span.inactive {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .chartBox, .activityBox {
+    flex: 1 1 100%;
+  }
+
+  .tableWrapper {
+    max-height: none;
+  }
 }

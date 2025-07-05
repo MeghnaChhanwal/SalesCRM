@@ -31,7 +31,6 @@ const Home = () => {
 
   const fetchActivity = async () => {
     try {
-      // ✅ Updated path based on activityRoutes.js
       const res = await API.get(`/api/activity/employee/${employee._id}`);
       if (res.data) {
         setActivities(res.data.slice(0, 10));
@@ -66,6 +65,22 @@ const Home = () => {
       month: "2-digit",
       year: "numeric",
     });
+  };
+
+  const getTimeAgo = (timestamp) => {
+    const now = new Date();
+    const then = new Date(timestamp);
+    const diffMs = now - then;
+
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
+
+    if (diffDay >= 1) return `${diffDay} day${diffDay > 1 ? "s" : ""} ago`;
+    if (diffHr >= 1) return `${diffHr} hour${diffHr > 1 ? "s" : ""} ago`;
+    if (diffMin >= 1) return `${diffMin} minute${diffMin > 1 ? "s" : ""} ago`;
+    return "Just now";
   };
 
   return (
@@ -125,16 +140,8 @@ const Home = () => {
           <ul>
             {activities.length > 0 ? (
               activities.map((item, idx) => (
-                <li key={idx}>
-                  {item.message} —{" "}
-                  {new Date(item.time).toLocaleString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                  })}
+                <li key={`${item.message}-${idx}`}>
+                  {item.message} — {getTimeAgo(item.time)}
                 </li>
               ))
             ) : (

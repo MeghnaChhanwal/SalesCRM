@@ -1,83 +1,92 @@
 
-:root {
-  --sidebar-width: 274px;
-  --sidebar-bg: #d3d3d3;
-  --sidebar-hover-bg: #bbb;
-  --active-bg: #6b6d6b;
-  --active-text: #ffffff;
-  --text-color: #000000;
-  --font-size-base: 1rem;
-  --font-size-logo: 1.3rem;
-  --padding-base: 0.75rem;
-  --border-radius: 4px;
-}
-
-
 .sidebar {
-  width: var(--sidebar-width);
+  width: 274px;
   height: 100vh;
-  background-color: var(--sidebar-bg);
+  background-color: #e0e0e0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 1rem var(--padding-base);
+  padding: 1rem 0.75rem;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+  font-family: "Segoe UI", Roboto, sans-serif;
 }
 
-/* ===== Logo Section ===== */
+
 .logo {
-  font-size: var(--font-size-logo);
-  font-weight: bold;
+  font-size: 1.3rem;
+  font-weight: 600;
   padding-left: 0.5rem;
   margin-bottom: 2rem;
+  color: #000000;
 }
 
 .crm {
-  color: var(--active-bg);
+  color: #6b6d6b;
 }
 
 /* ===== Navigation List ===== */
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex-grow: 1;
 }
 
 .navItem {
   background-color: transparent;
   border: none;
-  padding: 0.6rem 0.5rem;
+  padding: 0.65rem 0.75rem;
   text-align: left;
-  border-radius: var(--border-radius);
+  border-radius: 6px;
   cursor: pointer;
-  font-size: var(--font-size-base);
-  color: var(--text-color);
+  font-size: 1rem;
+  color: #000000;
   transition: background-color 0.2s ease, color 0.2s ease;
+  font-weight: 500;
 }
 
 .navItem:hover {
-  background-color: var(--sidebar-hover-bg);
+  background-color: #cccccc;
 }
 
 .navItem.active {
-  background-color: var(--active-bg);
-  color: var(--active-text);
+  background-color: #6b6d6b;
+  color: #ffffff;
 }
 
-/* ===== Bottom Section ===== */
 .bottom {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding-bottom: 1rem;
+  gap: 0.6rem;
+  padding-top: 1rem;
+  padding-bottom: 0.5rem;
 }
 
-/* ===== Optional: Small Screen Handling (Optional for Desktop Apps) ===== */
+
+.navScrollable {
+  overflow-y: auto;
+  max-height: calc(100vh - 150px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.navScrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.navScrollable::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.navScrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 @media (max-width: 1024px) {
   .sidebar {
     width: 240px;

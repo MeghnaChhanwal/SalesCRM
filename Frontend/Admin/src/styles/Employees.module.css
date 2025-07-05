@@ -1,55 +1,55 @@
-/* Main Container */
+
 .container {
-  padding: 1.25rem;
+  padding: 1.5rem;
   background-color: #f5f7fa;
   min-height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-/* Add Button */
+
 .addBtn {
-  background-color: #969a9d;
-  color: white;
+  background-color: #6b7280; 
+  color: #ffffff;
   padding: 10px 18px;
   border: none;
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
-  transition: 0.3s ease-in-out;
+  transition: background-color 0.3s ease-in-out;
 }
 
 .addBtn:hover {
-  background-color: #797979;
+  background-color: #4b5563; 
 }
 
-/* Error Message */
+
 .error {
-  color: red;
+  color: #dc2626; 
   font-size: 0.85rem;
-  margin: 1rem 0;
+  margin-top: 1rem;
+  font-weight: 500;
 }
 
-/* Table Container */
+
 .tableContainer {
-  background-color: white;
+  background-color: #ffffff;
   padding: 1rem;
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   margin-top: 1rem;
-  overflow-x: auto; /* Allow scroll if content is too wide */
-
-  /* Hide scrollbar visually */
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none;    /* Firefox */
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+
 .tableContainer::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
 
-/* Table Styles */
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -57,28 +57,29 @@
 
 .table th,
 .table td {
-  padding: 6px 8px;
+  padding: 10px 14px;
   text-align: left;
-  font-size: 0.82rem;
-  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .table th {
-  background-color: #f1f4f8;
-  color: #333;
+  background-color: #f9fafb;
   font-weight: 600;
+  color: #374151;
+  user-select: none;
   cursor: pointer;
 }
 
-/* Status Styles */
+
 .statusActive,
 .statusInactive {
-  border-radius: 16px;
   padding: 4px 10px;
-  display: inline-block;
   font-size: 0.8rem;
   font-weight: 600;
+  border-radius: 16px;
   min-width: 80px;
+  display: inline-block;
   text-align: center;
 }
 
@@ -92,20 +93,20 @@
   color: #991b1b;
 }
 
-/* Employee ID Styling */
+
 .empIdBox {
   background-color: #f3f4f6;
   color: #4b5563;
-  border-radius: 16px;
-  padding: 4px 10px;
   font-weight: 600;
   font-size: 0.8rem;
+  border-radius: 16px;
+  padding: 4px 10px;
+  text-align: center;
   display: inline-block;
   min-width: 100px;
-  text-align: center;
 }
 
-/* 3-dot Menu */
+
 .dropdown {
   position: relative;
   display: inline-block;
@@ -124,12 +125,12 @@
   display: none;
   position: absolute;
   right: 0;
-  top: 25px;
-  background-color: white;
-  border: 1px solid #ddd;
+  top: 28px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 130px;
+  width: 140px;
   z-index: 10;
 }
 
@@ -141,37 +142,43 @@
   background: none;
   border: none;
   padding: 10px 16px;
+  font-size: 0.9rem;
   width: 100%;
   text-align: left;
+  color: #111827;
   cursor: pointer;
-  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .menuContent button:hover {
-  background-color: #f0f0f0;
+  background-color: #f3f4f6;
 }
 
-/* Pagination */
 .paginationContainer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1.25rem;
-  gap: 0.75rem;
+  margin-top: 1.5rem;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
 .arrowBtn {
   padding: 8px 14px;
   font-size: 0.9rem;
-  background-color: white;
-  border: 1px solid #ccc;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
   cursor: pointer;
-  color: #333;
+  color: #374151;
+  transition: background-color 0.2s ease;
+}
+
+.arrowBtn:hover:not(:disabled) {
+  background-color: #f3f4f6;
 }
 
 .arrowBtn:disabled {
@@ -192,24 +199,24 @@
   border-radius: 6px;
   border: none;
   background-color: transparent;
-  color: #4a5568;
+  color: #4b5563;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .pageBtn:hover {
-  background-color: #f0f0f0;
+  background-color: #e5e7eb;
 }
 
 .active {
-  background-color: #e2e8f0;
-  color: #111;
-  font-weight: bold;
-  border: 1px solid #cbd5e0;
+  background-color: #cbd5e1;
+  color: #111827;
+  font-weight: 600;
+  border: 1px solid #94a3b8;
 }
 
 .ellipsis {
   padding: 0 5px;
-  color: #718096;
   font-size: 1rem;
+  color: #9ca3af;
 }

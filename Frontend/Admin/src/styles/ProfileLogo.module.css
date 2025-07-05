@@ -1,4 +1,4 @@
-
+/* ===== Profile Circle ===== */
 .profileCircle {
   width: 34px;
   height: 34px;
@@ -13,92 +13,25 @@
   text-transform: uppercase;
 }
 
+/* ===== Name + Circle Wrapper ===== */
 .nameCell {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-/* Full Name Styling */
+/* ===== Full Name ===== */
 .empName {
   font-weight: 600;
   color: #1f2937;
   font-size: 0.9rem;
+  line-height: 1.2;
 }
 
-/* Email Styling (optional) */
+/* ===== Email (Optional) ===== */
 .empEmail {
   color: #374151;
   font-size: 0.85rem;
   font-weight: 500;
-}
-/* Profile Circle */
-.profileCircle {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background-color: #d1d5db;
-  color: #111827;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-}
-
-/* Profile Info Container */
-.nameCell {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* Full Name Styling */
-.empName {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 0.9rem;
-}
-/* Profile Circle */
-.profileCircle {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background-color: #d1d5db;
-  color: #111827;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 600;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-}
-
-/* Profile Info Container */
-.nameCell {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-/* Full Name Styling */
-.empName {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 0.9rem;
-}
-
-/* Email Styling (optional) */
-.empEmail {
-  color: #374151;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-/* Email Styling (optional) */
-.empEmail {
-  color: #374151;
-  font-size: 0.85rem;
-  font-weight: 500;
+  line-height: 1.2;
 }
