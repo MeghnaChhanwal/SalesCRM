@@ -4,48 +4,36 @@ import cors from "cors";
 import dotenv from "dotenv";
 import fs from "fs";
 
-// Load environment variables
+// ✅ Load environment variables
 dotenv.config();
 
 const app = express();
 
-// ✅ Create upload folder if not exists
+// ✅ Create upload folder if it doesn't exist
 const uploadFolder = "upload";
 if (!fs.existsSync(uploadFolder)) {
   fs.mkdirSync(uploadFolder);
 }
 
-// ✅ Allowed frontend URLs
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://your-frontend1.onrender.com",
-  "https://your-frontend2.vercel.app",
-  "https://your-frontend3.netlify.app",
-  // Add more if needed
-];
-
-// ✅ CORS Middleware
+// ✅ CORS Middleware - Allow All Origins (Dev Only)
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("❌ Not allowed by CORS"));
-      }
-    },
+    origin: true, // ✅ Allow all origins
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// ✅ Handle preflight requests
+// ✅ Handle preflight requests globally
 app.options("*", cors());
 
-// ✅ Body Parsers
+// ✅ Body parsers
 app.use(express.json());
-app.use(express.text()); // For navigator.sendBeacon support
+app.use(express.text()); // Support for navigator.sendBeacon
+
+// ✅ Serve static uploaded files if needed
+app.use("/uploads", express.static("upload"));
 
 // ✅ Connect to MongoDB
 mongoose
@@ -69,9 +57,15 @@ app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-// ✅ Default Route
+// ✅ Default test route
 app.get("/", (req, res) => {
   res.send("🚀 SalesCRM Backend is running");
+});
+
+// ✅ Global error handler (important for multer or CORS errors)
+app.use((err, req, res, next) => {
+  console.error("🔥 Global Error:", err.message);
+  res.status(500).json({ error: err.message || "Internal Server Error" });
 });
 
 // ✅ Start Server

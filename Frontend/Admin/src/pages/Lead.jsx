@@ -51,15 +51,31 @@ const Lead = () => {
     }
   };
 
+  // ✅ Improved CSV validation logic
   const verifyCSV = (file, callback) => {
     Papa.parse(file, {
       header: true,
+      skipEmptyLines: true,
       complete: (results) => {
         const required = ["name", "email", "phone", "language", "location"];
-        const invalidRows = results.data.filter((row) =>
-          required.some((field) => !row[field] || row[field].trim() === "")
+
+        const cleanedRows = results.data.map((row) => {
+          const cleanedRow = {};
+          required.forEach((field) => {
+            cleanedRow[field] = row[field]?.trim() || "";
+          });
+          return cleanedRow;
+        });
+
+        const invalidRows = cleanedRows.filter((row) =>
+          required.some((field) => row[field] === "")
         );
+
         callback(invalidRows.length === 0, invalidRows.length);
+      },
+      error: (err) => {
+        console.error("CSV Parse Error:", err);
+        callback(false, 0);
       },
     });
   };
@@ -181,9 +197,7 @@ const Lead = () => {
             )}
 
             <div className={styles.formActions}>
-              <button type="submit" disabled={uploading || !file}>
-                Upload
-              </button>
+              <button type="submit" disabled={uploading || !file}>Upload</button>
               <button type="button" onClick={() => { setFile(null); setModalType(null); }} disabled={uploading}>
                 Cancel
               </button>
