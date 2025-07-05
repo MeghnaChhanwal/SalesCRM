@@ -5,14 +5,16 @@ import {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  autoUpdateEmployeeStatuses,
 } from "../controllers/employeeController.js";
 
 const router = express.Router();
 
-router.get("/", getEmployees);         // with pagination/search/sort
-router.get("/all", getAllEmployees);   // all employees - dashboard use
+router.get("/", getEmployees);
+router.get("/all", getAllEmployees);
 router.post("/", createEmployee);
 router.put("/:id", updateEmployee);
 router.delete("/:id", deleteEmployee);
+router.patch("/auto/update-status", autoUpdateEmployeeStatuses);
 
 export default router;
