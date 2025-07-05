@@ -1,3 +1,4 @@
+// routes/authRoutes.js
 import express from "express";
 import { loginEmployee, logoutEmployee } from "../controllers/authController.js";
 

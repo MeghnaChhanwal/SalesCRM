@@ -1,3 +1,4 @@
+// src/pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import API from "../utils/axios";
@@ -8,16 +9,20 @@ const Home = () => {
   const { employee } = useAuth();
   const [timing, setTiming] = useState(null);
   const [activities, setActivities] = useState([]);
+  const [breakHistory, setBreakHistory] = useState([]);
 
   useEffect(() => {
     if (employee) {
       fetchTiming();
       fetchActivity();
+      fetchBreaks();
     }
 
-    // Refetch on tab focus (e.g., after logout via beacon)
     const handleFocus = () => {
-      if (employee) fetchTiming();
+      if (employee) {
+        fetchTiming();
+        fetchBreaks();
+      }
     };
 
     window.addEventListener("visibilitychange", handleFocus);
@@ -26,23 +31,26 @@ const Home = () => {
 
   const fetchTiming = async () => {
     try {
-      const res = await API.get(`/api/timing/${employee._id}`);
-      if (res.data?.timing) {
-        setTiming(res.data.timing);
-      } else {
-        setTiming(null);
-      }
+      const res = await API.get(`/api/timing/today/${employee._id}`);
+      setTiming(res.data?.timing || null);
     } catch (err) {
       console.error("Fetch timing error:", err);
+    }
+  };
+
+  const fetchBreaks = async () => {
+    try {
+      const res = await API.get(`/api/timing/breaks/${employee._id}`);
+      setBreakHistory(res.data || []);
+    } catch (err) {
+      console.error("Fetch breaks error:", err);
     }
   };
 
   const fetchActivity = async () => {
     try {
       const res = await API.get(`/api/activity/employee/${employee._id}`);
-      if (res.data) {
-        setActivities(res.data.slice(0, 10));
-      }
+      if (res.data) setActivities(res.data.slice(0, 10));
     } catch (err) {
       console.error("Fetch activity error:", err);
     }
@@ -79,9 +87,7 @@ const Home = () => {
     const now = new Date();
     const then = new Date(timestamp);
     const diffMs = now - then;
-
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
+    const diffMin = Math.floor(diffMs / 60000);
     const diffHr = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHr / 24);
 
@@ -117,18 +123,16 @@ const Home = () => {
           </div>
         </div>
 
-        {/* ✅ Break History */}
-        {timing?.breaks?.length > 0 && (
+        {/* ✅ Break History (latest on top, first is today's in blue) */}
+        {breakHistory?.length > 0 && (
           <div className={styles.breakCard}>
             <div className={styles.breakHeader}>
-              <strong>Break Start</strong>
-              <strong>Break End</strong>
+              <strong>Break</strong>
+              <strong>Ended</strong>
               <strong>Date</strong>
             </div>
-            {[...timing.breaks]
-              .filter((b) => b.start && b.end)
-              .slice(-7)
-              .reverse()
+            {[...breakHistory]
+              .slice(0, 7)
               .map((brk, i) => (
                 <div
                   key={i}
@@ -138,7 +142,7 @@ const Home = () => {
                 >
                   <span>{formatTime(brk.start)}</span>
                   <span>{formatTime(brk.end)}</span>
-                  <span>{formatDate(timing.date)}</span>
+                  <span>{formatDate(brk.date)}</span>
                 </div>
               ))}
           </div>

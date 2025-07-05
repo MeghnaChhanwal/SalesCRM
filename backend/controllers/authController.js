@@ -16,11 +16,12 @@ export const loginEmployee = async (req, res) => {
       return res.status(404).json({ error: "Employee not found" });
     }
 
+    // Password check based on last name (case insensitive)
     if (employee.lastName.toLowerCase() !== password.toLowerCase()) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Set employee status as Active
+    // Mark employee Active
     employee.status = "Active";
     await employee.save();
 
@@ -30,7 +31,7 @@ export const loginEmployee = async (req, res) => {
     let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
-      // First login today
+      // First login of the day
       timing = new Timing({
         employee: employee._id,
         date,
@@ -40,20 +41,20 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      // Re-login today: update checkIn + end break if open
+      // Re-login: update checkIn & ensure any ongoing break is ended
       timing.checkIn = time;
       timing.status = "Active";
       timing.breakStatus = "OffBreak";
 
       const lastBreak = timing.breaks[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
-        lastBreak.end = time; // end last break on login
+        lastBreak.end = time; // close the open break
       }
     }
 
     await timing.save();
 
-    // Remove password before sending response
+    // Clean response (remove password logic)
     const { password: _, ...empData } = employee.toObject();
     res.status(200).json(empData);
   } catch (error) {
@@ -72,7 +73,7 @@ export const logoutEmployee = async (req, res) => {
       return res.status(404).json({ error: "Employee not found" });
     }
 
-    // Set employee status as Inactive
+    // Mark employee Inactive
     employee.status = "Inactive";
     await employee.save();
 
@@ -85,7 +86,7 @@ export const logoutEmployee = async (req, res) => {
       timing.checkOut = time;
       timing.status = "Inactive";
       timing.breakStatus = "OnBreak";
-      timing.breaks.push({ start: time }); // start new break
+      timing.breaks.push({ start: time }); // assume end of session is break
       await timing.save();
 
       res.status(200).json({ message: "Logged out", timing });
