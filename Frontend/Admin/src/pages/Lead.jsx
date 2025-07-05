@@ -51,14 +51,12 @@ const Lead = () => {
     }
   };
 
-  // ✅ Improved CSV validation logic
   const verifyCSV = (file, callback) => {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
         const required = ["name", "email", "phone", "language", "location"];
-
         const cleanedRows = results.data.map((row) => {
           const cleanedRow = {};
           required.forEach((field) => {
@@ -94,17 +92,20 @@ const Lead = () => {
       try {
         setUploading(true);
         const response = await API.post("/api/leads/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
           onUploadProgress: (e) => {
             setUploadProgress(Math.round((e.loaded * 100) / e.total));
           },
         });
 
-        alert(response.data.message || "File uploaded successfully");
+        alert(
+          `${response.data.message}\nUploaded: ${response.data.uploaded}\nInvalid Rows: ${response.data.invalidRows}`
+        );
+
         setUploading(false);
         setUploadProgress(0);
         setFile(null);
         setModalType(null);
+        setCurrentPage(1); // ✅ Reset page after upload
         fetchLeads();
       } catch (err) {
         console.error("Upload error:", err);
@@ -121,6 +122,7 @@ const Lead = () => {
       alert("Lead added successfully");
       setModalType(null);
       setFormData({ name: "", email: "", phone: "", location: "", language: "" });
+      setCurrentPage(1);
       fetchLeads();
     } catch (err) {
       console.error("Manual entry error:", err);
