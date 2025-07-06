@@ -72,60 +72,61 @@ const Home = () => {
   return (
     <Layout>
       <div className={styles.homeContainer}>
-        {/* ==== Timing Card ==== */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <h3>Timing</h3>
-            {timing?.checkIn && !timing?.checkOut && (
-              <div className={styles.statusDot} title="Active"></div>
-            )}
-          </div>
-          {timing ? (
-            <ul className={styles.timingList}>
-              
-              <li><strong>Check-In:</strong> {timing.checkIn || "–"}</li>
-              <li><strong>Check-Out:</strong> {timing.checkOut || "–"}</li>
-              <li><strong>Status:</strong> {timing.status}</li>
-              <li><strong>Break:</strong> {timing.breakStatus === "OnBreak" ? "On Break" : "Off Break"}</li>
-            </ul>
-          ) : (
-            <p>No check-in record found today.</p>
-          )}
+        {/* === Greeting Header (optional) === */}
+        <div className={styles.headerCard}>
+          <p className={styles.greet}>Good Morning</p>
+          <h2 className={styles.name}>{employee?.firstName} {employee?.lastName}</h2>
         </div>
 
-        {/* ==== Break Logs Card ==== */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-             <li><strong>Break:</strong> {timing.breakStatus === "OnBreak" ? "On Break" : "Off Break"}</li>
-            <span className={styles.blueLabel}>Last 7 Days</span>
+        {/* === Timings Section === */}
+        <h4 className={styles.sectionTitle}>Timings</h4>
+        <div className={styles.cardRow}>
+          <div className={`${styles.blueCard} ${styles.active}`}>
+            <p className={styles.cardLabel}>Checked-In</p>
+            <p className={styles.cardTime}>{timing?.checkIn || "--:--"}</p>
+            <div className={styles.greenBar}></div>
           </div>
-          {breaks.length > 0 ? (
-            <ul className={styles.breakList}>
-              {breaks.map((b, idx) => (
-                <li key={idx} className={styles.breakItem}>
-                  <span>{new Date(b.date).toLocaleDateString()}:</span> <span>{b.start} → {b.end}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No completed breaks yet.</p>
-          )}
+          <div className={styles.blueCard}>
+            <p className={styles.cardLabel}>Check Out</p>
+            <p className={styles.cardTime}>{timing?.checkOut || "--:--"}</p>
+            <div className={styles.greenBar}></div>
+          </div>
         </div>
 
-        {/* ==== Activity Log Card ==== */}
-        <div className={styles.card}>
-          <h3> Recent Activity</h3>
-          {activities.length > 0 ? (
+        {/* === Latest Break === */}
+        {timing?.breakStart && timing?.breakEnd && (
+          <div className={`${styles.blueCard} ${styles.breakCard}`}>
+            <p className={styles.cardLabel}>Break</p>
+            <p className={styles.cardTime}>{timing.breakStart} → {timing.breakEnd}</p>
+            <div className={styles.redBar}></div>
+          </div>
+        )}
+
+        {/* === Break History Table === */}
+        <div className={styles.breakHistory}>
+          {breaks.slice(1, 5).map((b, idx) => (
+            <div key={idx} className={styles.breakRow}>
+              <span>{b.start}</span>
+              <span>{b.end}</span>
+              <span>{new Date(b.date).toLocaleDateString()}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* === Recent Activity === */}
+        <h4 className={styles.sectionTitle}>Recent Activity</h4>
+        <div className={styles.recentBox}>
+          {activities.length === 0 ? (
+            <p className={styles.empty}>No recent activity.</p>
+          ) : (
             <ul className={styles.activityList}>
               {activities.map((a, i) => (
                 <li key={i}>
-                  <span> {a.message}</span>
-                  <small>{getTimeAgo(a.time)}</small>
+                  • {a.message}
+                  <span className={styles.timeAgo}> — {getTimeAgo(a.time)}</span>
                 </li>
               ))}
             </ul>
-          ) : (
-            <p>No recent activity.</p>
           )}
         </div>
       </div>

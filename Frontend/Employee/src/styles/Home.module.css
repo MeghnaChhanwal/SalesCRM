@@ -1,24 +1,115 @@
-/* ...existing styles... */
-
-.actionBtn {
-  margin-top: 4px;
-  padding: 6px 12px;
-  background-color: #007bff;
+/* HEADER */
+.headerCard {
+  padding: 16px;
+  background-color: #1e52e8;
   color: white;
-  border: none;
-  border-radius: 25px;
-  font-weight: bold;
+  border-radius: 0 0 20px 20px;
+}
+
+.greet {
+  margin: 0;
   font-size: 14px;
-  cursor: pointer;
 }
 
-.actionBtn:hover {
-  background-color: #0056b3;
+.name {
+  font-size: 20px;
+  font-weight: 600;
 }
 
-.loading {
-  padding: 2rem;
-  text-align: center;
+/* TIMING + BREAK */
+.sectionTitle {
   font-size: 16px;
-  color: #666;
+  margin: 16px 0 8px;
+}
+
+.cardRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.blueCard {
+  background-color: #e3eeff;
+  flex: 1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  position: relative;
+}
+
+.cardLabel {
+  font-size: 12px;
+  color: #555;
+}
+
+.cardTime {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.greenBar {
+  position: absolute;
+  right: 8px;
+  top: 10px;
+  bottom: 10px;
+  width: 5px;
+  background-color: #28c76f;
+  border-radius: 6px;
+}
+
+.redBar {
+  position: absolute;
+  right: 8px;
+  top: 10px;
+  bottom: 10px;
+  width: 5px;
+  background-color: #ea5455;
+  border-radius: 6px;
+}
+
+.breakCard {
+  margin-bottom: 16px;
+}
+
+/* BREAK HISTORY */
+.breakHistory {
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+.breakRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+/* ACTIVITY */
+.recentBox {
+  background-color: #f4f4f4;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.activityList {
+  list-style: none;
+  padding-left: 0;
+}
+
+.activityList li {
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+.timeAgo {
+  font-size: 12px;
+  color: #888;
+  margin-left: 6px;
+}
+
+.empty {
+  font-size: 14px;
+  color: #999;
 }
