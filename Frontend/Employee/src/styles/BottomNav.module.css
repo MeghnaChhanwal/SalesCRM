@@ -79,9 +79,3 @@
   }
 }
 
-/* ✅ Safe-area support for iPhones with notch (e.g., iPhone X+) */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .navbar {
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-  }
-}
