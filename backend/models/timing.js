@@ -1,39 +1,37 @@
 import mongoose from "mongoose";
 
-// 🔹 Sub-schema for each break entry (no ObjectId)
 const breakSchema = new mongoose.Schema(
   {
     start: {
-      type: String, // Format: "HH:MM AM/PM"
+      type: String, // "HH:MM AM/PM"
       required: true,
     },
     end: {
-      type: String, // optional — break may still be ongoing
+      type: String, // optional (for ongoing break)
     },
   },
-  { _id: false } // no _id field for subdocs
+  { _id: false }
 );
 
-// 🔹 Main schema for daily timing record
 const timingSchema = new mongoose.Schema(
   {
     employee: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Employee",
       required: true,
-      index: true, // faster lookup by employee
+      index: true,
     },
     date: {
-      type: String, // Format: YYYY-MM-DD (IST)
+      type: String, // "YYYY-MM-DD"
       required: true,
-      index: true, // efficient filtering by day
+      index: true,
     },
     checkIn: {
-      type: String, // e.g. "09:00 AM"
+      type: String, // "HH:MM AM/PM"
       required: true,
     },
     checkOut: {
-      type: String, // e.g. "06:00 PM"
+      type: String,
       default: null,
     },
     status: {
@@ -46,14 +44,13 @@ const timingSchema = new mongoose.Schema(
       enum: ["OnBreak", "OffBreak"],
       default: "OffBreak",
     },
-    breaks: [breakSchema], // array of breaks
+    breaks: [breakSchema],
   },
   {
-    timestamps: true, // adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 
-// 🔹 Optional compound index (if frequently queried together)
 timingSchema.index({ employee: 1, date: 1 }, { unique: true });
 
 export default mongoose.model("Timing", timingSchema);
