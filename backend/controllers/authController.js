@@ -20,9 +20,9 @@ export const loginEmployee = async (req, res) => {
     if (employee.status === "Active")
       return res.status(403).json({ error: "Already logged in" });
 
-    // ✅ Set status Active
+    // Step 1: Set Active status
     employee.status = "Active";
-    await employee.save();
+    await employee.save(); // Step 2: Save to MongoDB
 
     const date = todayIST();
     const time = timeIST();
@@ -30,7 +30,7 @@ export const loginEmployee = async (req, res) => {
     let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
-      // ✅ First login today
+      // New day – check in
       timing = new Timing({
         employee: employee._id,
         date,
@@ -40,28 +40,27 @@ export const loginEmployee = async (req, res) => {
         breaks: [],
       });
     } else {
-      // ✅ Re-login: update check-in time and resume
-      timing.checkIn = time; // ⬅️ Overwrite previous check-in time
+      // Already exists – resume session
+      checkIn: time,
       timing.status = "Active";
       timing.breakStatus = "OffBreak";
 
       const lastBreak = timing.breaks[timing.breaks.length - 1];
       if (lastBreak && !lastBreak.end) {
-        lastBreak.end = time; // End open break
+        lastBreak.end = time; // Auto-end break
       }
     }
 
     await timing.save();
 
-    const updatedEmployee = await Employee.findById(employee._id).lean();
-    const { password: _, ...empData } = updatedEmployee;
-
+    const { password: pwd, ...empData } = employee.toObject();
     res.status(200).json(empData);
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ error: "Login failed" });
   }
-}
+};
+
 // ✅ Logout Controller (check-out + break + inactive)
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
@@ -71,7 +70,6 @@ export const logoutEmployee = async (req, res) => {
     if (!employee)
       return res.status(404).json({ error: "Employee not found" });
 
-    // ✅ Update employee status
     employee.status = "Inactive";
     await employee.save();
 
@@ -80,21 +78,17 @@ export const logoutEmployee = async (req, res) => {
 
     const timing = await Timing.findOne({ employee: employeeId, date });
 
-    if (!timing)
-      return res.status(404).json({ error: "Timing record not found for logout" });
+    if (timing) {
+      timing.checkOut = time;
+      timing.status = "Inactive";
+      timing.breakStatus = "OnBreak";
+      timing.breaks.push({ start: time }); // idle break
+      await timing.save();
 
-    if (timing.checkOut) {
-      return res.status(400).json({ error: "Already logged out" });
+      res.status(200).json({ message: "Logged out", timing });
+    } else {
+      res.status(404).json({ error: "Timing record not found for logout" });
     }
-
-    // ✅ Update today's timing record
-    timing.checkOut = time;
-    timing.status = "Inactive";
-    timing.breakStatus = "OnBreak";
-    timing.breaks.push({ start: time }); // start idle break
-    await timing.save();
-
-    res.status(200).json({ message: "Logged out", timing });
   } catch (error) {
     console.error("Logout Error:", error);
     res.status(500).json({ error: "Logout failed" });
