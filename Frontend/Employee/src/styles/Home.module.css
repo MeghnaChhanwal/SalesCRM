@@ -1,103 +1,147 @@
-.homeWrapper {
-  padding: 16px;
-  font-family: "Inter", sans-serif;
+.container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 .sectionTitle {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 8px 0 4px 4px;
 }
 
-.cardRow {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.blueCard {
-  background-color: #2563eb;
-  color: white;
+.card {
+  background-color: #fff;
   border-radius: 14px;
-  padding: 12px;
-  flex: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.blueHeader {
+  background-color: #007bff;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: relative;
+  border-radius: 14px 14px 0 0;
+  color: #fff;
+}
+
+.timingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .label {
-  font-size: 14px;
-  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #e0e0e0;
 }
 
-.time {
-  font-size: 20px;
-  font-weight: bold;
+.valueDark {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
 }
 
-.statusLineGreen {
+.indicator {
   position: absolute;
-  right: 8px;
   top: 8px;
-  height: 40px;
-  width: 6px;
-  border-radius: 68px;
-  background-color: limegreen;
-}
-
-.statusLineRed {
-  position: absolute;
   right: 8px;
-  top: 8px;
-  height: 40px;
   width: 6px;
-  border-radius: 68px;
-  background-color: red;
+  height: 60%;
+  border-radius: 86px;
 }
 
-.breakBox {
-  margin-bottom: 12px;
+.green {
+  background-color: #4caf50;
 }
 
-.breakHistory {
-  background: #f3f4f6;
-  border-radius: 14px;
-  padding: 12px;
-  margin-bottom: 16px;
+.red {
+  background-color: #f44336;
 }
 
-.breakRow {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  margin-bottom: 6px;
+.historyHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  background-color: #f7f7f7;
+  padding: 10px 16px;
 }
 
-.recentBox {
-  background: #f3f4f6;
-  border-radius: 14px;
-  padding: 12px;
-  max-height: 150px;
+.historyRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #555;
+  border-top: 1px solid #eee;
+}
+
+.scrollBox {
+  max-height: 160px;
   overflow-y: auto;
+  padding: 8px 0;
+}
+
+.scrollBoxTall {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 12px 16px;
 }
 
 .activityList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 14px;
-}
-
-.activityList li {
-  margin-bottom: 8px;
+  padding-left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 15px;
+  color: #444;
 }
 
 .timeAgo {
-  color: gray;
-  font-size: 12px;
+  color: #aaa;
+  font-size: 11px;
+}
+
+.empty {
+  font-size: 13px;
+  color: #aaa;
+  text-align: center;
+  padding: 12px;
 }
 
 .loading {
-  padding: 30px;
   text-align: center;
-  font-size: 16px;
+  padding: 24px;
+  font-size: 15px;
+  color: #666;
+}
+
+@media (max-width: 600px) {
+  .valueDark {
+    font-size: 15px;
+  }
+
+  .label {
+    font-size: 11px;
+  }
+
+  .historyRow,
+  .historyHeader {
+    font-size: 12px;
+  }
+
+  .sectionTitle {
+    font-size: 18px;
+  }
 }

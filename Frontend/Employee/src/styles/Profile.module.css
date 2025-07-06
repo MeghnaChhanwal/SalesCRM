@@ -1,103 +1,100 @@
-/* Reset */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* Profile Card */
 .card {
-  padding: 20px;
+  max-width: 300px;
+  width: 100%;
+  background-color: #fff;
+  margin: 30px auto;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 15px auto;
-  max-width: 400px;
-  background-color: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  gap: 14px;
+  font-family: "Segoe UI", sans-serif;
 }
 
-/* Label Style */
 label {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   color: #333;
+  margin-bottom: 4px;
 }
 
-/* Input Style */
 input {
-  width: 100%;
   padding: 10px 14px;
   font-size: 14px;
-  border: 1px solid #ccc;
   border-radius: 10px;
-  background-color: #fefefe;
-  transition: border-color 0.3s ease;
+  border: 1px solid #ddd;
+  outline: none;
+  background-color: #f9f9f9;
+  transition: border-color 0.2s ease;
 }
 
 input:focus {
-  border-color: #1a4be1;
-  outline: none;
+  border-color: #007bff;
+  background-color: #fff;
 }
 
-/* Password Input Wrapper */
 .passwordWrapper {
-  position: relative;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  background-color: #f1f6ff;
+  border: 1px solid #cfdffe;
+  border-radius: 10px;
+  padding: 8px 12px;
 }
 
 .passwordWrapper input {
+  border: none;
+  background: transparent;
   flex: 1;
-  padding-right: 40px;
+  padding: 0;
+  font-size: 14px;
+}
+
+.passwordWrapper input:focus {
+  outline: none;
 }
 
 .passwordWrapper span {
-  position: absolute;
-  right: 12px;
-  font-size: 18px;
-  color: #555;
+  font-size: 12px;
+  color: #007bff;
   cursor: pointer;
   user-select: none;
+  padding-left: 10px;
 }
 
-/* Save Button */
 .saveButton {
-  background-color: #1a4be1;
+  background-color: #0a57ff;
   color: #fff;
-  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
   border: none;
   border-radius: 10px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
   margin-top: 8px;
-  transition: background-color 0.3s ease;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .saveButton:hover {
-  background-color: #003ecb;
+  background-color: #094add;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 500px) {
   .card {
-    margin: 16px;
-    padding: 18px;
+    padding: 20px;
+    border-radius: 12px;
   }
 
-  input {
-    font-size: 13.5px;
-    padding: 9px 12px;
+  input,
+  .passwordWrapper input {
+    font-size: 13px;
   }
 
   .saveButton {
-    font-size: 13.5px;
-    padding: 10px 18px;
-  }
-
-  .passwordWrapper span {
-    font-size: 16px;
+    font-size: 13px;
+    padding: 9px;
   }
 }

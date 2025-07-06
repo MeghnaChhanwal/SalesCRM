@@ -35,9 +35,7 @@ const Home = () => {
   const fetchTodayTiming = async () => {
     try {
       const res = await API.get(`/api/timing/${employee._id}/today`);
-      if (res.data?.length > 0) {
-        setTiming(res.data[0]);
-      }
+      if (res.data?.length > 0) setTiming(res.data[0]);
     } catch (err) {
       console.error("❌ Timing fetch error", err);
     } finally {
@@ -48,7 +46,16 @@ const Home = () => {
   const fetchBreakHistory = async () => {
     try {
       const res = await API.get(`/api/timing/${employee._id}/breaks`);
-      setBreaks(res.data || []);
+      const breaks = res.data || [];
+
+      // Sort breaks by date and time descending
+      const sorted = breaks.sort((a, b) => {
+        const aTime = new Date(`${a.date}T${a.start || "00:00"}`);
+        const bTime = new Date(`${b.date}T${b.start || "00:00"}`);
+        return bTime - aTime;
+      });
+
+      setBreaks(sorted);
     } catch (err) {
       console.error("❌ Break fetch error", err);
     }
@@ -65,72 +72,80 @@ const Home = () => {
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
 
+  const latestBreak = breaks.length > 0 ? breaks[0] : null;
+
   return (
     <Layout>
       <div className={styles.container}>
-        {/* === Timing Box === */}
+        <p className={styles.sectionTitle}>Timings</p>
+
+        {/* ✅ Check-in/out */}
         <div className={styles.card}>
-          <div className={styles.cardContent}>
-            <div>
+          <div className={styles.blueHeader}>
+            <div className={styles.timingBlock}>
               <p className={styles.label}>Checked-In</p>
-              <p className={styles.time}>{timing?.checkIn || "--:--"}</p>
+              <p className={styles.valueDark}>{timing?.checkIn || "--:--"}</p>
             </div>
-            <div style={{ marginLeft: "30px" }}>
+            <div className={styles.timingBlock}>
               <p className={styles.label}>Check Out</p>
-              <p className={styles.time}>{timing?.checkOut || "--:--"}</p>
+              <p className={styles.valueDark}>{timing?.checkOut || "--:--"}</p>
             </div>
+            <div className={`${styles.indicator} ${styles.green}`}></div>
           </div>
-          {!timing?.checkOut && <div className={styles.greenBar}></div>}
         </div>
 
-        {/* === Recent Break === */}
-        {timing?.breakStart && timing?.breakEnd && (
-          <div className={styles.card}>
-            <div className={styles.cardContent}>
-              <div>
-                <p className={styles.label}>Break</p>
-                <p className={styles.time}>
-                  {timing.breakStart} → {timing.breakEnd}
-                </p>
-              </div>
+        {/* ✅ Break */}
+        <div className={styles.card}>
+          <div className={styles.blueHeader}>
+            <div className={styles.timingBlock}>
+              <p className={styles.label}>Start</p>
+              <p className={styles.valueDark}>{latestBreak?.start || "--:--"}</p>
             </div>
-            <div className={styles.redBar}></div>
+            <div className={styles.timingBlock}>
+              <p className={styles.label}>Ended</p>
+              <p className={styles.valueDark}>{latestBreak?.end || "--:--"}</p>
+            </div>
+            <div className={`${styles.indicator} ${styles.red}`}></div>
           </div>
-        )}
 
-        {/* === Break History Table === */}
-        <div className={styles.historyBox}>
-          <div className={styles.breakHeader}>
-            <span>Break</span>
+          <div className={styles.historyHeader}>
+            <span>Start</span>
             <span>Ended</span>
             <span>Date</span>
           </div>
+
           <div className={styles.scrollBox}>
-            {breaks.slice(1).map((b, idx) => (
-              <div key={idx} className={styles.breakRow}>
-                <span>{b.start}</span>
-                <span>{b.end}</span>
-                <span>{new Date(b.date).toLocaleDateString()}</span>
-              </div>
-            ))}
+            {breaks.length > 0 ? (
+              breaks.map((b, idx) => (
+                <div key={idx} className={styles.historyRow}>
+                  <span>{b.start}</span>
+                  <span>{b.end}</span>
+                  <span>{new Date(b.date).toLocaleDateString()}</span>
+                </div>
+              ))
+            ) : (
+              <p className={styles.empty}>No previous break history.</p>
+            )}
           </div>
         </div>
 
-        {/* === Recent Activity === */}
+        {/* ✅ Activity */}
         <h4 className={styles.sectionTitle}>Recent Activity</h4>
-        <div className={styles.recentBox}>
-          {activities.length === 0 ? (
-            <p className={styles.empty}>No recent activity.</p>
-          ) : (
-            <ul className={styles.activityList}>
-              {activities.map((a, i) => (
-                <li key={i}>
-                  • {a.message}
-                  <span className={styles.timeAgo}> — {getTimeAgo(a.time)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+        <div className={styles.card}>
+          <div className={styles.scrollBoxTall}>
+            {activities.length === 0 ? (
+              <p className={styles.empty}>No recent activity.</p>
+            ) : (
+              <ul className={styles.activityList}>
+                {activities.map((a, i) => (
+                  <li key={i}>
+                    • {a.message}
+                    <span className={styles.timeAgo}> — {getTimeAgo(a.time)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </Layout>
