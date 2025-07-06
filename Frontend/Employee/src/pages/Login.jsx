@@ -10,7 +10,7 @@ const Login = () => {
 
   // 🚫 Already logged in? Redirect to home
   if (employee) {
-    navigate("/");
+    navigate("/dashboard");
     return null;
   }
 

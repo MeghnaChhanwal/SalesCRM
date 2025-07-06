@@ -38,7 +38,7 @@ const Header = () => {
   const handleBack = () => {
     if (path === "/profile") navigate("/schedule");
     else if (path === "/schedule") navigate("/leads");
-    else if (path === "/leads") navigate("/dashboard");
+    else if (path === "/leads") navigate("/home");
     else navigate("/dashboard"); // fallback
   };
 

@@ -1,55 +1,24 @@
-.homeContainer {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* ...existing styles... */
+
+.actionBtn {
+  margin-top: 4px;
+  padding: 6px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
 }
 
-.card {
-  background: #fff;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 0 4px rgba(0,0,0,0.1);
-}
-
-.cardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.statusDot {
-  width: 10px;
-  height: 10px;
-  background-color: #00c853; /* green */
-  border-radius: 50%;
-}
-
-.blueLabel {
-  font-size: 12px;
-  background: #d0e9ff;
-  color: #0077c2;
-  padding: 2px 8px;
-  border-radius: 10px;
-}
-
-.breakList,
-.activityList,
-.timingList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.breakItem {
-  padding: 4px 0;
-  display: flex;
-  justify-content: space-between;
+.actionBtn:hover {
+  background-color: #0056b3;
 }
 
 .loading {
-  padding: 40px;
+  padding: 2rem;
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
+  color: #666;
 }
