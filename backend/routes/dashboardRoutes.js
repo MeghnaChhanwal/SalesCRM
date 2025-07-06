@@ -11,4 +11,4 @@ router.get("/overview", getDashboardOverview);
 router.get("/chart", getChartData);
 router.get("/activity/admin", getAdminRecentActivities);
 
-export default router;
+export default routr;
