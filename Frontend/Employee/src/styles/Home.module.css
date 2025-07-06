@@ -1,66 +1,55 @@
+.homeContainer {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .card {
   background: #fff;
   padding: 16px;
   border-radius: 12px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
 }
 
-.headerRow {
+.cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.status {
-  margin-left: auto;
-  margin-top: 8px;
-}
-
-.greenDot {
-  width: 12px;
-  height: 12px;
-  background-color: green;
-  border-radius: 50%;
-}
-
-.redDot {
-  width: 12px;
-  height: 12px;
-  background-color: red;
-  border-radius: 50%;
-}
-
-.breakCard, .activityCard {
-  background: #fff;
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 16px;
-}
-
-.breakHeader {
-  display: flex;
-  justify-content: space-between;
-  font-weight: bold;
   margin-bottom: 8px;
 }
 
-.breakRow {
+.statusDot {
+  width: 10px;
+  height: 10px;
+  background-color: #00c853; /* green */
+  border-radius: 50%;
+}
+
+.blueLabel {
+  font-size: 12px;
+  background: #d0e9ff;
+  color: #0077c2;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.breakList,
+.activityList,
+.timingList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.breakItem {
+  padding: 4px 0;
   display: flex;
   justify-content: space-between;
-  padding: 4px 0;
 }
 
-.activeBreak {
-  background-color: #dbeafe; /* blue highlight */
-  border-radius: 8px;
-  padding: 6px;
-}
-
-
-@media (max-width: 480px) {
-  .headerRow {
-    flex-direction: column;
-    gap: 8px;
-  }
+.loading {
+  padding: 40px;
+  text-align: center;
+  font-size: 18px;
 }

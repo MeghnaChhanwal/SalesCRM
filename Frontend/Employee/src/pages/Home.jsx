@@ -21,8 +21,10 @@ const Home = () => {
 
   const fetchTodayTiming = async () => {
     try {
-      const res = await API.get(`/api/timing/${employee._id}`);
-      if (res.data?.length > 0) setTiming(res.data[0]);
+      const res = await API.get(`/api/timing/${employee._id}/today`);
+      if (res.data?.length > 0) {
+        setTiming(res.data[0]);
+      }
     } catch (err) {
       console.error("❌ Timing fetch error", err);
     } finally {
@@ -32,8 +34,8 @@ const Home = () => {
 
   const fetchBreakHistory = async () => {
     try {
-      const res = await API.get(`/api/timing/breaks/${employee._id}`);
-      setBreaks(res.data.slice(0, 7)); // latest 7
+      const res = await API.get(`/api/timing/${employee._id}/breaks`);
+      setBreaks(res.data || []);
     } catch (err) {
       console.error("❌ Break fetch error", err);
     }
@@ -42,20 +44,10 @@ const Home = () => {
   const fetchRecentActivity = async () => {
     try {
       const res = await API.get(`/api/leads/activity/${employee._id}`);
-      setActivities(res.data.slice(0, 5));
+      setActivities(res.data || []);
     } catch (err) {
       console.error("❌ Activity fetch error", err);
     }
-  };
-
-  const renderIndicator = () => {
-    if (timing?.checkIn && !timing?.checkOut) {
-      return <span className={styles.statusDotGreen}></span>;
-    }
-    if (timing?.checkOut) {
-      return <span className={styles.statusDotRed}></span>;
-    }
-    return null;
   };
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
@@ -63,51 +55,56 @@ const Home = () => {
   return (
     <Layout>
       <div className={styles.homeContainer}>
-        <div className={styles.timingsCard}>
-          <div className={styles.timingsHeader}>
-            <div className={styles.checkinBox}>
-              <p>Checked-In</p>
-              <h3>{timing?.checkIn || "--:--"}</h3>
-            </div>
-            <div className={styles.checkoutBox}>
-              <p>Check Out</p>
-              <h3>{timing?.checkOut || "--:--"}</h3>
-              {renderIndicator()}
-            </div>
+        {/* ==== Timing Card ==== */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h3>🕒 Today's Timing</h3>
+            {timing?.checkIn && !timing?.checkOut && (
+              <div className={styles.statusDot} title="Active"></div>
+            )}
           </div>
-
-          <div className={styles.breakCard}>
-            <div className={styles.breakTitle}>
-              <p>Break</p>
-              <p>{timing?.breaks?.length > 0 ? `${timing.breaks.slice(-1)[0].start} → ${timing.breaks.slice(-1)[0].end || "--:--"}` : "--:--"}</p>
-            </div>
-            <table className={styles.breakTable}>
-              <thead>
-                <tr>
-                  <th>Break</th>
-                  <th>Ended</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {breaks.map((b, i) => (
-                  <tr key={i}>
-                    <td>{b.start}</td>
-                    <td>{b.end || "--:--"}</td>
-                    <td>{b.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {timing ? (
+            <ul className={styles.timingList}>
+              <li><strong>Date:</strong> {timing.date}</li>
+              <li><strong>Check-In:</strong> {timing.checkIn || "–"}</li>
+              <li><strong>Check-Out:</strong> {timing.checkOut || "–"}</li>
+              <li><strong>Status:</strong> {timing.status}</li>
+              <li><strong>Break:</strong> {timing.breakStatus === "OnBreak" ? "On Break" : "Off Break"}</li>
+            </ul>
+          ) : (
+            <p>No check-in record found today.</p>
+          )}
         </div>
 
-        <div className={styles.activityCard}>
-          <h3>Recent Activity</h3>
+        {/* ==== Break Logs Card ==== */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h3>⏸ Break Log</h3>
+            <span className={styles.blueLabel}>Last 7 Days</span>
+          </div>
+          {breaks.length > 0 ? (
+            <ul className={styles.breakList}>
+              {breaks.map((b, idx) => (
+                <li key={idx} className={styles.breakItem}>
+                  <span>{b.date}:</span> <span>{b.start} → {b.end}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No completed breaks yet.</p>
+          )}
+        </div>
+
+        {/* ==== Activity Log Card ==== */}
+        <div className={styles.card}>
+          <h3>📋 Recent Activity</h3>
           {activities.length > 0 ? (
-            <ul>
-              {activities.map((act, idx) => (
-                <li key={idx}>• {act.message} – {act.timeAgo}</li>
+            <ul className={styles.activityList}>
+              {activities.map((a, i) => (
+                <li key={i}>
+                  <span>{a.message}</span>
+                  <small>{a.timestamp}</small>
+                </li>
               ))}
             </ul>
           ) : (

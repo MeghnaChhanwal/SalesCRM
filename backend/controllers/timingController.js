@@ -1,50 +1,53 @@
 import Timing from "../models/timing.js";
+import Employee from "../models/employee.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// 🔹 GET: Today's check-in/check-out/breaks
+// ✅ GET: Today's timing by employee ID
 export const getTodayTiming = async (req, res) => {
-  const { id: employeeId } = req.params;
-  const date = todayIST();
-
   try {
-    const timing = await Timing.findOne({ employee: employeeId, date });
-    if (!timing) return res.status(404).json({ error: "No timing found" });
+    const { id } = req.params;
+    const today = todayIST();
 
-    res.status(200).json([timing]); // Sent as array for frontend table
-  } catch (error) {
-    console.error("Get timing error:", error);
-    res.status(500).json({ error: "Failed to fetch timing" });
+    const timing = await Timing.find({ employee: id, date: today });
+    res.status(200).json(timing);
+  } catch (err) {
+    console.error("❌ Timing fetch error", err);
+    res.status(500).json({ error: "Failed to fetch today's timing" });
   }
 };
 
-// 🔹 GET: Full break history
+// ✅ GET: Break history for employee
 export const getBreakHistory = async (req, res) => {
-  const { id: employeeId } = req.params;
-
   try {
-    const timings = await Timing.find({ employee: employeeId })
+    const { id } = req.params;
+    const last7Days = new Date();
+    last7Days.setDate(last7Days.getDate() - 6); // include today
+
+    const breaks = await Timing.find({
+      employee: id,
+      date: { $gte: last7Days.toISOString().split("T")[0] },
+    })
       .sort({ date: -1 })
       .select("date breaks");
 
-    const breakData = timings
-      .flatMap((t) =>
-        t.breaks
-          .filter((b) => b.start && b.end)
-          .map((brk) => ({
-            date: t.date,
-            start: brk.start,
-            end: brk.end,
-          }))
-      );
+    const formatted = breaks.flatMap((day) =>
+      day.breaks
+        .filter((b) => b.start && b.end)
+        .map((b) => ({
+          date: day.date,
+          start: b.start,
+          end: b.end,
+        }))
+    );
 
-    res.status(200).json(breakData);
-  } catch (error) {
-    console.error("Break fetch error:", error);
+    res.status(200).json(formatted);
+  } catch (err) {
+    console.error("❌ Break fetch error", err);
     res.status(500).json({ error: "Failed to fetch break history" });
   }
 };
 
-// 🔹 POST: Manual Check-in (used for cases outside login logic)
+// ✅ POST: Check In
 export const checkIn = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -74,14 +77,18 @@ export const checkIn = async (req, res) => {
     }
 
     await timing.save();
+
+    // ✅ Also update employee status
+    await Employee.findByIdAndUpdate(employeeId, { status: "Active" });
+
     res.status(200).json({ message: "Check-in successful", timing });
   } catch (err) {
-    console.error("Check-in error:", err);
+    console.error("❌ Check-in error:", err);
     res.status(500).json({ error: "Failed to check in" });
   }
 };
 
-// 🔹 POST: Check-out
+// ✅ POST: Check Out
 export const checkOut = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -98,18 +105,21 @@ export const checkOut = async (req, res) => {
     timing.status = "Inactive";
     timing.breakStatus = "OnBreak";
 
-    // Optional: record idle break after checkout
     timing.breaks.push({ start: time });
+
     await timing.save();
+
+    // ✅ Also update employee status
+    await Employee.findByIdAndUpdate(employeeId, { status: "Inactive" });
 
     res.status(200).json({ message: "Check-out successful", timing });
   } catch (err) {
-    console.error("Check-out error:", err);
+    console.error("❌ Check-out error:", err);
     res.status(500).json({ error: "Failed to check out" });
   }
 };
 
-// 🔹 POST: Start Break
+// ✅ POST: Start Break
 export const startBreak = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -117,24 +127,23 @@ export const startBreak = async (req, res) => {
 
   try {
     const timing = await Timing.findOne({ employee: employeeId, date });
-    if (!timing) return res.status(404).json({ error: "Check-in required before break" });
+    if (!timing || timing.breakStatus === "OnBreak") {
+      return res.status(400).json({ error: "Already on break or no check-in found" });
+    }
 
-    const ongoing = timing.breaks.some((b) => b.start && !b.end);
-    if (ongoing) return res.status(400).json({ error: "Break already in progress" });
-
-    timing.breaks.push({ start: time });
     timing.breakStatus = "OnBreak";
-    timing.status = "OnBreak";
+    timing.breaks.push({ start: time });
 
     await timing.save();
+
     res.status(200).json({ message: "Break started", timing });
-  } catch (error) {
-    console.error("Start break error:", error);
+  } catch (err) {
+    console.error("❌ Start break error:", err);
     res.status(500).json({ error: "Failed to start break" });
   }
 };
 
-// 🔹 POST: End Break
+// ✅ POST: End Break
 export const endBreak = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -142,19 +151,21 @@ export const endBreak = async (req, res) => {
 
   try {
     const timing = await Timing.findOne({ employee: employeeId, date });
-    if (!timing) return res.status(404).json({ error: "No active timing record" });
+    if (!timing || timing.breakStatus === "OffBreak") {
+      return res.status(400).json({ error: "Not currently on a break" });
+    }
 
-    const activeBreak = timing.breaks.find((b) => b.start && !b.end);
-    if (!activeBreak) return res.status(400).json({ error: "No active break to end" });
+    const currentBreak = timing.breaks[timing.breaks.length - 1];
+    if (currentBreak && !currentBreak.end) {
+      currentBreak.end = time;
+    }
 
-    activeBreak.end = time;
     timing.breakStatus = "OffBreak";
-    timing.status = "Active";
-
     await timing.save();
+
     res.status(200).json({ message: "Break ended", timing });
-  } catch (error) {
-    console.error("End break error:", error);
+  } catch (err) {
+    console.error("❌ End break error:", err);
     res.status(500).json({ error: "Failed to end break" });
   }
 };
