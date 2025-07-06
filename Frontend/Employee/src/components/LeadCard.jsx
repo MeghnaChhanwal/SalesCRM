@@ -11,7 +11,6 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
   const scheduleRef = useRef();
   const statusRef = useRef();
 
-  // Close popups on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -59,7 +58,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
           </div>
         </div>
 
-        <p className={styles.label}>date</p>
+        <p className={styles.label}>Date</p>
         <div className={styles.dateAndIconsRow}>
           <div className={styles.dateRow}>
             <img src="/images/schedule.png" alt="schedule" />
@@ -105,7 +104,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
 
         {/* Type Popup */}
         {showTypePopup && (
-          <div className={styles.popup} ref={typeRef}>
+          <div className={`${styles.popup} ${styles.popupType}`} ref={typeRef}>
             {["Hot", "Warm", "Cold"].map((type) => (
               <div
                 key={type}
@@ -123,7 +122,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
 
         {/* Schedule Popup */}
         {showSchedulePopup && (
-          <div className={styles.popup} ref={scheduleRef}>
+          <div className={`${styles.popup} ${styles.popupSchedule}`} ref={scheduleRef}>
             <label>Date</label>
             <input
               type="date"
@@ -142,7 +141,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
 
         {/* Status Popup */}
         {showStatusPopup && (
-          <div className={styles.popup} ref={statusRef}>
+          <div className={`${styles.popup} ${styles.popupStatus}`} ref={statusRef}>
             {["Ongoing", "Closed"].map((status) => (
               <div
                 key={status}

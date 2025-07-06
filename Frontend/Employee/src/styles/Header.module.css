@@ -64,12 +64,7 @@
   text-align: left;
 }
 
-/* ✅ Safe area support for iOS (PWA fullscreen, notch) */
-@supports (padding-top: env(safe-area-inset-top)) {
-  .header {
-    padding-top: max(env(safe-area-inset-top), 24px);
-  }
-}
+
 
 /* 🔽 Responsive tweaks for small mobile screens */
 @media (max-width: 400px) {

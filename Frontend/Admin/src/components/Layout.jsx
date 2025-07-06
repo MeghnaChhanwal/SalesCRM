@@ -14,7 +14,7 @@ const MainLayout = ({
 }) => {
   return (
     <div className={styles.container}>
-      <Sidebar />
+      <SideBar />
 
       <div className={styles.mainContent}>
         {showSearch && <SearchBar onSearch={onSearch} />}
