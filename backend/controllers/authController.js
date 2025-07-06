@@ -41,7 +41,7 @@ export const loginEmployee = async (req, res) => {
       });
     } else {
       // Already exists – resume session
-      checkIn: time,
+      timing.checkIn = time; // ✅ fix
       timing.status = "Active";
       timing.breakStatus = "OffBreak";
 
@@ -53,8 +53,9 @@ export const loginEmployee = async (req, res) => {
 
     await timing.save();
 
-    const { password: pwd, ...empData } = employee.toObject();
-    res.status(200).json(empData);
+    // ✅ Return fresh employee after saving
+    const updatedEmployee = await Employee.findById(employee._id).lean();
+    res.status(200).json(updatedEmployee);
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ error: "Login failed" });
@@ -72,6 +73,7 @@ export const logoutEmployee = async (req, res) => {
 
     employee.status = "Inactive";
     await employee.save();
+    console.log(`👋 Employee ${employeeId} marked as Inactive`);
 
     const date = todayIST();
     const time = timeIST();
@@ -84,10 +86,12 @@ export const logoutEmployee = async (req, res) => {
       timing.breakStatus = "OnBreak";
       timing.breaks.push({ start: time }); // idle break
       await timing.save();
+      console.log(`📅 Timing updated for ${employeeId} on ${date}`);
 
       res.status(200).json({ message: "Logged out", timing });
     } else {
-      res.status(404).json({ error: "Timing record not found for logout" });
+      console.warn(`⚠️ Timing not found for logout: ${employeeId} on ${date}`);
+      res.status(200).json({ message: "Logged out (no timing found)", employee });
     }
   } catch (error) {
     console.error("Logout Error:", error);
