@@ -75,14 +75,14 @@ const Home = () => {
         {/* ==== Timing Card ==== */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h3>🕒 Today's Timing</h3>
+            <h3>Timing</h3>
             {timing?.checkIn && !timing?.checkOut && (
               <div className={styles.statusDot} title="Active"></div>
             )}
           </div>
           {timing ? (
             <ul className={styles.timingList}>
-              <li><strong>Date:</strong> {new Date(timing.date).toLocaleDateString()}</li>
+              
               <li><strong>Check-In:</strong> {timing.checkIn || "–"}</li>
               <li><strong>Check-Out:</strong> {timing.checkOut || "–"}</li>
               <li><strong>Status:</strong> {timing.status}</li>
@@ -96,7 +96,7 @@ const Home = () => {
         {/* ==== Break Logs Card ==== */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
-            <h3>⏸ Break Log</h3>
+             <li><strong>Break:</strong> {timing.breakStatus === "OnBreak" ? "On Break" : "Off Break"}</li>
             <span className={styles.blueLabel}>Last 7 Days</span>
           </div>
           {breaks.length > 0 ? (
@@ -114,12 +114,12 @@ const Home = () => {
 
         {/* ==== Activity Log Card ==== */}
         <div className={styles.card}>
-          <h3>📋 Recent Activity</h3>
+          <h3> Recent Activity</h3>
           {activities.length > 0 ? (
             <ul className={styles.activityList}>
               {activities.map((a, i) => (
                 <li key={i}>
-                  <span>📝 {a.message}</span>
+                  <span> {a.message}</span>
                   <small>{getTimeAgo(a.time)}</small>
                 </li>
               ))}
