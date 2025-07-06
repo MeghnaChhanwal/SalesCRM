@@ -1,6 +1,6 @@
 // src/components/Layout.jsx
 import React from "react";
-import Sidebar from "./SideBar";
+import Sidebar from "./Sidebar";
 import Breadcrumb from "./Breadcrumb";
 import SearchBar from "./Search";
 import styles from "../styles/Layout.module.css";
