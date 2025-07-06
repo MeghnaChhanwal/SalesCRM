@@ -4,19 +4,15 @@ import API from "../utils/axios";
 import Layout from "../components/Layout";
 import styles from "../styles/Home.module.css";
 
-// ⏱️ Time ago formatter
 const getTimeAgo = (timestamp) => {
   const now = new Date();
   const past = new Date(timestamp);
   const diffMs = now - past;
   const diffMins = Math.floor(diffMs / 60000);
-
   if (diffMins < 1) return "Just now";
   if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
-
   const diffHours = Math.floor(diffMins / 60);
   if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-
   const diffDays = Math.floor(diffHours / 24);
   return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
 };
@@ -71,46 +67,53 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className={styles.homeContainer}>
-        {/* === Greeting Header (optional) === */}
-        <div className={styles.headerCard}>
-          <p className={styles.greet}>Good Morning</p>
-          <h2 className={styles.name}>{employee?.firstName} {employee?.lastName}</h2>
+      <div className={styles.container}>
+        {/* === Timing Box === */}
+        <div className={styles.card}>
+          <div className={styles.cardContent}>
+            <div>
+              <p className={styles.label}>Checked-In</p>
+              <p className={styles.time}>{timing?.checkIn || "--:--"}</p>
+            </div>
+            <div style={{ marginLeft: "30px" }}>
+              <p className={styles.label}>Check Out</p>
+              <p className={styles.time}>{timing?.checkOut || "--:--"}</p>
+            </div>
+          </div>
+          {!timing?.checkOut && <div className={styles.greenBar}></div>}
         </div>
 
-        {/* === Timings Section === */}
-        <h4 className={styles.sectionTitle}>Timings</h4>
-        <div className={styles.cardRow}>
-          <div className={`${styles.blueCard} ${styles.active}`}>
-            <p className={styles.cardLabel}>Checked-In</p>
-            <p className={styles.cardTime}>{timing?.checkIn || "--:--"}</p>
-            <div className={styles.greenBar}></div>
-          </div>
-          <div className={styles.blueCard}>
-            <p className={styles.cardLabel}>Check Out</p>
-            <p className={styles.cardTime}>{timing?.checkOut || "--:--"}</p>
-            <div className={styles.greenBar}></div>
-          </div>
-        </div>
-
-        {/* === Latest Break === */}
+        {/* === Recent Break === */}
         {timing?.breakStart && timing?.breakEnd && (
-          <div className={`${styles.blueCard} ${styles.breakCard}`}>
-            <p className={styles.cardLabel}>Break</p>
-            <p className={styles.cardTime}>{timing.breakStart} → {timing.breakEnd}</p>
+          <div className={styles.card}>
+            <div className={styles.cardContent}>
+              <div>
+                <p className={styles.label}>Break</p>
+                <p className={styles.time}>
+                  {timing.breakStart} → {timing.breakEnd}
+                </p>
+              </div>
+            </div>
             <div className={styles.redBar}></div>
           </div>
         )}
 
         {/* === Break History Table === */}
-        <div className={styles.breakHistory}>
-          {breaks.slice(1, 5).map((b, idx) => (
-            <div key={idx} className={styles.breakRow}>
-              <span>{b.start}</span>
-              <span>{b.end}</span>
-              <span>{new Date(b.date).toLocaleDateString()}</span>
-            </div>
-          ))}
+        <div className={styles.historyBox}>
+          <div className={styles.breakHeader}>
+            <span>Break</span>
+            <span>Ended</span>
+            <span>Date</span>
+          </div>
+          <div className={styles.scrollBox}>
+            {breaks.slice(1).map((b, idx) => (
+              <div key={idx} className={styles.breakRow}>
+                <span>{b.start}</span>
+                <span>{b.end}</span>
+                <span>{new Date(b.date).toLocaleDateString()}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* === Recent Activity === */}
