@@ -15,35 +15,25 @@ import activityRoutes from "./routes/activityRoutes.js";
 // 🌍 Load environment variables
 dotenv.config();
 
+// ✅ Initialize Express App
 const app = express();
 
 // ✅ Connect MongoDB
 connectDB();
 
-// ✅ CORS Configuration
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:5175",
-  "https://your-frontend.vercel.app" // ✅ Add your deployed frontend here
-];
-
+// ✅ Allow all origins with credentials (⚠️ Use only in dev)
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
-      callback(null, true);
-    } else {
-      console.warn(`🚫 CORS blocked for origin: ${origin}`);
-      callback(new Error("Not allowed by CORS"));
-    }
+    // Allow all origins or undefined (like Postman)
+    callback(null, true);
   },
   credentials: true
 }));
 
-// ✅ Handle Preflight
+// ✅ Handle Preflight Requests Globally
 app.options("*", cors());
 
-// ✅ JSON Body Parser
+// ✅ JSON Body Parser Middleware
 app.use(express.json());
 
 // ✅ API Routes
@@ -52,10 +42,10 @@ app.use("/api/leads", leadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/timing", timingRoutes);
-app.use("/api/admin", adminRoutes);         // For future: admin-level tools
-app.use("/api/activity", activityRoutes);   // Includes: /activity/admin and /activity/employee/:id
+app.use("/api/admin", adminRoutes);         // Admin tools
+app.use("/api/activity", activityRoutes);   // Employee & Admin activity logs
 
-// 🚫 Catch-all route (optional: helpful for debugging)
+// 🚫 Catch-all route for undefined paths
 app.use((req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
