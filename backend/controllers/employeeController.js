@@ -1,10 +1,10 @@
 import Employee from "../models/employee.js";
 import Lead from "../models/lead.js";
-import Timing from "../models/timing.js"; // ✅ default import
+import Timing from "../models/timing.js";
 import { buildQueryOptions } from "../utils/query.js";
 import { todayIST } from "../utils/time.js";
 
-// 🔹 GET: Paginated employee list with search, sorting & lead counts
+// 🔹 GET: Paginated employee list with status, lead counts
 export const getEmployees = async (req, res) => {
   try {
     const { search, sortBy, order, page, limit, skip } = buildQueryOptions(req);
@@ -31,11 +31,12 @@ export const getEmployees = async (req, res) => {
     };
 
     const total = await Employee.countDocuments(query);
-
     const employees = await Employee.find(query)
       .skip(skip)
       .limit(limit)
       .sort({ [sortField]: order });
+
+    const today = todayIST();
 
     const enrichedEmployees = await Promise.all(
       employees.map(async (emp) => {
@@ -45,10 +46,17 @@ export const getEmployees = async (req, res) => {
           status: "Closed",
         });
 
+        const timing = await Timing.findOne({ employee: emp._id, date: today });
+        let status = "Inactive";
+        if (timing && timing.checkIn && !timing.checkOut && timing.status !== "Inactive") {
+          status = "Active";
+        }
+
         return {
           ...emp.toObject(),
           assignedLeads,
           closedLeads,
+          status,
         };
       })
     );
@@ -69,6 +77,7 @@ export const getEmployees = async (req, res) => {
 export const getAllEmployees = async (req, res) => {
   try {
     const employees = await Employee.find().sort({ createdAt: -1 });
+    const today = todayIST();
 
     const enriched = await Promise.all(
       employees.map(async (emp) => {
@@ -78,10 +87,17 @@ export const getAllEmployees = async (req, res) => {
           status: "Closed",
         });
 
+        const timing = await Timing.findOne({ employee: emp._id, date: today });
+        let status = "Inactive";
+        if (timing && timing.checkIn && !timing.checkOut && timing.status !== "Inactive") {
+          status = "Active";
+        }
+
         return {
           ...emp.toObject(),
           assignedLeads,
           closedLeads,
+          status,
         };
       })
     );
@@ -138,7 +154,7 @@ export const deleteEmployee = async (req, res) => {
   }
 };
 
-// 🔹 PATCH: Auto update statuses (Active / Inactive) based on timing
+// 🔹 PATCH: Auto update statuses in DB (if needed by CRON or admin trigger)
 export const autoUpdateEmployeeStatuses = async (req, res) => {
   const today = todayIST();
 

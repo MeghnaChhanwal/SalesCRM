@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import MainLayout from "../components/Layout";
 import Pagination from "../components/Pagination";
 import API from "../utils/axios";
@@ -18,16 +18,15 @@ const Employee = () => {
   const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", location: "", language: "" });
   const [errorMessage, setErrorMessage] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
-  const menuRef = useRef(null);
 
   useEffect(() => {
     fetchEmployees();
   }, [searchTerm, currentPage, sortConfig]);
 
-  // Close dropdown when clicking outside
+  // ✅ Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+      if (!e.target.closest(`.${styles.dropdown}`)) {
         setOpenMenuId(null);
       }
     };
@@ -71,16 +70,16 @@ const Employee = () => {
     setFormMode("edit");
     setFormData({ ...employee });
     setShowForm(true);
-    setOpenMenuId(null); // Close menu on edit
+    setOpenMenuId(null);
   };
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Are you sure you want to delete this employee?");
-    if (!confirm) return;
+    const confirmDelete = window.confirm("Are you sure you want to delete this employee?");
+    if (!confirmDelete) return;
     try {
       await API.delete(`/api/employees/${id}`);
       fetchEmployees();
-      setOpenMenuId(null); // Close menu on delete
+      setOpenMenuId(null);
     } catch {
       setErrorMessage("Failed to delete employee.");
     }
@@ -148,7 +147,11 @@ const Employee = () => {
   return (
     <MainLayout
       onSearch={setSearchTerm}
-      rightElement={<button className={styles.addBtn} onClick={handleAddClick}> Add Employee</button>}
+      rightElement={
+        <button className={styles.addBtn} onClick={handleAddClick}>
+          Add Employee
+        </button>
+      }
     >
       {errorMessage && <p className={styles.error}>{errorMessage}</p>}
 
@@ -176,29 +179,49 @@ const Employee = () => {
                       showEmail={true}
                     />
                   </td>
-                  <td><span className={styles.empIdBox}>{emp.employeeId}</span></td>
                   <td>
-                    <span className={emp.status === "Active" ? styles.statusActive : styles.statusInactive}>
+                    <span className={styles.empIdBox}>{emp.employeeId}</span>
+                  </td>
+                  <td>
+                    <span
+                      className={
+                        emp.status === "Active"
+                          ? styles.statusActive
+                          : styles.statusInactive
+                      }
+                    >
                       {emp.status}
                     </span>
                   </td>
                   <td>{emp.assignedLeads}</td>
                   <td>{emp.closedLeads}</td>
-                  <td ref={menuRef} className={styles.dropdown}>
+                  <td className={styles.dropdown}>
                     <button
                       className={styles.menuBtn}
-                      onClick={() => setOpenMenuId(openMenuId === emp._id ? null : emp._id)}
+                      onClick={() =>
+                        setOpenMenuId(openMenuId === emp._id ? null : emp._id)
+                      }
                     >
                       ⋮
                     </button>
                     {openMenuId === emp._id && (
                       <div className={styles.menuContent}>
                         <button onClick={() => handleEditClick(emp)}>
-                          <img src="/edit.png" alt="Edit" height={14} style={{ marginRight: 6 }} />
+                          <img
+                            src="/edit.png"
+                            alt="Edit"
+                            height={14}
+                            style={{ marginRight: 6 }}
+                          />
                           Edit
                         </button>
                         <button onClick={() => handleDelete(emp._id)}>
-                          <img src="/delete.png" alt="Delete" height={14} style={{ marginRight: 6 }} />
+                          <img
+                            src="/delete.png"
+                            alt="Delete"
+                            height={14}
+                            style={{ marginRight: 6 }}
+                          />
                           Delete
                         </button>
                       </div>
@@ -208,14 +231,20 @@ const Employee = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={6} style={{ textAlign: "center" }}>No employees found.</td>
+                <td colSpan={6} style={{ textAlign: "center" }}>
+                  No employees found.
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
 
       {showForm && (
         <EmployeeForm
