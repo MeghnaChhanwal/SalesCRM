@@ -4,6 +4,23 @@ import API from "../utils/axios";
 import Layout from "../components/Layout";
 import styles from "../styles/Home.module.css";
 
+// ⏱️ Time ago formatter
+const getTimeAgo = (timestamp) => {
+  const now = new Date();
+  const past = new Date(timestamp);
+  const diffMs = now - past;
+  const diffMins = Math.floor(diffMs / 60000);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+};
+
 const Home = () => {
   const { employee } = useAuth();
   const [timing, setTiming] = useState(null);
@@ -43,7 +60,7 @@ const Home = () => {
 
   const fetchRecentActivity = async () => {
     try {
-      const res = await API.get(`/api/leads/activity/${employee._id}`);
+      const res = await API.get(`/api/activity/employee/${employee._id}`);
       setActivities(res.data || []);
     } catch (err) {
       console.error("❌ Activity fetch error", err);
@@ -65,7 +82,7 @@ const Home = () => {
           </div>
           {timing ? (
             <ul className={styles.timingList}>
-              <li><strong>Date:</strong> {timing.date}</li>
+              <li><strong>Date:</strong> {new Date(timing.date).toLocaleDateString()}</li>
               <li><strong>Check-In:</strong> {timing.checkIn || "–"}</li>
               <li><strong>Check-Out:</strong> {timing.checkOut || "–"}</li>
               <li><strong>Status:</strong> {timing.status}</li>
@@ -86,7 +103,7 @@ const Home = () => {
             <ul className={styles.breakList}>
               {breaks.map((b, idx) => (
                 <li key={idx} className={styles.breakItem}>
-                  <span>{b.date}:</span> <span>{b.start} → {b.end}</span>
+                  <span>{new Date(b.date).toLocaleDateString()}:</span> <span>{b.start} → {b.end}</span>
                 </li>
               ))}
             </ul>
@@ -102,8 +119,8 @@ const Home = () => {
             <ul className={styles.activityList}>
               {activities.map((a, i) => (
                 <li key={i}>
-                  <span>{a.message}</span>
-                  <small>{a.timestamp}</small>
+                  <span>📝 {a.message}</span>
+                  <small>{getTimeAgo(a.time)}</small>
                 </li>
               ))}
             </ul>
