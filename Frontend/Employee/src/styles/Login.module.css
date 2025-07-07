@@ -1,5 +1,4 @@
-
-
+/*================= Base Layout ===========*/
 .content {
   position: fixed;
   top: 0;
@@ -12,7 +11,7 @@
   padding: 16px;
   background-color: #f8f9fa;
   box-sizing: border-box;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 .formBox {
@@ -108,17 +107,70 @@ input:focus {
   cursor: not-allowed;
 }
 
-/*=================Mobile Optimization ===========*/
-@media (max-width: 480px) {
+/*================= Responsive ===========*/
+@media (max-width: 768px) {
+  .formBox {
+    padding: 26px 22px;
+    gap: 16px;
+  }
+
+  h2 {
+    font-size: 21px;
+  }
+
+  input {
+    font-size: 14px;
+    padding: 11px 13px;
+  }
+
+  .button {
+    font-size: 15.5px;
+    padding: 13px;
+  }
+}
+
+@media (max-width: 600px) {
   .formBox {
     padding: 24px 20px;
+    gap: 15px;
   }
 
   h2 {
     font-size: 20px;
   }
 
+  input {
+    font-size: 13.5px;
+    padding: 10px 12px;
+  }
+
   .button {
     font-size: 15px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .formBox {
+    padding: 22px 18px;
+    gap: 14px;
+  }
+
+  h2 {
+    font-size: 19px;
+  }
+
+  input {
+    font-size: 13px;
+    padding: 9px 11px;
+  }
+
+  .button {
+    font-size: 14px;
+    padding: 11px;
+  }
+
+  .showText {
+    font-size: 12.5px;
   }
 }

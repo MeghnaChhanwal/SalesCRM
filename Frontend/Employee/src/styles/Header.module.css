@@ -41,7 +41,7 @@
 }
 
 .name {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   margin: 0;
   line-height: 1.4;
@@ -60,18 +60,35 @@
   opacity: 0.9;
 }
 
-/* Responsive Styling */
-@media (max-width: 400px) {
+@media (max-width: 768px) {
+  .logo {
+    font-size: 21px;
+  }
+
+  .name {
+    font-size: 17px;
+  }
+
+  .greeting {
+    font-size: 13.5px;
+  }
+
+  .pageTitle {
+    font-size: 14.5px;
+  }
+}
+
+@media (max-width: 600px) {
   .logo {
     font-size: 20px;
   }
 
   .name {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .greeting {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .pageTitle {
@@ -79,18 +96,33 @@
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 400px) {
   .logo {
     font-size: 18.5px;
   }
 
   .name {
-    font-size: 14px;
+    font-size: 14.5px;
   }
 
   .greeting,
   .pageTitle {
     font-size: 12.5px;
+  }
+}
+
+@media (max-width: 360px) {
+  .logo {
+    font-size: 17.5px;
+  }
+
+  .name {
+    font-size: 13.5px;
+  }
+
+  .greeting,
+  .pageTitle {
+    font-size: 12px;
   }
 
   .subHeader {

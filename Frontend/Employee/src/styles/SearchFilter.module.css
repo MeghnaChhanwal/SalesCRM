@@ -1,7 +1,7 @@
-/* 🔒 Transparent Fixed Container */
+
 .searchBarContainer {
   position: fixed;
-  top: 80px; /* Adjust according to your header */
+  top: 80px; 
   left: 0;
   right: 0;
   z-index: 999;
@@ -10,7 +10,7 @@
   box-shadow: none;
 }
 
-/* 🔍 Main Container */
+
 .container {
   display: flex;
   justify-content: space-between;
@@ -21,7 +21,7 @@
   flex-wrap: nowrap;
 }
 
-/* 🔍 Search box */
+
 .searchWrapper {
   flex: 1;
   display: flex;
@@ -47,7 +47,7 @@
   color: #333;
 }
 
-/* 🔽 Filter */
+/* 🔽 Filter Icon */
 .filterWrapper {
   position: relative;
   z-index: 1;
@@ -68,7 +68,7 @@
   height: 18px;
 }
 
-/* 🔽 Filter Dropdown */
+
 .popupCard {
   position: absolute;
   top: 48px;
@@ -115,8 +115,6 @@
 .saveBtn:hover {
   background-color: #0056b3;
 }
-
-/* 📱 Responsive */
 @media (max-width: 768px) {
   .container {
     gap: 10px;
@@ -142,16 +140,16 @@
     top: 76px;
   }
 }
-
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .container {
     flex-wrap: wrap;
-    padding: 8px 10px;
     gap: 8px;
+    padding: 10px 12px;
   }
 
   .popupCard {
-    width: 160px;
+    width: 165px;
+    top: 44px;
   }
 
   .searchInput {
@@ -166,30 +164,5 @@
 
   .searchBarContainer {
     top: 72px;
-  }
-}
-
-@media (max-width: 360px) {
-  .container {
-    gap: 6px;
-    padding: 6px 8px;
-  }
-
-  .popupCard {
-    width: 150px;
-  }
-
-  .popupLabel {
-    font-size: 13px;
-  }
-
-  .popupSelect,
-  .saveBtn {
-    font-size: 12.5px;
-    padding: 5px 8px;
-  }
-
-  .searchBarContainer {
-    top: 68px;
   }
 }

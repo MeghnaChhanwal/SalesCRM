@@ -1,15 +1,14 @@
 /* ====== Global container ====== */
 .container {
-  padding: 12px;               /* ⬅️ Reduced from 16px */
+  padding: 12px;             
   display: flex;
   flex-direction: column;
-  gap: 12px;                   /* ⬅️ Reduced from 15px */
   font-family: 'Segoe UI', sans-serif;
 }
 
 /* ====== Section Headings ====== */
 .sectionTitle {
-  font-size: 20px;             /* ⬅️ Slightly reduced */
+  font-size: 20px;           
   font-weight: 700;
   color: #2c3e50;
   margin: 4px 0 2px 4px;
@@ -18,7 +17,7 @@
 /* ====== Card Block ====== */
 .card {
   background-color: #fff;
-  border-radius: 10px;         /* ⬅️ Reduced from 14px */
+  border-radius: 10px;      
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
@@ -58,7 +57,7 @@
   color: #fff;
 }
 
-/* ====== Status Indicator ====== */
+
 .indicator {
   position: absolute;
   top: 8px;
@@ -106,7 +105,7 @@
 .scrollBoxTall {
   max-height: 280px;
   overflow-y: auto;
-  padding: 10px 12px;         /* ⬅️ Reduced padding */
+  padding: 10px 12px;        
 }
 
 .activityList {
@@ -151,7 +150,7 @@
   font-size: 14px;
   color: #666;
 }
-/* ✅ Mobile Optimization */
+
 @media (max-width: 600px) {
   .container {
     padding: 10px;
@@ -219,7 +218,6 @@
   }
 }
 
-/* ✅ Extra Small Devices (≤400px) */
 @media (max-width: 400px) {
   .sectionTitle {
     font-size: 16px;
@@ -253,3 +251,116 @@
   }
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .sectionTitle {
+    font-size: 18px;
+  }
+
+  .card {
+    border-radius: 9px;
+  }
+
+  .blueHeader {
+    padding: 6px 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .timingBlock {
+    min-width: 90px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .valueDark {
+    font-size: 14px;
+  }
+
+  .historyHeader,
+  .historyRow {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .scrollBoxTall {
+    max-height: 260px;
+  }
+
+  .activityList li {
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sectionTitle {
+    font-size: 17px;
+  }
+
+  .valueDark {
+    font-size: 13.5px;
+  }
+
+  .label {
+    font-size: 11.5px;
+  }
+
+  .historyHeader,
+  .historyRow {
+    font-size: 12.5px;
+    padding: 6px 8px;
+  }
+
+  .scrollBoxTall {
+    max-height: 220px;
+  }
+
+  .activityList li {
+    font-size: 12.5px;
+    padding: 5px 8px;
+  }
+
+  .timeAgo {
+    font-size: 10.5px;
+  }
+}
+
+@media (max-width: 400px) {
+  .sectionTitle {
+    font-size: 16px;
+  }
+
+  .valueDark {
+    font-size: 12.5px;
+  }
+
+  .label {
+    font-size: 11px;
+  }
+
+  .historyHeader,
+  .historyRow {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+
+  .scrollBoxTall {
+    max-height: 180px;
+  }
+
+  .activityList li {
+    font-size: 12px;
+    padding: 5px 6px;
+  }
+
+  .timeAgo {
+    font-size: 10px;
+  }
+}

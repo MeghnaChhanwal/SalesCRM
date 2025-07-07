@@ -76,7 +76,7 @@
 
 .dateRow {
   display: flex;
-  align-items: right;
+  align-items: center;
   font-size: 0.9rem;
   color: #333;
   gap: 6px;
@@ -98,7 +98,6 @@
   height: 20px;
   cursor: pointer;
 }
-
 
 .popup {
   position: absolute;
@@ -166,10 +165,38 @@
   color: #0891b2;
 }
 
-@media screen and (max-width: 480px) {
+/* 🟡 Max Width 768px - Tablets */
+@media screen and (max-width: 768px) {
   .card {
-    flex-direction: row;
-    flex-wrap: wrap;
+    padding: 0.9rem;
+  }
+
+  .name {
+    font-size: 0.95rem;
+  }
+
+  .email {
+    font-size: 0.8rem;
+  }
+
+  .statusCircle {
+    width: 80px;
+    height: 80px;
+    font-size: 0.95rem;
+  }
+
+  .dateRow img,
+  .actionsWrapper img {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+
+@media screen and (max-width: 600px) {
+  .card {
+    flex-direction: column;
+    gap: 12px;
   }
 
   .topRow,
@@ -181,14 +208,59 @@
 
   .statusCircle {
     margin-left: auto;
-  }
-
-  .actionsRowRight img {
-    width: 18px;
-    height: 18px;
+    width: 75px;
+    height: 75px;
+    font-size: 0.9rem;
   }
 
   .dateRow {
+    font-size: 0.85rem;
+  }
+
+  .actionsWrapper {
+    gap: 8px;
+  }
+
+  .actionsWrapper img {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .card {
+    padding: 0.8rem;
+  }
+
+  .name {
+    font-size: 0.9rem;
+  }
+
+  .email {
+    font-size: 0.75rem;
+  }
+
+  .statusCircle {
+    width: 70px;
+    height: 70px;
+    font-size: 0.85rem;
+  }
+
+  .popup {
+    width: 160px;
+    padding: 0.6rem;
+  }
+
+  .popup input {
+    font-size: 0.85rem;
+  }
+
+  .popup button {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+
+  .option {
     font-size: 0.85rem;
   }
 }

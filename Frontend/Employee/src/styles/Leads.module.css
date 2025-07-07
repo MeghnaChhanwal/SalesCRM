@@ -1,80 +1,240 @@
 .container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 1rem;
+  padding: 80px 16px 80px;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-/* Fixed Search Bar transparent */
 .searchBarContainer {
   position: fixed;
-  top: 80px; /* header height */
+  top: 80px;
   left: 0;
   right: 0;
   z-index: 999;
-  background-color: transparent; /* Remove white bg */
-  border-bottom: none;
-  box-shadow: none;
+  background-color: #f9f9f9;
+  padding: 8px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-/* Body where cards show */
 .body {
-  margin-top: 100px; /* to make space for fixed bar */
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 16px;
+  padding-top: 72px;
+  margin-top: 12px;
 }
 
-/* Error & Empty states */
+.card {
+  background-color: #f1f1f1;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  background-color: #1854f1;
+  color: white;
+}
+
+.card:hover .referralTitle,
+.card:hover .dateLabel,
+.card:hover .dateTime,
+.card:hover .phone,
+.card:hover .callLabel,
+.card:hover .leadName {
+  color: white;
+}
+
+.activeCard {
+  background-color: #1854f1;
+  color: white;
+}
+
+.activeCard .referralTitle,
+.activeCard .dateLabel,
+.activeCard .dateTime,
+.activeCard .phone,
+.activeCard .callLabel,
+.activeCard .leadName {
+  color: white;
+}
+
+.cardTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.leftContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.rightDate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.referralTitle,
+.phone,
+.dateLabel,
+.dateTime,
+.callLabel,
+.leadName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111;
+  line-height: 1.4;
+}
+
+.callDetails {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  filter: grayscale(50%);
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  background-color: #1854f1;
+  color: white;
+  font-weight: 600;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .errorMsg {
   color: red;
-  font-size: 0.95rem;
   text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
 }
 
-.emptyMsg {
-  font-size: 0.95rem;
-  color: #555;
-  text-align: center;
-  padding: 1rem;
-}
-
-/* 📱 Responsive */
-@media screen and (max-width: 480px) {
+/* 768px and below (Tablets) */
+@media (max-width: 768px) {
   .container {
-    padding: 0.75rem;
+    padding: 72px 14px 72px;
   }
 
-  .body {
-    gap: 0.75rem;
+  .card {
+    padding: 15px;
   }
 
-  .errorMsg,
-  .emptyMsg {
-    font-size: 0.85rem;
-    padding: 0.75rem;
+  .referralTitle,
+  .phone,
+  .dateLabel,
+  .dateTime,
+  .callLabel,
+  .leadName {
+    font-size: 13.8px;
   }
 
-  .searchBarContainer {
-    top: 72px;
+  .avatar {
+    width: 27px;
+    height: 27px;
+    font-size: 12.5px;
+  }
+
+  .icon {
+    width: 15px;
+    height: 15px;
   }
 }
 
-@media screen and (max-width: 360px) {
+/* 600px and below (Standard Androids & small iPhones) */
+@media (max-width: 600px) {
   .container {
-    padding: 0.5rem;
+    padding: 70px 12px 70px;
   }
 
-  .body {
-    gap: 0.6rem;
+  .referralTitle,
+  .phone,
+  .dateLabel,
+  .dateTime,
+  .callLabel,
+  .leadName {
+    font-size: 13.5px;
   }
 
-  .errorMsg,
-  .emptyMsg {
-    font-size: 0.8rem;
-    padding: 0.6rem;
+  .avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
   }
 
-  .searchBarContainer {
-    top: 68px;
+  .icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* 400px and below (Compact mobile screens) */
+@media (max-width: 400px) {
+  .container {
+    padding: 68px 10px 68px;
+  }
+
+  .card {
+    padding: 13px;
+  }
+
+  .referralTitle,
+  .phone,
+  .dateLabel,
+  .dateTime,
+  .callLabel,
+  .leadName {
+    font-size: 13px;
+  }
+
+  .avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 11.5px;
+  }
+
+  .icon {
+    width: 13px;
+    height: 13px;
+  }
+
+  .cardTopRow {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .rightDate {
+    align-items: flex-end;
+    text-align: right;
+    white-space: nowrap;
   }
 }

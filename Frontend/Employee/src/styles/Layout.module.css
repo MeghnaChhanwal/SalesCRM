@@ -6,6 +6,8 @@
   font-family: 'Segoe UI', sans-serif;
   overflow: hidden;
 }
+
+
 .networkBanner {
   background-color: red;
   color: white;
@@ -22,7 +24,7 @@
 .content {
   flex: 1;
   padding: 16px;
-  padding-top: 110px;   
+  padding-top: 110px;  
   padding-bottom: 80px; 
   box-sizing: border-box;
   overflow-y: auto;

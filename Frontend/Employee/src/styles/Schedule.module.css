@@ -23,17 +23,17 @@
   transition: background-color 0.3s ease, color 0.3s ease;
   cursor: pointer;
 }
+
 .searchBarContainer {
   position: fixed;
   top: 80px; /* header height */
   left: 0;
   right: 0;
   z-index: 999;
-  background-color: transparent; /* Remove white bg */
+  background-color: transparent;
   border-bottom: none;
   box-shadow: none;
 }
-
 
 .card:hover {
   background-color: #1854f1;
@@ -63,7 +63,6 @@
   color: white;
 }
 
-/* ===== Top Row Layout ===== */
 .cardTopRow {
   display: flex;
   justify-content: space-between;
@@ -88,7 +87,6 @@
   white-space: nowrap;
 }
 
-/* ===== Text Styling ===== */
 .referralTitle,
 .phone,
 .dateLabel,
@@ -101,7 +99,6 @@
   line-height: 1.4;
 }
 
-/* ===== Call Section ===== */
 .callDetails {
   display: flex;
   align-items: center;
@@ -114,7 +111,6 @@
   filter: grayscale(50%);
 }
 
-/* ===== User Info ===== */
 .user {
   display: flex;
   align-items: center;
@@ -141,7 +137,6 @@
   font-size: 14px;
 }
 
-/* ✅ Mobile Responsive */
 @media (max-width: 400px) {
   .container {
     padding: 72px 12px 72px;
@@ -171,7 +166,6 @@
     height: 14px;
   }
 
-  /* ✅ Keep row layout so date stays right */
   .cardTopRow {
     flex-direction: row;
     align-items: flex-start;
@@ -182,5 +176,44 @@
     align-items: flex-end;
     text-align: right;
     white-space: nowrap;
+  }
+}
+@media (max-width: 600px) {
+  .container {
+    padding: 76px 14px 76px;
+  }
+
+  .referralTitle,
+  .phone,
+  .dateLabel,
+  .dateTime,
+  .callLabel,
+  .leadName {
+    font-size: 13.5px;
+  }
+
+  .avatar {
+    width: 27px;
+    height: 27px;
+    font-size: 12.5px;
+  }
+
+  .icon {
+    width: 15px;
+    height: 15px;
+  }
+}
+@media (max-width: 768px) {
+  .container {
+    padding: 80px 16px 80px;
+  }
+
+  .referralTitle,
+  .phone,
+  .dateLabel,
+  .dateTime,
+  .callLabel,
+  .leadName {
+    font-size: 14px;
   }
 }
