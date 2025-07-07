@@ -269,6 +269,7 @@ export const scheduleCall = async (req, res) => {
 
 
 // ✅ GET: Fetch scheduled calls (today or upcoming)
+// ✅ GET: Fetch scheduled calls (today or upcoming)
 export const getScheduledCalls = async (req, res) => {
   try {
     const { filter = "all" } = req.query;
@@ -281,6 +282,7 @@ export const getScheduledCalls = async (req, res) => {
       end.setHours(23, 59, 59, 999);
 
       leads = await Lead.find({
+        status: { $ne: "Closed" }, // 🔹 Exclude closed leads
         scheduledCalls: {
           $elemMatch: {
             callDate: { $gte: start, $lte: end },
@@ -289,6 +291,7 @@ export const getScheduledCalls = async (req, res) => {
       }).populate("assignedEmployee", "firstName lastName");
     } else {
       leads = await Lead.find({
+        status: { $ne: "Closed" }, // 🔹 Exclude closed leads
         scheduledCalls: {
           $elemMatch: {
             callDate: { $gte: new Date() },
