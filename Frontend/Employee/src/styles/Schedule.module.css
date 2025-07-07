@@ -161,13 +161,16 @@
     height: 14px;
   }
 
+  /* ✅ Keep row layout so date stays right */
   .cardTopRow {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
-    gap: 8px;
+    justify-content: space-between;
   }
 
   .rightDate {
-    align-items: flex-start;
+    align-items: flex-end;
+    text-align: right;
+    white-space: nowrap;
   }
 }
