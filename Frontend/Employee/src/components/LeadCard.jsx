@@ -92,16 +92,20 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
                 setShowStatusPopup(false);
               }}
             />
-            <img
-              ref={scheduleIconRef}
-              src="/images/calendar.png"
-              alt="Schedule"
-              onClick={() => {
-                setShowSchedulePopup(!showSchedulePopup);
-                setShowTypePopup(false);
-                setShowStatusPopup(false);
-              }}
-            />
+
+            {lead.status !== "Closed" && (
+              <img
+                ref={scheduleIconRef}
+                src="/images/calendar.png"
+                alt="Schedule"
+                onClick={() => {
+                  setShowSchedulePopup(!showSchedulePopup);
+                  setShowTypePopup(false);
+                  setShowStatusPopup(false);
+                }}
+              />
+            )}
+
             <img
               src="/images/status.png"
               alt="Status"
@@ -131,7 +135,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
               </div>
             )}
 
-            {showSchedulePopup && (
+            {showSchedulePopup && lead.status !== "Closed" && (
               <div
                 className={`${styles.popup} ${styles.popupSchedule} ${
                   popupDirection === "up" ? styles.popupUp : ""
