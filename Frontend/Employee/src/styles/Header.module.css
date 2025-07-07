@@ -5,19 +5,21 @@
   right: 0;
   z-index: 1000;
   background-color: #1854f1;
-  padding: 20px 16px 16px 16px;
-  padding-top: env(safe-area-inset-top, 24px);
+  padding: 16px;
+  padding-top: calc(env(safe-area-inset-top, 16px) + 10px); /* Ensures space even if safe-area is small */
   color: white;
   border-bottom-left-radius: 16px;
   border-bottom-right-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-family: 'Segoe UI', sans-serif;
+  box-sizing: border-box;
 }
 
 .logo {
   font-size: 22px;
   font-weight: 700;
   line-height: 1.2;
+  margin-bottom: 6px; /* Ensures space between logo and greeting */
 }
 
 .crm {
@@ -25,7 +27,6 @@
 }
 
 .subHeader {
-  margin-top: 8px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -59,7 +60,7 @@
   opacity: 0.9;
 }
 
-/* Responsive styling */
+/* Responsive Styling */
 @media (max-width: 400px) {
   .logo {
     font-size: 20px;

@@ -1,55 +1,67 @@
+/* Login.module.css */
+
 .content {
-  flex: 1;
-  padding: 16px;
-  padding-top: 110px;
-  padding-bottom: 32px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
+  padding: 16px;
   background-color: #f8f9fa;
   box-sizing: border-box;
+  overflow: hidden; /* ✅ Prevent scrolling */
 }
-
 
 .formBox {
   width: 100%;
   max-width: 380px;
   background-color: #ffffff;
-  padding: 24px;
+  padding: 28px 24px;
   border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   gap: 18px;
+  font-family: 'Segoe UI', sans-serif;
 }
 
 h2 {
   text-align: center;
   font-size: 22px;
   font-weight: 600;
+  margin-bottom: 6px;
   color: #1a1a1a;
-  margin-bottom: 8px;
-  font-family: 'Segoe UI', sans-serif;
 }
 
 input {
+  width: 100%;
   padding: 12px 14px;
+  font-size: 15px;
   border: 1px solid #ccc;
   border-radius: 10px;
-  font-size: 16px;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #fff;
+  font-family: inherit;
+  background-color: #f1f5ff;
+  box-sizing: border-box;
   transition: border 0.2s ease;
 }
 
 input:focus {
   border-color: #3366ff;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(51, 102, 255, 0.1);
+  box-shadow: 0 0 0 2px rgba(51, 102, 255, 0.15);
 }
 
 .passwordWrapper {
   position: relative;
+  width: 100%;
+}
+
+.passwordWrapper input {
+  width: 100%;
+  padding-right: 60px;
 }
 
 .showText {
@@ -64,16 +76,17 @@ input:focus {
 }
 
 .error {
-  color: #ff4d4f;
-  background: #fff1f0;
+  color: #b3261e;
+  background-color: #ffe0e0;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
+  border: 1px solid #ffb3b3;
   text-align: center;
 }
 
 .button {
-  margin-top: 12px;
+  margin-top: 10px;
   width: 100%;
   padding: 14px;
   font-size: 16px;
@@ -95,43 +108,17 @@ input:focus {
   cursor: not-allowed;
 }
 
-/* ✅ Mobile Responsiveness Tweaks */
+/* ✅ Mobile Optimization */
 @media (max-width: 480px) {
   .formBox {
-    padding: 20px;
-    border-radius: 14px;
-  }
-
-  input {
-    font-size: 15px;
-    padding: 11px 13px;
-  }
-
-  .button {
-    font-size: 15px;
-    padding: 12px;
+    padding: 24px 20px;
   }
 
   h2 {
     font-size: 20px;
   }
-}
-
-@media (max-width: 360px) {
-  .formBox {
-    padding: 16px;
-  }
-
-  input {
-    font-size: 14px;
-  }
 
   .button {
-    font-size: 14px;
-    padding: 11px;
-  }
-
-  h2 {
-    font-size: 18px;
+    font-size: 15px;
   }
 }

@@ -4,6 +4,7 @@
   padding: 1rem;
 }
 
+/*==== Header Section===== */
 .header {
   margin-bottom: 1rem;
   display: flex;
@@ -17,6 +18,7 @@
   color: #1a1a1a;
 }
 
+
 .body {
   margin-top: 1rem;
   display: flex;
@@ -24,6 +26,7 @@
   gap: 1rem;
 }
 
+/*=====Error / Empty Messages =====*/
 .errorMsg {
   color: red;
   font-size: 0.95rem;
@@ -37,7 +40,7 @@
   padding: 1rem;
 }
 
-/* Responsive - Mobile Optimizations */
+
 @media screen and (max-width: 480px) {
   .container {
     padding: 0.75rem;
@@ -61,5 +64,26 @@
   .errorMsg {
     font-size: 0.85rem;
     padding: 0.75rem;
+  }
+}
+
+/*====Responsive Extra Small Phones========*/
+@media screen and (max-width: 360px) {
+  .container {
+    padding: 0.5rem;
+  }
+
+  .header h2 {
+    font-size: 1.1rem;
+  }
+
+  .body {
+    gap: 0.6rem;
+  }
+
+  .emptyMsg,
+  .errorMsg {
+    font-size: 0.8rem;
+    padding: 0.6rem;
   }
 }

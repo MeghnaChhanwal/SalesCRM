@@ -9,7 +9,7 @@
   position: relative;
 }
 
-/* Search bar wrapper */
+/* ===========Search bar wrapper============= */
 .searchWrapper {
   flex: 1;
   display: flex;
@@ -19,14 +19,14 @@
   padding: 6px 12px;
 }
 
-/* Search icon */
+/*========== Search icon=================== */
 .searchIcon {
   width: 20px;
   height: 20px;
   margin-right: 8px;
 }
 
-/* Input */
+/*========== Input=========== */
 .searchInput {
   border: none;
   background: transparent;
@@ -36,12 +36,12 @@
   color: #333;
 }
 
-/* Filter icon wrapper */
+/*========= Filter icon wrapper============ */
 .filterWrapper {
   position: relative;
 }
 
-/* Circle-style filter button */
+/*====== Circle-style filter button===== */
 .filterCircle {
   background-color: #e0e0e0;
   border-radius: 50%;
@@ -91,7 +91,7 @@
   color: #333;
 }
 
-/* Save button inside popup */
+/* ==== button inside popup=== */
 .saveBtn {
   background-color: #007bff;
   color: white;
@@ -108,7 +108,7 @@
   background-color: #0056b3;
 }
 
-/* 📱 Mobile responsiveness */
+
 @media (max-width: 768px) {
   .container {
     flex-wrap: wrap;

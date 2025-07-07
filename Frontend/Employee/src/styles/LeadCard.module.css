@@ -7,7 +7,9 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   position: relative;
   z-index: 0;
-  overflow: visible;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
 }
 
 .leftBar {
@@ -15,35 +17,37 @@
   height: 40px;
   border-radius: 8px;
   margin-right: 12px;
+  background-color: #2563eb;
 }
 
 .mainContent {
   flex: 1;
-  width: 100%;
+  min-width: 0;
 }
 
 .topRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .nameEmail {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
 
 .name {
   font-size: 1rem;
   font-weight: 600;
-  margin: 0;
   color: #1a1a1a;
 }
 
 .email {
   font-size: 0.85rem;
-  color: #888;
-  margin: 4px 0;
+  color: #777;
 }
 
 .label {
@@ -53,17 +57,18 @@
 }
 
 .statusCircle {
-  width: 90px;
-  height: 90px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  border: 5px solid orange;
+  border: 4px solid orange;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   background-color: #dedede;
   color: #1a1a1a;
+  margin-left: auto;
 }
 
 .dateAndIconsRow {
@@ -72,6 +77,7 @@
   align-items: center;
   margin-top: 8px;
   flex-wrap: wrap;
+  gap: 10px;
 }
 
 .dateRow {
@@ -80,6 +86,8 @@
   font-size: 0.9rem;
   color: #333;
   gap: 6px;
+  flex: 1;
+  min-width: 0;
 }
 
 .dateRow img {
@@ -99,6 +107,7 @@
   cursor: pointer;
 }
 
+/* Popup */
 .popup {
   position: absolute;
   top: 75px;
@@ -140,6 +149,7 @@
   cursor: pointer;
 }
 
+/* Option Status Colors */
 .option {
   padding: 8px;
   border-radius: 6px;
@@ -165,21 +175,26 @@
   color: #0891b2;
 }
 
+/* ✅ Mobile Responsive */
 @media screen and (max-width: 480px) {
   .card {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem 1rem 1.25rem;
   }
 
-  .topRow,
-  .dateAndIconsRow {
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
+  .topRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 
   .statusCircle {
-    margin-left: auto;
+    margin-left: 0;
+    align-self: flex-end;
+    width: 66px;
+    height: 66px;
+    font-size: 0.85rem;
   }
 
   .actionsRowRight img {
@@ -189,5 +204,16 @@
 
   .dateRow {
     font-size: 0.85rem;
+    gap: 5px;
+  }
+
+  .dateRow img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .popup {
+    width: 160px;
+    top: 65px;
   }
 }
