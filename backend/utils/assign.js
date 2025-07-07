@@ -1,7 +1,6 @@
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 
-//  Prepare distribution based on existing lead counts
 export const prepareLeadDistribution = async (newLeadCount = 0) => {
   const employees = await Employee.find();
   if (employees.length === 0) {
@@ -31,9 +30,8 @@ export const prepareLeadDistribution = async (newLeadCount = 0) => {
   return { employees, maxPerEmployee, tempLeadMap };
 };
 
-//  Assign employee to a lead based on matching criteria
 export const assignEmployeeByConditions = async (lead, maxPerEmployee, employees, tempLeadMap) => {
-  if (!employees || !employees.length) return null;
+  if (!employees || employees.length === 0) return null;
 
   const sortedEmployees = employees
     .filter((emp) => (tempLeadMap[emp._id.toString()] || 0) < maxPerEmployee)
@@ -43,15 +41,26 @@ export const assignEmployeeByConditions = async (lead, maxPerEmployee, employees
       return aCount - bCount;
     });
 
+  const leadLang = lead.language?.toLowerCase();
+  const leadLoc = lead.location?.toLowerCase();
+
+
   for (let emp of sortedEmployees) {
-    if (emp.language === lead.language && emp.location === lead.location) {
+    if (
+      emp.language?.toLowerCase() === leadLang &&
+      emp.location?.toLowerCase() === leadLoc
+    ) {
       tempLeadMap[emp._id.toString()]++;
       return emp._id;
     }
   }
 
+  
   for (let emp of sortedEmployees) {
-    if (emp.language === lead.language || emp.location === lead.location) {
+    if (
+      emp.language?.toLowerCase() === leadLang ||
+      emp.location?.toLowerCase() === leadLoc
+    ) {
       tempLeadMap[emp._id.toString()]++;
       return emp._id;
     }
@@ -66,7 +75,7 @@ export const assignEmployeeByConditions = async (lead, maxPerEmployee, employees
   return null;
 };
 
-// Reassign pending leads of deleted employee
+
 export const redistributeLeadsOfDeletedEmployee = async (employeeId) => {
   const pendingLeads = await Lead.find({
     assignedEmployee: employeeId,
@@ -78,13 +87,18 @@ export const redistributeLeadsOfDeletedEmployee = async (employeeId) => {
   const { employees, maxPerEmployee, tempLeadMap } = await prepareLeadDistribution(pendingLeads.length);
 
   for (const lead of pendingLeads) {
-    const newEmployee = await assignEmployeeByConditions(lead, maxPerEmployee, employees, tempLeadMap);
+    const newEmployee = await assignEmployeeByConditions(
+      lead,
+      maxPerEmployee,
+      employees,
+      tempLeadMap
+    );
     lead.assignedEmployee = newEmployee;
     await lead.save();
   }
 };
 
-// Assign unassigned leads after adding new employee
+
 export const assignUnassignedLeads = async () => {
   const unassignedLeads = await Lead.find({ assignedEmployee: null });
   if (unassignedLeads.length === 0) return;
@@ -92,7 +106,12 @@ export const assignUnassignedLeads = async () => {
   const { employees, maxPerEmployee, tempLeadMap } = await prepareLeadDistribution(unassignedLeads.length);
 
   for (const lead of unassignedLeads) {
-    const newEmployee = await assignEmployeeByConditions(lead, maxPerEmployee, employees, tempLeadMap);
+    const newEmployee = await assignEmployeeByConditions(
+      lead,
+      maxPerEmployee,
+      employees,
+      tempLeadMap
+    );
     lead.assignedEmployee = newEmployee;
     await lead.save();
   }

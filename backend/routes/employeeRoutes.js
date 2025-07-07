@@ -9,7 +9,6 @@ import {
 } from "../controllers/employeeController.js";
 
 const router = express.Router();
-
 router.get("/", getEmployees);
 router.get("/all", getAllEmployees);
 router.post("/", createEmployee);
