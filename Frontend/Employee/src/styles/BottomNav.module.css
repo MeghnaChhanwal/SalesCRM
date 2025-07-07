@@ -1,4 +1,4 @@
-/* 📱 Main bottom navigation bar */
+
 .navbar {
   display: flex;
   justify-content: space-around;
@@ -15,7 +15,7 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
-/* Each nav item */
+
 .navItem {
   display: flex;
   flex-direction: column;
@@ -30,7 +30,7 @@
   user-select: none;
 }
 
-/* Icon styling */
+
 .icon {
   width: 24px;
   height: 24px;
@@ -38,7 +38,7 @@
   transition: filter 0.2s ease-in-out;
 }
 
-/* Active state */
+
 .active {
   color: #1854f1;
   font-weight: 500;
@@ -48,13 +48,13 @@
   filter: brightness(0) saturate(100%) invert(28%) sepia(95%) saturate(1785%) hue-rotate(218deg) brightness(99%) contrast(102%);
 }
 
-/* iOS/Android-style tap highlight */
+
 .navItem:active {
   background-color: #f0f4ff;
   border-radius: 8px;
 }
 
-/* 📲 Responsive: small phones */
+
 @media (max-width: 400px) {
   .icon {
     width: 22px;
@@ -66,7 +66,7 @@
   }
 }
 
-/* 📲 Extra tiny screens */
+
 @media (max-width: 360px) {
   .icon {
     width: 20px;

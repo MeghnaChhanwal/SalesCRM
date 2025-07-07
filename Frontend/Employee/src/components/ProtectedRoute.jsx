@@ -5,7 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 const ProtectedRoute = ({ children }) => {
   const { employee, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>; // 🌀 Spinner वापरायला हवे असल्यास change करा
+  if (loading) return <div>Loading...</div>; 
 
   return employee ? children : <Navigate to="/login" replace />;
 };

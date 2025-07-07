@@ -37,7 +37,7 @@ const Home = () => {
       const res = await API.get(`/api/timing/${employee._id}/today`);
       if (res.data?.length > 0) setTiming(res.data[0]);
     } catch (err) {
-      console.error("❌ Timing fetch error", err);
+      console.error("Timing fetch error", err);
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ const Home = () => {
 
       setBreaks(sorted);
     } catch (err) {
-      console.error("❌ Break fetch error", err);
+      console.error(" Break fetch error", err);
     }
   };
 
@@ -66,7 +66,7 @@ const Home = () => {
       const res = await API.get(`/api/activity/employee/${employee._id}`);
       setActivities(res.data || []);
     } catch (err) {
-      console.error("❌ Activity fetch error", err);
+      console.error(" Activity fetch error", err);
     }
   };
 
@@ -79,7 +79,7 @@ const Home = () => {
       <div className={styles.container}>
         <p className={styles.sectionTitle}>Timings</p>
 
-        {/* ✅ Check-in/out */}
+       
         <div className={styles.card}>
           <div className={styles.blueHeader}>
             <div className={styles.timingBlock}>
@@ -94,7 +94,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* ✅ Break */}
+        {/*  Break */}
         <div className={styles.card}>
           <div className={styles.blueHeader}>
             <div className={styles.timingBlock}>
@@ -129,7 +129,7 @@ const Home = () => {
           </div>
         </div>
 
-        {/* ✅ Activity */}
+        {/*  Activity */}
         <h4 className={styles.sectionTitle}>Recent Activity</h4>
         <div className={styles.card}>
           <div className={styles.scrollBoxTall}>

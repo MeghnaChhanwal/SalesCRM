@@ -1,4 +1,4 @@
-/* 📦 Fixed top header with safe padding */
+
 .header {
   position: fixed;
   top: 0;
@@ -6,7 +6,7 @@
   right: 0;
   z-index: 1000;
   background-color: #1854f1;
-  padding: 20px 16px 16px 16px; /* top, right, bottom, left */
+  padding: 20px 16px 16px 16px; 
   padding-top: env(safe-area-inset-top, 24px); /* iOS notch safe */
   color: white;
   border-bottom-left-radius: 16px;

@@ -1,10 +1,10 @@
-// src/pages/Login.jsx
+
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import PageLayout from "../components/Layout"; // Layout wrapper
-import styles from "../styles/Login.module.css"; // CSS module
+import PageLayout from "../components/Layout"; 
+import styles from "../styles/Login.module.css";
 
 const Login = () => {
   const { employee, login } = useAuth();

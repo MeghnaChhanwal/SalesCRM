@@ -1,4 +1,4 @@
-// src/components/PageLayout.jsx
+
 import React from "react";
 import Header from "./Header";
 import BottomNav from "./BottomNav";

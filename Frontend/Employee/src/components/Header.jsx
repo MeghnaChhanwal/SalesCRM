@@ -1,10 +1,10 @@
-// src/components/Header.jsx
+
 import React from "react";
 import styles from "../styles/Header.module.css";
 import { useAuth } from "../contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 
-// Get greeting by current hour
+
 const getGreeting = () => {
   const hour = new Date().getHours();
   if (hour < 12) return "Good Morning";
@@ -22,19 +22,19 @@ const Header = () => {
   const isLogin = path === "/";
   const isHome = path === "/dashboard";
 
-  // Page title mapping
+
   const pageTitles = {
     "/profile": "Profile",
     "/schedule": "Schedule",
     "/leads": "Leads",
   };
 
-  // Detect current page title
+ 
   const pageName = Object.entries(pageTitles).find(([route]) =>
     path.startsWith(route)
   )?.[1];
 
-  // Manual back path logic
+
   const handleBack = () => {
     if (path === "/profile") navigate("/schedule");
     else if (path === "/schedule") navigate("/leads");
@@ -44,12 +44,12 @@ const Header = () => {
 
   return (
     <div className={styles.header}>
-      {/* ✅ Logo always visible */}
+     
       <div className={styles.logo}>
         Canova<span className={styles.crm}>CRM</span>
       </div>
 
-      {/* ✅ Sub-header conditionally rendered */}
+    
       {!isLogin && (
         <div className={styles.subHeader}>
           {isHome && employee && (

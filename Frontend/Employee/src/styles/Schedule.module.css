@@ -1,63 +1,62 @@
-.container {
-  padding: 16px;
-  padding-bottom: 80px;
-}
-
-.body {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .card {
-  display: flex;
-  flex-direction: column;
-  background-color: rgb(230, 230, 230);
+  background-color: #f0f0f0;
   border-radius: 16px;
   padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.3s;
 }
 
 .card:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-}
-
-.activeCard {
   background-color: #004de7;
   color: #fff;
 }
 
-.cardHeader {
+.card:hover .callType,
+.card:hover .phone,
+.card:hover .callLabel,
+.card:hover .leadName {
+  color: #fff;
+}
+
+.topRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+  align-items: flex-start;
+}
+
+.dateLabel {
+  font-size: 30px;
+  color: #060606;
+  font-weight: 500;
 }
 
 .callType {
   font-weight: 600;
-  font-size: 14px;
-}
-
-.date {
-  font-size: 12px;
-  color: #666;
+  font-size: 18px;
+  color: #222;
 }
 
 .phone {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
 }
 
-.callDetails {
+.bottomRow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.callBox {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .icon {
@@ -65,18 +64,23 @@
   height: 16px;
 }
 
+.callLabel {
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+}
+
 .user {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
 }
 
 .avatar {
   width: 28px;
   height: 28px;
-  background-color: #007bff;
-  color: #fff;
+  background-color: #004de7;
+  color: white;
   font-size: 12px;
   font-weight: 600;
   display: flex;
@@ -88,7 +92,8 @@
 
 .leadName {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
+  color: #000;
 }
 
 .errorMsg {

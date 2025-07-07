@@ -77,7 +77,7 @@ const Leads = () => {
     try {
       await API.post(`/api/leads/${leadId}/schedule`, {
         callDate,
-        callType: "Cold Call", // ✅ Default call type passed
+        callType: "Cold Call", 
       });
       alert("Call scheduled!");
     } catch (err) {
