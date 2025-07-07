@@ -15,7 +15,7 @@ const Login = () => {
 
   useEffect(() => {
     if (employee) {
-      navigate("/dashboard");
+      navigate("/home");
     }
   }, [employee, navigate]);
 

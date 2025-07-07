@@ -20,7 +20,7 @@ const Header = () => {
   const path = location.pathname;
 
   const isLogin = path === "/";
-  const isHome = path === "/dashboard";
+  const isHome = path === "/home";
 
   // Page title mapping
   const pageTitles = {
@@ -39,7 +39,7 @@ const Header = () => {
     if (path === "/profile") navigate("/schedule");
     else if (path === "/schedule") navigate("/leads");
     else if (path === "/leads") navigate("/home");
-    else navigate("/dashboard"); // fallback
+    else navigate("/home"); // fallback
   };
 
   return (
