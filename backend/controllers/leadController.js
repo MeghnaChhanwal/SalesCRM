@@ -8,6 +8,7 @@ import {
 } from "../utils/assign.js";
 
 
+// ✅ GET: All leads (with search, filter, sort, pagination)
 export const getLeads = async (req, res) => {
   try {
     const {
@@ -59,6 +60,7 @@ export const getLeads = async (req, res) => {
 };
 
 
+// ✅ POST: Manually add lead
 export const addLeadManually = async (req, res) => {
   try {
     const { name, email, phone, language, location, status, type } = req.body;
@@ -96,6 +98,7 @@ export const addLeadManually = async (req, res) => {
 };
 
 
+// ✅ POST: Upload leads via CSV
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
@@ -111,7 +114,6 @@ export const uploadCSV = async (req, res) => {
         .on("error", reject);
     });
 
-   
     const validRows = allRows.filter((row) =>
       requiredFields.every((f) => row[f] && row[f].trim() !== "")
     );
@@ -121,7 +123,7 @@ export const uploadCSV = async (req, res) => {
     const { employees, maxPerEmployee, tempLeadMap } = await prepareLeadDistribution(validRows.length);
 
     for (const row of validRows) {
-      // Optional: avoid duplicate by email or phone
+      // Avoid duplicates
       const existing = await Lead.findOne({
         $or: [{ email: row.email }, { phone: row.phone }],
       });
@@ -162,6 +164,7 @@ export const uploadCSV = async (req, res) => {
 };
 
 
+// ✅ PATCH: Update lead type
 export const updateLeadType = async (req, res) => {
   try {
     const { id } = req.params;
@@ -182,6 +185,7 @@ export const updateLeadType = async (req, res) => {
 };
 
 
+// ✅ PATCH: Update lead status
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -222,7 +226,8 @@ export const updateLeadStatus = async (req, res) => {
   }
 };
 
-// ✅ POST: Schedule call
+
+// ✅ POST: Schedule a call
 export const scheduleCall = async (req, res) => {
   try {
     const { id } = req.params;
@@ -236,7 +241,7 @@ export const scheduleCall = async (req, res) => {
     }
 
     const parsedDate = new Date(callDate);
-    parsedDate.setSeconds(0, 0); // normalize
+    parsedDate.setSeconds(0, 0);
 
     const existing = await Lead.findOne({
       "scheduledCalls.callDate": parsedDate,
@@ -263,6 +268,7 @@ export const scheduleCall = async (req, res) => {
 };
 
 
+// ✅ GET: Fetch scheduled calls (today or upcoming)
 export const getScheduledCalls = async (req, res) => {
   try {
     const { filter = "all" } = req.query;

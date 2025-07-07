@@ -164,6 +164,7 @@ export const autoUpdateEmployeeStatuses = async (req, res) => {
 
   try {
     const allEmployees = await Employee.find();
+    let updatedCount = 0;
 
     for (const emp of allEmployees) {
       const timing = await Timing.findOne({ employee: emp._id, date: today });
@@ -172,14 +173,19 @@ export const autoUpdateEmployeeStatuses = async (req, res) => {
         if (emp.status !== "Inactive") {
           emp.status = "Inactive";
           await emp.save();
+          updatedCount++;
         }
       } else if (timing.checkIn && emp.status !== "Active") {
         emp.status = "Active";
         await emp.save();
+        updatedCount++;
       }
     }
 
-    res.status(200).json({ message: "Employee statuses updated successfully" });
+    res.status(200).json({
+      message: "Employee statuses updated successfully",
+      updatedCount,
+    });
   } catch (error) {
     console.error("Auto status update error:", error);
     res.status(500).json({ error: "Failed to update employee statuses" });
