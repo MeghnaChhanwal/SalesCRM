@@ -1,5 +1,7 @@
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
+import Timing from "../models/timing.js";
+import { todayIST } from "../utils/time.js";
 
 // Full dashboard overview
 export const getDashboardOverview = async (req, res) => {
@@ -7,9 +9,8 @@ export const getDashboardOverview = async (req, res) => {
     const totalLeads = await Lead.countDocuments();
     const unassignedLeads = await Lead.countDocuments({ assignedEmployee: null });
     const closedLeads = await Lead.countDocuments({ status: "Closed" });
-    const activeSalespeople = await Employee.countDocuments({ status: "Active" });
 
-    //Assigned leads this week
+    // Assigned leads this week
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
@@ -19,10 +20,21 @@ export const getDashboardOverview = async (req, res) => {
       receivedDate: { $gte: startOfWeek },
     });
 
-    // Conversion Rate logic
+    // Conversion Rate
     const conversionRate = totalLeads > 0 ? Math.round((closedLeads / totalLeads) * 100) : 0;
 
-    // Recent Activity 
+    // ✅ Real-time active employees from Timing collection
+    const today = todayIST();
+    const activeTimings = await Timing.find({
+      date: today,
+      checkIn: { $ne: null },
+      checkOut: null,
+      status: { $ne: "Inactive" },
+    }).distinct("employee");
+
+    const activeSalespeople = activeTimings.length;
+
+    // Recent Activity
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
@@ -73,13 +85,13 @@ export const getDashboardOverview = async (req, res) => {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
 
-    // Last 10 days
-    const today = new Date();
+    // Graph data for last 10 days
+    const todayDate = new Date();
     const graphData = [];
 
     for (let i = 9; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
+      const date = new Date(todayDate);
+      date.setDate(todayDate.getDate() - i);
       date.setHours(0, 0, 0, 0);
 
       const nextDate = new Date(date);
@@ -100,7 +112,7 @@ export const getDashboardOverview = async (req, res) => {
       });
     }
 
-    // Employees with assigned & closed lead counts
+    // Enriched employees with assigned/closed leads + dynamic status
     const enrichedEmployees = await Promise.all(
       (await Employee.find()).map(async (emp) => {
         const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
@@ -109,15 +121,22 @@ export const getDashboardOverview = async (req, res) => {
           status: "Closed",
         });
 
+        const timing = await Timing.findOne({ employee: emp._id, date: today });
+        let status = "Inactive";
+        if (timing && timing.checkIn && !timing.checkOut && timing.status !== "Inactive") {
+          status = "Active";
+        }
+
         return {
           ...emp.toObject(),
           assignedLeads,
           closedLeads: closed,
+          status,
         };
       })
     );
 
-    // send all dashboard data
+    // Send dashboard response
     res.status(200).json({
       unassignedLeads,
       assignedThisWeek,
@@ -128,12 +147,13 @@ export const getDashboardOverview = async (req, res) => {
       employees: enrichedEmployees,
     });
   } catch (err) {
-    console.error(" Dashboard overview error:", err);
+    console.error("Dashboard overview error:", err);
     res.status(500).json({ error: "Failed to fetch dashboard stats" });
   }
 };
 
 
+// Chart data for custom number of days (7–14)
 export const getChartData = async (req, res) => {
   try {
     const { days = 10 } = req.query;

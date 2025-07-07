@@ -158,7 +158,6 @@ export const deleteEmployee = async (req, res) => {
   }
 };
 
-// 🔹 PATCH: Auto update employee Active/Inactive based on today's timing
 export const autoUpdateEmployeeStatuses = async (req, res) => {
   const today = todayIST();
 
@@ -169,14 +168,13 @@ export const autoUpdateEmployeeStatuses = async (req, res) => {
     for (const emp of allEmployees) {
       const timing = await Timing.findOne({ employee: emp._id, date: today });
 
-      if (!timing || timing.status === "Inactive" || timing.checkOut) {
-        if (emp.status !== "Inactive") {
-          emp.status = "Inactive";
-          await emp.save();
-          updatedCount++;
-        }
-      } else if (timing.checkIn && emp.status !== "Active") {
-        emp.status = "Active";
+      let computedStatus = "Inactive";
+      if (timing && timing.checkIn && !timing.checkOut && timing.status !== "Inactive") {
+        computedStatus = "Active";
+      }
+
+      if (emp.status !== computedStatus) {
+        emp.status = computedStatus;
         await emp.save();
         updatedCount++;
       }
