@@ -6,10 +6,12 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [scheduleData, setScheduleData] = useState({ date: "", time: "" });
+  const [popupDirection, setPopupDirection] = useState("down");
 
   const typeRef = useRef();
   const scheduleRef = useRef();
   const statusRef = useRef();
+  const scheduleIconRef = useRef();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -27,6 +29,14 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (showSchedulePopup && scheduleIconRef.current) {
+      const rect = scheduleIconRef.current.getBoundingClientRect();
+      const availableBelow = window.innerHeight - rect.bottom;
+      setPopupDirection(availableBelow < 200 ? "up" : "down");
+    }
+  }, [showSchedulePopup]);
 
   const getColor = () => {
     if (lead.type === "Hot") return "#ff4d4f";
@@ -71,7 +81,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
             </span>
           </div>
 
-          <div className={styles.actionsRowRight}>
+          <div className={styles.actionsWrapper}>
             <img
               src="/images/type.png"
               alt="Edit Type"
@@ -82,6 +92,7 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
               }}
             />
             <img
+              ref={scheduleIconRef}
               src="/images/calendar.png"
               alt="Schedule"
               onClick={() => {
@@ -100,62 +111,67 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
               }}
             />
           </div>
+
+          {/* Popups must be relative to actionsWrapper */}
+          <div className={styles.popupWrapper}>
+            {showTypePopup && (
+              <div className={`${styles.popup} ${styles.popupType}`} ref={typeRef}>
+                {["Hot", "Warm", "Cold"].map((type) => (
+                  <div
+                    key={type}
+                    className={`${styles.option} ${styles[type.toLowerCase()]}`}
+                    onClick={() => {
+                      onTypeChange(lead._id, type);
+                      setShowTypePopup(false);
+                    }}
+                  >
+                    {type}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {showSchedulePopup && (
+              <div
+                className={`${styles.popup} ${styles.popupSchedule} ${
+                  popupDirection === "up" ? styles.popupUp : ""
+                }`}
+                ref={scheduleRef}
+              >
+                <label>Date</label>
+                <input
+                  type="date"
+                  value={scheduleData.date}
+                  onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
+                />
+                <label>Time</label>
+                <input
+                  type="time"
+                  value={scheduleData.time}
+                  onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
+                />
+                <button onClick={handleScheduleSave}>Save</button>
+              </div>
+            )}
+
+            {showStatusPopup && (
+              <div className={`${styles.popup} ${styles.popupStatus}`} ref={statusRef}>
+                {["Ongoing", "Closed"].map((status) => (
+                  <div
+                    key={status}
+                    className={styles.option}
+                    onClick={() => {
+                      onStatusChange(lead._id, status);
+                      setShowStatusPopup(false);
+                    }}
+                  >
+                    {status}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* Type Popup */}
-        {showTypePopup && (
-          <div className={`${styles.popup} ${styles.popupType}`} ref={typeRef}>
-            {["Hot", "Warm", "Cold"].map((type) => (
-              <div
-                key={type}
-                className={`${styles.option} ${styles[type.toLowerCase()]}`}
-                onClick={() => {
-                  onTypeChange(lead._id, type);
-                  setShowTypePopup(false);
-                }}
-              >
-                {type}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Schedule Popup */}
-        {showSchedulePopup && (
-          <div className={`${styles.popup} ${styles.popupSchedule}`} ref={scheduleRef}>
-            <label>Date</label>
-            <input
-              type="date"
-              value={scheduleData.date}
-              onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
-            />
-            <label>Time</label>
-            <input
-              type="time"
-              value={scheduleData.time}
-              onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
-            />
-            <button onClick={handleScheduleSave}>Save</button>
-          </div>
-        )}
-
-        {/* Status Popup */}
-        {showStatusPopup && (
-          <div className={`${styles.popup} ${styles.popupStatus}`} ref={statusRef}>
-            {["Ongoing", "Closed"].map((status) => (
-              <div
-                key={status}
-                className={styles.option}
-                onClick={() => {
-                  onStatusChange(lead._id, status);
-                  setShowStatusPopup(false);
-                }}
-              >
-                {status}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

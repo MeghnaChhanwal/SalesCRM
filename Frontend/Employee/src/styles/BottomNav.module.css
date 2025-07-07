@@ -49,7 +49,7 @@
 .navItem:active {
   background-color: #f0f4ff;
 }
-
+/*=======mobile adjustment==========*/
 @media (max-width: 400px) {
   .icon {
     width: 22px;

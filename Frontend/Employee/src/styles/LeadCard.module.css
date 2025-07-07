@@ -107,49 +107,70 @@
   cursor: pointer;
 }
 
-/* Popup */
+/*=========Popup ===============*/
+.popupWrapper {
+  position: relative;
+}
+
 .popup {
   position: absolute;
-  top: 75px;
+  top: 36px;
   right: 0;
-  background-color: white;
-  border: 1px solid #ddd;
-  padding: 0.75rem;
-  border-radius: 10px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  z-index: 999999;
-  width: 180px;
-  max-height: 240px;
-  overflow-y: auto;
-}
-
-.popup label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  display: block;
-  margin-bottom: 6px;
-}
-
-.popup input {
-  width: 100%;
-  padding: 6px;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
+  z-index: 1000;
+  background: white;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 12px;
+  padding: 12px;
+  width: 200px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 
-.popup button {
+.popupUp {
+  top: auto;
+  bottom: 100%;
+  margin-bottom: 10px;
+}
+
+.popupType .option,
+.popupStatus .option {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.popupType .option:hover,
+.popupStatus .option:hover {
+  background-color: #f0f0f0;
+}
+
+.popupSchedule label {
+  font-size: 13px;
+  margin-bottom: 4px;
+  display: block;
+  color: #333;
+}
+
+.popupSchedule input {
   width: 100%;
-  background-color: #2563eb;
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.popupSchedule button {
+  width: 100%;
+  background-color: #1854f1;
   color: white;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
   border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
   cursor: pointer;
 }
-
-/* Option Status Colors */
+/*============= Option Status Colors============= */
 .option {
   padding: 8px;
   border-radius: 6px;
@@ -175,7 +196,7 @@
   color: #0891b2;
 }
 
-/* ✅ Mobile Responsive */
+/* ===========Mobile Responsive=============== */
 @media screen and (max-width: 480px) {
   .card {
     flex-direction: column;

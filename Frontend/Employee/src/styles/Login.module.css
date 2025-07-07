@@ -1,4 +1,4 @@
-/* Login.module.css */
+
 
 .content {
   position: fixed;
@@ -12,7 +12,7 @@
   padding: 16px;
   background-color: #f8f9fa;
   box-sizing: border-box;
-  overflow: hidden; /* ✅ Prevent scrolling */
+  overflow: hidden; 
 }
 
 .formBox {
@@ -108,7 +108,7 @@ input:focus {
   cursor: not-allowed;
 }
 
-/* ✅ Mobile Optimization */
+/*=================Mobile Optimization ===========*/
 @media (max-width: 480px) {
   .formBox {
     padding: 24px 20px;
