@@ -25,7 +25,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (employee) {
+    if (employee?._id) {
       fetchTodayTiming();
       fetchBreakHistory();
       fetchRecentActivity();
@@ -46,18 +46,14 @@ const Home = () => {
   const fetchBreakHistory = async () => {
     try {
       const res = await API.get(`/api/timing/${employee._id}/breaks`);
-      const breaks = res.data || [];
-
-      // Sort breaks by date and time descending
-      const sorted = breaks.sort((a, b) => {
+      const sorted = (res.data || []).sort((a, b) => {
         const aTime = new Date(`${a.date}T${a.start || "00:00"}`);
         const bTime = new Date(`${b.date}T${b.start || "00:00"}`);
         return bTime - aTime;
       });
-
       setBreaks(sorted);
     } catch (err) {
-      console.error(" Break fetch error", err);
+      console.error("Break fetch error", err);
     }
   };
 
@@ -66,7 +62,7 @@ const Home = () => {
       const res = await API.get(`/api/activity/employee/${employee._id}`);
       setActivities(res.data || []);
     } catch (err) {
-      console.error(" Activity fetch error", err);
+      console.error("Activity fetch error", err);
     }
   };
 
@@ -79,7 +75,6 @@ const Home = () => {
       <div className={styles.container}>
         <p className={styles.sectionTitle}>Timings</p>
 
-       
         <div className={styles.card}>
           <div className={styles.blueHeader}>
             <div className={styles.timingBlock}>
@@ -90,13 +85,16 @@ const Home = () => {
               <p className={styles.label}>Check Out</p>
               <p className={styles.valueDark}>{timing?.checkOut || "--:--"}</p>
             </div>
-            <div className={`${styles.indicator} ${styles.green}`}></div>
+            <div className={`${styles.indicator} ${styles.green}`} />
           </div>
         </div>
 
-        {/*  Break */}
         <div className={styles.card}>
           <div className={styles.blueHeader}>
+            <div style={{ width: "100%" }}>
+              <p className={styles.blueTitle}>Break</p>
+            </div>
+
             <div className={styles.timingBlock}>
               <p className={styles.label}>Start</p>
               <p className={styles.valueDark}>{latestBreak?.start || "--:--"}</p>
@@ -105,7 +103,8 @@ const Home = () => {
               <p className={styles.label}>Ended</p>
               <p className={styles.valueDark}>{latestBreak?.end || "--:--"}</p>
             </div>
-            <div className={`${styles.indicator} ${styles.red}`}></div>
+
+            <div className={`${styles.indicator} ${styles.red}`} />
           </div>
 
           <div className={styles.historyHeader}>
@@ -129,7 +128,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/*  Activity */}
         <h4 className={styles.sectionTitle}>Recent Activity</h4>
         <div className={styles.card}>
           <div className={styles.scrollBoxTall}>

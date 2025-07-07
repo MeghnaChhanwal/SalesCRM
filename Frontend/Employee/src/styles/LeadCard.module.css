@@ -16,6 +16,12 @@
   border-radius: 8px;
   margin-right: 12px;
 }
+.card:last-child {
+  margin-bottom: 80px;
+}
+.container {
+  padding-bottom: 80px; 
+}
 
 .mainContent {
   flex: 1;

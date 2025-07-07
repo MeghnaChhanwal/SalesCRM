@@ -6,6 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 1. Mark refreshing during page reload
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -14,7 +15,7 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-
+  // 2. Restore session on refresh
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem("employee");
@@ -26,14 +27,14 @@ export const AuthProvider = ({ children }) => {
 
       sessionStorage.removeItem("refreshing"); // Clear flag
     } catch (err) {
-      console.error(" Session restore error:", err);
+      console.error("Session restore error:", err);
       sessionStorage.removeItem("employee");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // ✅ 3. Auto logout on tab close (not on refresh)
+
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
@@ -48,7 +49,7 @@ export const AuthProvider = ({ children }) => {
             );
           }
         } catch (e) {
-          console.error(" Logout beacon error:", e);
+          console.error("Logout beacon error:", e);
         }
         sessionStorage.clear();
       }
@@ -59,7 +60,7 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // ✅ 4. Manual login handler
+  // 4. Manual login function (with checkIn call)
   const login = async (email, password) => {
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE}/api/auth/login`,
@@ -79,10 +80,25 @@ export const AuthProvider = ({ children }) => {
     const data = await response.json();
     setEmployee(data);
     sessionStorage.setItem("employee", JSON.stringify(data));
+
+    // ✅ Call checkIn API after login
+    try {
+      await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/timing/checkin/${data._id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
+    } catch (checkInError) {
+      console.error("Check-in failed:", checkInError);
+    }
+
     return data;
   };
 
-
+  // 5. Manual logout
   const logout = async () => {
     try {
       if (employee?._id) {

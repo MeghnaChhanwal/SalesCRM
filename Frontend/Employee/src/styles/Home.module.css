@@ -14,7 +14,7 @@
   margin: 4px 0 2px 4px;
 }
 
-/* ====== Card Block ====== */
+
 .card {
   background-color: #fff;
   border-radius: 10px;      
@@ -25,9 +25,16 @@
 }
 
 /* ====== Card Header ====== */
+.blueTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
 .blueHeader {
   background-color: #007bff;
-  padding: 4px 6px;          /* ⬅️ Reduced padding */
+  padding: 4px 6px;         
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -37,7 +44,7 @@
   flex-wrap: wrap;
 }
 
-/* ====== Key Value Block ====== */
+/* ====== time aahe Block ====== */
 .timingBlock {
   display: flex;
   flex-direction: column;
@@ -80,8 +87,7 @@
 .historyRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  padding: 8px 12px;           /* ⬅️ Reduced padding */
-  font-size: 15px;
+  padding: 8px 12px;           
   color: #333;
 }
 
