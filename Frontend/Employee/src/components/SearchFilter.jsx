@@ -43,7 +43,6 @@ const SearchFilter = ({
 
   return (
     <div className={styles.container}>
-  
       <div className={styles.searchWrapper}>
         <img
           src="/images/search.png"
@@ -69,7 +68,6 @@ const SearchFilter = ({
           />
         </div>
 
-    
         {showPopup && (
           <div className={styles.popupCard} ref={popupRef}>
             <label className={styles.popupLabel}>Filter By</label>

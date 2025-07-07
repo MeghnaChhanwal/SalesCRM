@@ -4,7 +4,7 @@ import SearchFilter from "../components/SearchFilter";
 import Layout from "../components/Layout";
 import API from "../utils/axios";
 import { useAuth } from "../contexts/AuthContext";
-import styles from "../styles/Leads.module.css";
+import styles from "../styles/Leads.module.css"; // Include searchBarContainer style in this CSS too
 
 const Leads = () => {
   const { employee } = useAuth();
@@ -89,14 +89,18 @@ const Leads = () => {
   return (
     <Layout>
       <div className={styles.container}>
-        <SearchFilter
-          searchTerm={searchTerm}
-          onSearch={setSearchTerm}
-          filterOption={filterOption}
-          onFilterChange={setFilterOption}
-          pageType="lead"
-        />
+        {/* 🔍 Fixed Search Bar just like Schedule page */}
+        <div className={styles.searchBarContainer}>
+          <SearchFilter
+            searchTerm={searchTerm}
+            onSearch={setSearchTerm}
+            filterOption={filterOption}
+            onFilterChange={setFilterOption}
+            pageType="lead"
+          />
+        </div>
 
+        {/* 📋 Main Lead List */}
         <section className={styles.body}>
           {loading && <p>Loading leads...</p>}
           {error && <p className={styles.errorMsg}>{error}</p>}

@@ -6,6 +6,18 @@
   font-family: 'Segoe UI', sans-serif;
   overflow: hidden;
 }
+.networkBanner {
+  background-color: red;
+  color: white;
+  text-align: center;
+  padding: 8px;
+  font-size: 14px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
 
 .content {
   flex: 1;

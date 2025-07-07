@@ -7,6 +7,12 @@
   padding: 0;
 }
 
+html, body {
+  overflow-x: hidden;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f2f2f2;
+}
+
 /* ========= Card Wrapper ========= */
 .card {
   max-width: 420px;
@@ -19,7 +25,24 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  font-family: "Segoe UI", sans-serif;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* ========= Heading ========= */
+.card h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #222;
+  text-align: center;
+}
+
+/* ========= Error Message ========= */
+.error {
+  color: red;
+  font-size: 13.5px;
+  text-align: center;
+  margin-top: -6px;
 }
 
 /* ========= Label Style ========= */
@@ -80,7 +103,8 @@ input:focus {
   white-space: nowrap;
 }
 
-/* ========= Button ========= */
+/* ========= Submit Button ========= */
+.button,
 .saveButton {
   background-color: #0a57ff;
   color: #ffffff;
@@ -95,15 +119,17 @@ input:focus {
   width: 100%;
 }
 
+.button:hover,
 .saveButton:hover {
   background-color: #094add;
 }
 
-/* ========= Mobile Responsive ========= */
+/* ========= Responsive Fixes ========= */
 @media (max-width: 768px) {
   .card {
-    margin: 32px 16px;
+    margin: 32px auto;
     padding: 22px;
+    width: calc(100% - 32px);
     gap: 16px;
   }
 
@@ -113,7 +139,7 @@ input:focus {
     padding: 10px 12px;
   }
 
-  .saveButton {
+  .button {
     font-size: 14.5px;
     padding: 11px;
   }
@@ -125,8 +151,9 @@ input:focus {
 
 @media (max-width: 480px) {
   .card {
-    margin: 28px 12px;
+    margin: 28px auto;
     padding: 20px;
+    width: calc(100% - 24px);
     gap: 14px;
   }
 
@@ -136,7 +163,7 @@ input:focus {
     padding: 9px 11px;
   }
 
-  .saveButton {
+  .button {
     font-size: 14px;
     padding: 10px;
   }
@@ -148,8 +175,9 @@ input:focus {
 
 @media (max-width: 360px) {
   .card {
-    margin: 24px 10px;
+    margin: 24px auto;
     padding: 18px;
+    width: calc(100% - 20px);
     gap: 12px;
   }
 
@@ -159,7 +187,7 @@ input:focus {
     padding: 8px 10px;
   }
 
-  .saveButton {
+  .button {
     font-size: 13.5px;
     padding: 9px;
   }

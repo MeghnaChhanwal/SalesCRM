@@ -34,7 +34,6 @@ const Schedule = () => {
     fetchLeads();
   }, [employee]);
 
-  // ✅ Get latest scheduled call for a lead (based on filter and search)
   const getLatestValidCall = (lead) => {
     const sorted = (lead.scheduledCalls || [])
       .filter((call) => call.callDate)
@@ -43,7 +42,6 @@ const Schedule = () => {
     const latestCall = sorted[0];
     if (!latestCall) return null;
 
-    // Filter: Today
     if (filterOption === "Today") {
       const callDate = new Date(latestCall.callDate).toDateString();
       const today = new Date().toDateString();
@@ -57,7 +55,6 @@ const Schedule = () => {
     return matchesSearch ? latestCall : null;
   };
 
-  // ✅ Format time + date
   const formatDateTime = (dateStr) => {
     const date = new Date(dateStr);
     const time = date.toLocaleTimeString("en-IN", {
@@ -65,31 +62,33 @@ const Schedule = () => {
       minute: "2-digit",
       hour12: true,
     });
-    const formattedDate = date.toLocaleDateString("en-GB"); // DD/MM/YYYY
+    const formattedDate = date.toLocaleDateString("en-GB");
     return `${time} ${formattedDate}`;
   };
 
   return (
     <Layout>
       <div className={styles.container}>
-        {/* 🔍 Search & Filter */}
-        <SearchFilter
-          searchTerm={searchTerm}
-          onSearch={setSearchTerm}
-          filterOption={filterOption}
-          onFilterChange={setFilterOption}
-          pageType="schedule"
-        />
+        {/* 🔍 Fixed Search Bar */}
+        <div className={styles.searchBarContainer}>
+          <SearchFilter
+            searchTerm={searchTerm}
+            onSearch={setSearchTerm}
+            filterOption={filterOption}
+            onFilterChange={setFilterOption}
+            pageType="schedule"
+          />
+        </div>
 
-        {loading && <p>Loading scheduled calls...</p>}
-        {error && <p className={styles.errorMsg}>{error}</p>}
-
+        {/* 🧾 Body Cards */}
         <div className={styles.body}>
+          {loading && <p>Loading scheduled calls...</p>}
+          {error && <p className={styles.errorMsg}>{error}</p>}
+
           {leads.map((lead) => {
             const latestCall = getLatestValidCall(lead);
             if (!latestCall) return null;
 
-            // ✅ Hide CLOSED leads only after call time has passed
             const isClosed = lead.status === "Closed";
             const callTime = new Date(latestCall.callDate);
             const now = new Date();
@@ -109,7 +108,6 @@ const Schedule = () => {
                     <div className={styles.referralTitle}>Referral</div>
                     <div className={styles.phone}>{lead.phone || "—"}</div>
                   </div>
-
                   <div className={styles.rightDate}>
                     <span className={styles.dateLabel}>Date</span>
                     <span className={styles.dateTime}>
@@ -118,7 +116,7 @@ const Schedule = () => {
                   </div>
                 </div>
 
-                {/* 📞 Call Details */}
+                {/* 📞 Call */}
                 <div className={styles.callDetails}>
                   <img
                     src="/images/location.png"
@@ -128,7 +126,7 @@ const Schedule = () => {
                   <span className={styles.callLabel}>Call</span>
                 </div>
 
-                {/* 👤 Lead Name */}
+                {/* 👤 User */}
                 <div className={styles.user}>
                   <div className={styles.avatar}>
                     {lead.name

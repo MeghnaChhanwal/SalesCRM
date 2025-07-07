@@ -23,8 +23,18 @@
   transition: background-color 0.3s ease, color 0.3s ease;
   cursor: pointer;
 }
+.searchBarContainer {
+  position: fixed;
+  top: 80px; /* header height */
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background-color: transparent; /* Remove white bg */
+  border-bottom: none;
+  box-shadow: none;
+}
 
-/* 👇 Hover effect */
+
 .card:hover {
   background-color: #1854f1;
   color: white;
