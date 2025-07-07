@@ -248,29 +248,33 @@ export const scheduleCall = async (req, res) => {
 
     const parsedDate = new Date(callDate);
     parsedDate.setSeconds(0, 0);
-
-    
     const now = new Date();
+
+    // 🔁 Auto callType based on lead type
+    let autoCallType = "Referral";
+    if (lead.type === "Cold") autoCallType = "Cold Call";
+    else if (lead.type === "Warm") autoCallType = "Follow-up";
+    else if (lead.type === "Hot") autoCallType = "Urgent Follow-up";
+
     const futureCallIndex = (lead.scheduledCalls || []).findIndex(
       (call) => new Date(call.callDate) > now
     );
 
-    
     if (futureCallIndex !== -1) {
       lead.scheduledCalls[futureCallIndex].callDate = parsedDate;
+      lead.scheduledCalls[futureCallIndex].callType = autoCallType;
     } else {
-      // else push new call
-      const autoCallType = lead.type === "Cold" ? "Cold Call" : "Referral";
       lead.scheduledCalls.push({ callDate: parsedDate, callType: autoCallType });
     }
 
     await lead.save();
-    res.status(200).json({ message: "Call updated", lead });
+    res.status(200).json({ message: "Call scheduled", lead });
   } catch (error) {
     console.error("Schedule Call Error:", error);
     res.status(500).json({ error: "Failed to schedule call" });
   }
 };
+
 export const getScheduledCalls = async (req, res) => {
   try {
     const { filter = "all" } = req.query;
