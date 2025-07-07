@@ -69,7 +69,7 @@ const Schedule = () => {
   return (
     <Layout>
       <div className={styles.container}>
-        {/* 🔍 Fixed Search Bar */}
+      
         <div className={styles.searchBarContainer}>
           <SearchFilter
             searchTerm={searchTerm}
@@ -80,7 +80,6 @@ const Schedule = () => {
           />
         </div>
 
-        {/* 🧾 Body Cards */}
         <div className={styles.body}>
           {loading && <p>Loading scheduled calls...</p>}
           {error && <p className={styles.errorMsg}>{error}</p>}
@@ -94,6 +93,9 @@ const Schedule = () => {
             const now = new Date();
             if (isClosed && callTime < now) return null;
 
+            
+            const callType = latestCall.callType || "Cold Call";
+
             return (
               <div
                 key={lead._id}
@@ -102,10 +104,10 @@ const Schedule = () => {
                 }`}
                 onClick={() => setSelectedCardId(lead._id)}
               >
-                {/* 🔝 Top Row */}
+                {/* Top Row */}
                 <div className={styles.cardTopRow}>
                   <div className={styles.leftContent}>
-                    <div className={styles.referralTitle}>Referral</div>
+                    <div className={styles.callType}>{callType}</div>
                     <div className={styles.phone}>{lead.phone || "—"}</div>
                   </div>
                   <div className={styles.rightDate}>
@@ -116,7 +118,7 @@ const Schedule = () => {
                   </div>
                 </div>
 
-                {/* 📞 Call */}
+             
                 <div className={styles.callDetails}>
                   <img
                     src="/images/location.png"
@@ -126,7 +128,7 @@ const Schedule = () => {
                   <span className={styles.callLabel}>Call</span>
                 </div>
 
-                {/* 👤 User */}
+                {/* Lead Name */}
                 <div className={styles.user}>
                   <div className={styles.avatar}>
                     {lead.name
