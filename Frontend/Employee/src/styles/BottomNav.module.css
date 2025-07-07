@@ -1,4 +1,3 @@
-
 .navbar {
   display: flex;
   justify-content: space-around;
@@ -13,8 +12,8 @@
   z-index: 100;
   box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.05);
   font-family: 'Segoe UI', sans-serif;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* iPhone safe zone */
 }
-
 
 .navItem {
   display: flex;
@@ -26,10 +25,10 @@
   color: #888888;
   transition: color 0.2s ease-in-out;
   flex: 1;
-  padding: 4px 0;
+  padding: 6px 0;
   user-select: none;
+  border-radius: 8px;
 }
-
 
 .icon {
   width: 24px;
@@ -37,7 +36,6 @@
   margin-bottom: 4px;
   transition: filter 0.2s ease-in-out;
 }
-
 
 .active {
   color: #1854f1;
@@ -48,12 +46,9 @@
   filter: brightness(0) saturate(100%) invert(28%) sepia(95%) saturate(1785%) hue-rotate(218deg) brightness(99%) contrast(102%);
 }
 
-
 .navItem:active {
   background-color: #f0f4ff;
-  border-radius: 8px;
 }
-
 
 @media (max-width: 400px) {
   .icon {
@@ -63,9 +58,9 @@
 
   .navItem {
     font-size: 11px;
+    padding: 4px 0;
   }
 }
-
 
 @media (max-width: 360px) {
   .icon {
@@ -78,4 +73,3 @@
     padding: 2px 0;
   }
 }
-

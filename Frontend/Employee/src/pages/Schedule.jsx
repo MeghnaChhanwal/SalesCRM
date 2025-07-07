@@ -12,6 +12,7 @@ const Schedule = () => {
   const [filterOption, setFilterOption] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedCardId, setSelectedCardId] = useState(null);
 
   useEffect(() => {
     const fetchLeads = async () => {
@@ -56,9 +57,12 @@ const Schedule = () => {
 
   const formatDateTime = (dateStr) => {
     const date = new Date(dateStr);
-    const options = { hour: "numeric", minute: "2-digit", hour12: true };
-    const time = date.toLocaleTimeString("en-IN", options).toLowerCase();
-    const formattedDate = date.toLocaleDateString("en-GB"); // dd/mm/yyyy
+    const time = date.toLocaleTimeString("en-IN", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).toLowerCase();
+    const formattedDate = date.toLocaleDateString("en-GB"); // DD/MM/YYYY
     return `${time} ${formattedDate}`;
   };
 
@@ -82,42 +86,38 @@ const Schedule = () => {
             if (!latestCall) return null;
 
             return (
-              <div key={lead._id} className={styles.card}>
-                <div className={styles.topRow}>
-                  <div className={styles.left}>
-                    <span className={styles.callType}>
-                      {latestCall.callType || "Call"}
-                    </span>
+              <div
+                key={lead._id}
+                className={`${styles.card} ${selectedCardId === lead._id ? styles.activeCard : ""}`}
+                onClick={() => setSelectedCardId(lead._id)}
+              >
+                <div className={styles.cardTopRow}>
+                  <div className={styles.leftContent}>
+                    <div className={styles.referralTitle}>Referral</div>
+                    <div className={styles.phone}>{lead.phone || "—"}</div>
                   </div>
-                  <div className={styles.right}>
+
+                  <div className={styles.rightDate}>
                     <span className={styles.dateLabel}>Date</span>
-                    <span className={styles.date}>
+                    <span className={styles.dateTime}>
                       {formatDateTime(latestCall.callDate)}
                     </span>
                   </div>
                 </div>
 
-                <div className={styles.phone}>{lead.phone || "—"}</div>
+                <div className={styles.callDetails}>
+                  <img src="/images/location.png" alt="Call Icon" className={styles.icon} />
+                  <span className={styles.callLabel}>Call</span>
+                </div>
 
-                <div className={styles.bottomRow}>
-                  <div className={styles.callBox}>
-                    <img
-                      src="/images/location.png"
-                      alt="Call Icon"
-                      className={styles.icon}
-                    />
-                    <span className={styles.callLabel}>Call</span>
+                <div className={styles.user}>
+                  <div className={styles.avatar}>
+                    {lead.name
+                      ?.split(" ")
+                      .map((n) => n[0]?.toUpperCase())
+                      .join("")}
                   </div>
-                  <div className={styles.user}>
-                    <div className={styles.avatar}>
-                      {lead.name
-                        ?.split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()}
-                    </div>
-                    <span className={styles.leadName}>{lead.name}</span>
-                  </div>
+                  <span className={styles.leadName}>{lead.name}</span>
                 </div>
               </div>
             );
