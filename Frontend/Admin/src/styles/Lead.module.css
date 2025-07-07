@@ -197,16 +197,16 @@
 }
 
 .cancelButton {
-  background-color: #e11d48;
+  background-color: #898989;
   color: white;
 }
 
 .cancelButton:hover {
-  background-color: #be123c;
+  background-color: #7e7b7c;
 }
 
 .nextButton {
-  background-color: #6b7280;
+  background-color: #2b2b2c;
   color: white;
 }
 

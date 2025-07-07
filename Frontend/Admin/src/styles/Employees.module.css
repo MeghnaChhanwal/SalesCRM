@@ -48,7 +48,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 720px; /* Ensures table is wide enough */
+  min-width: 720px; 
 }
 
 .table th,
