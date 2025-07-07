@@ -23,7 +23,7 @@ const Employee = () => {
     fetchEmployees();
   }, [searchTerm, currentPage, sortConfig]);
 
-  // ✅ Close menu on outside click
+  
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest(`.${styles.dropdown}`)) {

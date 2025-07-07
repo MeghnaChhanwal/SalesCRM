@@ -39,7 +39,7 @@
   background: transparent;
   outline: none;
   font-size: 1rem;
-  color: #111827; /* gray-900 */
+  color: #111827; 
   font-family: "Segoe UI", Roboto, sans-serif;
   padding: 0.2rem 0;
 }
@@ -49,6 +49,6 @@
   width: 100%;
   max-width: 420px;
   height: 1px;
-  background-color: #d1d5db; /* gray-300 */
+  background-color: #d1d5db; 
   margin-top: 1.2rem;
 }

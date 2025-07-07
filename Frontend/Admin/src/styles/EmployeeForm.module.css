@@ -74,7 +74,7 @@
   transition: background-color 0.2s ease;
 }
 
-/* ✅ Primary Button */
+/* Primary Button */
 .formActions button[type="submit"] {
   background-color: #535456;
   color: #ffffff;
@@ -84,7 +84,7 @@
   background-color: #444546;
 }
 
-/* ✅ Cancel Button */
+/* Cancel Button */
 .formActions button[type="button"] {
   background-color: #e5e7eb;
   color: #333;

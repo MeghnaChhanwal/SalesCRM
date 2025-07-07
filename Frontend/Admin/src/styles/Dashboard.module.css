@@ -16,7 +16,7 @@
   border-radius: 10px;
 }
 
-/* === Dashboard Container === */
+
 .dashboardContainer {
   padding: 1.5rem;
   background-color: #f8f9fa;
@@ -26,7 +26,7 @@
   min-height: 100%;
 }
 
-/* === Summary Cards === */
+
 .cardGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -58,14 +58,14 @@
   color: #007bff;
 }
 
-/* === Analytics + Activity Row === */
+
 .analyticsRow {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
 }
 
-/* === Chart Box === */
+
 .chartBox {
   flex: 2;
   background: #ffffff;
@@ -93,7 +93,7 @@
   font-weight: 500;
 }
 
-/* === Activity Box === */
+
 .activityBox {
   flex: 1;
   background: #ffffff;
@@ -122,7 +122,7 @@
   line-height: 1.4;
 }
 
-/* === Table Wrapper === */
+
 .tableWrapper {
   background: #ffffff;
   padding: 1.25rem;
@@ -150,7 +150,7 @@
   color: #222;
 }
 
-/* === Table Scroll (for mobile) === */
+
 .tableScroll {
   overflow-x: auto;
 }
@@ -163,7 +163,7 @@
   border-radius: 10px;
 }
 
-/* === Table Styling === */
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -189,7 +189,7 @@ td {
   color: #555;
 }
 
-/* === Status Colors === */
+
 td span.active {
   color: #28a745;
   font-weight: bold;
@@ -200,7 +200,7 @@ td span.inactive {
   font-weight: bold;
 }
 
-/* === Responsive === */
+
 @media (max-width: 768px) {
   .chartBox, .activityBox {
     flex: 1 1 100%;

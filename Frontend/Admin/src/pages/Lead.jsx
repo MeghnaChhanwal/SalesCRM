@@ -211,14 +211,14 @@ const Lead = () => {
                     />
                   </label>
                   <a href="/leadsample.csv" download className={styles.sampleDownload}>
-                    📥 Download Sample File
+                     Download Sample File
                   </a>
-                  {file && <div className={styles.dropzone}>📄 {file.name}</div>}
+                  {file && <div className={styles.dropzone}> {file.name}</div>}
                 </>
               )}
 
               {uploadStep === "upload" && file && (
-                <div className={styles.dropzone}>📄 {file.name}</div>
+                <div className={styles.dropzone}> {file.name}</div>
               )}
 
               {uploadStep === "upload" && uploading && (

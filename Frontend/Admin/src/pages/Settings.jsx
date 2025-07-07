@@ -1,4 +1,4 @@
-// src/pages/Settings.jsx
+
 import React, { useState } from "react";
 import API from "../utils/axios";
 import MainLayout from "../components/Layout";
