@@ -60,35 +60,18 @@
   opacity: 0.9;
 }
 
-@media (max-width: 768px) {
-  .logo {
-    font-size: 21px;
-  }
-
-  .name {
-    font-size: 17px;
-  }
-
-  .greeting {
-    font-size: 13.5px;
-  }
-
-  .pageTitle {
-    font-size: 14.5px;
-  }
-}
-
-@media (max-width: 600px) {
+/* Responsive Styling */
+@media (max-width: 400px) {
   .logo {
     font-size: 20px;
   }
 
   .name {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .greeting {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .pageTitle {
@@ -96,33 +79,18 @@
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 360px) {
   .logo {
     font-size: 18.5px;
   }
 
   .name {
-    font-size: 14.5px;
+    font-size: 14px;
   }
 
   .greeting,
   .pageTitle {
     font-size: 12.5px;
-  }
-}
-
-@media (max-width: 360px) {
-  .logo {
-    font-size: 17.5px;
-  }
-
-  .name {
-    font-size: 13.5px;
-  }
-
-  .greeting,
-  .pageTitle {
-    font-size: 12px;
   }
 
   .subHeader {
