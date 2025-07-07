@@ -1,7 +1,7 @@
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 
-// 🔹 GET: Full dashboard overview
+// Full dashboard overview
 export const getDashboardOverview = async (req, res) => {
   try {
     const totalLeads = await Lead.countDocuments();
@@ -9,7 +9,7 @@ export const getDashboardOverview = async (req, res) => {
     const closedLeads = await Lead.countDocuments({ status: "Closed" });
     const activeSalespeople = await Employee.countDocuments({ status: "Active" });
 
-    // 🔹 Assigned leads this week
+    //Assigned leads this week
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
@@ -19,10 +19,10 @@ export const getDashboardOverview = async (req, res) => {
       receivedDate: { $gte: startOfWeek },
     });
 
-    // 🔹 Conversion Rate
+    // Conversion Rate logic
     const conversionRate = totalLeads > 0 ? Math.round((closedLeads / totalLeads) * 100) : 0;
 
-    // 🔹 Recent Activity (Leads + Employees)
+    // Recent Activity 
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
@@ -73,7 +73,7 @@ export const getDashboardOverview = async (req, res) => {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
 
-    // 🔹 Graph Data: Last 10 days
+    // Last 10 days
     const today = new Date();
     const graphData = [];
 
@@ -100,7 +100,7 @@ export const getDashboardOverview = async (req, res) => {
       });
     }
 
-    // 🔹 Employees with assigned & closed lead counts
+    // Employees with assigned & closed lead counts
     const enrichedEmployees = await Promise.all(
       (await Employee.find()).map(async (emp) => {
         const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
@@ -117,7 +117,7 @@ export const getDashboardOverview = async (req, res) => {
       })
     );
 
-    // 🔹 Send all dashboard data
+    // send all dashboard data
     res.status(200).json({
       unassignedLeads,
       assignedThisWeek,
@@ -128,12 +128,12 @@ export const getDashboardOverview = async (req, res) => {
       employees: enrichedEmployees,
     });
   } catch (err) {
-    console.error("❌ Dashboard overview error:", err);
+    console.error(" Dashboard overview error:", err);
     res.status(500).json({ error: "Failed to fetch dashboard stats" });
   }
 };
 
-// 🔹 (Optional) GET: Chart-only API (filtered by days)
+
 export const getChartData = async (req, res) => {
   try {
     const { days = 10 } = req.query;
@@ -168,7 +168,7 @@ export const getChartData = async (req, res) => {
 
     res.status(200).json(chartData);
   } catch (err) {
-    console.error("❌ Chart data error:", err);
+    console.error("Chart data error:", err);
     res.status(500).json({ error: "Failed to fetch chart data" });
   }
 };

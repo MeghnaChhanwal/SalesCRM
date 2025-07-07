@@ -9,13 +9,13 @@ import {
   getScheduledCalls,
 } from "../controllers/leadController.js";
 
-import { upload } from "../middleware/uploadMiddleware.js"; // ✅ Correct path
+import { upload } from "../middleware/uploadMiddleware.js"; 
 
 const router = express.Router();
 
 router.get("/", getLeads);
 router.post("/", addLeadManually);
-router.post("/upload", upload.single("file"), uploadCSV); // ✅ Attach middleware here
+router.post("/upload", upload.single("file"), uploadCSV); 
 router.patch("/:id/type", updateLeadType);
 router.patch("/:id/status", updateLeadStatus);
 router.post("/:id/schedule", scheduleCall);

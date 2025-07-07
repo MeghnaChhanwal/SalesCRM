@@ -1,4 +1,4 @@
-// backend/controllers/adminController.js
+
 import Admin from "../models/admin.js";
 import bcrypt from "bcrypt";
 
@@ -6,7 +6,7 @@ export const updateAdminProfile = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
-    // Assuming you have only one admin
+    // one admin
     const admin = await Admin.findOne();
     if (!admin) {
       return res.status(404).json({ error: "Admin not found" });

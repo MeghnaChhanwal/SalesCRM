@@ -1,8 +1,8 @@
-// backend/controllers/activityController.js
+
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 
-// ✅ 1. Employee personal activity
+// Employee personal activity
 export const getEmployeeActivity = async (req, res) => {
   const { id } = req.params;
 
@@ -45,7 +45,7 @@ export const getEmployeeActivity = async (req, res) => {
   }
 };
 
-// ✅ 2. Admin recent activity
+// Admin recent activity
 export const getAdminRecentActivities = async (req, res) => {
   try {
     const recentLeads = await Lead.find()

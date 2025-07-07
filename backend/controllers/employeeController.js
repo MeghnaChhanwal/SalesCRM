@@ -3,8 +3,9 @@ import Lead from "../models/lead.js";
 import Timing from "../models/timing.js";
 import { buildQueryOptions } from "../utils/query.js";
 import { todayIST } from "../utils/time.js";
+import { redistributeLeadsOfDeletedEmployee } from "../utils/assign.js";
 
-// 🔹 GET: Paginated employee list with status, lead counts
+
 export const getEmployees = async (req, res) => {
   try {
     const { search, sortBy, order, page, limit, skip } = buildQueryOptions(req);
@@ -109,7 +110,6 @@ export const getAllEmployees = async (req, res) => {
   }
 };
 
-// 🔹 POST: Create new employee
 export const createEmployee = async (req, res) => {
   try {
     const newEmp = new Employee(req.body);
@@ -141,20 +141,25 @@ export const updateEmployee = async (req, res) => {
   }
 };
 
-// 🔹 DELETE: Remove employee
+
 export const deleteEmployee = async (req, res) => {
   try {
-    const deleted = await Employee.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: "Employee not found" });
+    const employee = await Employee.findById(req.params.id);
+    if (!employee) return res.status(404).json({ error: "Employee not found" });
 
-    res.status(200).json({ message: "Employee deleted successfully" });
+   
+    await redistributeLeadsOfDeletedEmployee(employee._id);
+
+
+    await employee.deleteOne();
+
+    res.status(200).json({ message: "Employee deleted and leads reassigned successfully" });
   } catch (err) {
     console.error("Delete employee error:", err);
     res.status(500).json({ error: "Failed to delete employee" });
   }
 };
 
-// 🔹 PATCH: Auto update statuses in DB (if needed by CRON or admin trigger)
 export const autoUpdateEmployeeStatuses = async (req, res) => {
   const today = todayIST();
 

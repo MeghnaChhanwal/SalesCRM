@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Create 'upload' folder if it doesn't exist
+
 const uploadDir = "upload";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);

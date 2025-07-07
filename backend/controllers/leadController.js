@@ -7,7 +7,7 @@ import {
   assignEmployeeByConditions,
 } from "../utils/assign.js";
 
-// ✅ GET: All leads with filters, search, pagination, sort
+
 export const getLeads = async (req, res) => {
   try {
     const {
@@ -58,7 +58,7 @@ export const getLeads = async (req, res) => {
   }
 };
 
-// ✅ POST: Add lead manually
+
 export const addLeadManually = async (req, res) => {
   try {
     const { name, email, phone, language, location, status, type } = req.body;
@@ -95,7 +95,7 @@ export const addLeadManually = async (req, res) => {
   }
 };
 
-// ✅ POST: Upload leads via CSV
+
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
@@ -111,7 +111,7 @@ export const uploadCSV = async (req, res) => {
         .on("error", reject);
     });
 
-    // Clean and validate rows
+   
     const validRows = allRows.filter((row) =>
       requiredFields.every((f) => row[f] && row[f].trim() !== "")
     );
@@ -161,7 +161,7 @@ export const uploadCSV = async (req, res) => {
   }
 };
 
-// ✅ PATCH: Update type
+
 export const updateLeadType = async (req, res) => {
   try {
     const { id } = req.params;
@@ -181,7 +181,7 @@ export const updateLeadType = async (req, res) => {
   }
 };
 
-// ✅ PATCH: Update status
+
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -262,7 +262,7 @@ export const scheduleCall = async (req, res) => {
   }
 };
 
-// ✅ GET: Scheduled calls
+
 export const getScheduledCalls = async (req, res) => {
   try {
     const { filter = "all" } = req.query;

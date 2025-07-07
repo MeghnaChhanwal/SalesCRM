@@ -1,7 +1,7 @@
 import Lead from "../models/lead.js";
 import Employee from "../models/employee.js";
 
-// 🔹 Prepare distribution based on existing lead counts
+//  Prepare distribution based on existing lead counts
 export const prepareLeadDistribution = async (newLeadCount = 0) => {
   const employees = await Employee.find();
   if (employees.length === 0) {
@@ -31,7 +31,7 @@ export const prepareLeadDistribution = async (newLeadCount = 0) => {
   return { employees, maxPerEmployee, tempLeadMap };
 };
 
-// 🔹 Assign employee to a lead based on matching criteria
+//  Assign employee to a lead based on matching criteria
 export const assignEmployeeByConditions = async (lead, maxPerEmployee, employees, tempLeadMap) => {
   if (!employees || !employees.length) return null;
 
@@ -66,7 +66,7 @@ export const assignEmployeeByConditions = async (lead, maxPerEmployee, employees
   return null;
 };
 
-// 🔹 Reassign pending leads of deleted employee
+// Reassign pending leads of deleted employee
 export const redistributeLeadsOfDeletedEmployee = async (employeeId) => {
   const pendingLeads = await Lead.find({
     assignedEmployee: employeeId,
@@ -84,7 +84,7 @@ export const redistributeLeadsOfDeletedEmployee = async (employeeId) => {
   }
 };
 
-// 🔹 Assign unassigned leads after adding new employee
+// Assign unassigned leads after adding new employee
 export const assignUnassignedLeads = async () => {
   const unassignedLeads = await Lead.find({ assignedEmployee: null });
   if (unassignedLeads.length === 0) return;

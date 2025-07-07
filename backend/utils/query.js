@@ -1,4 +1,4 @@
-// backend/utils/queryHelper.js
+
 
 export const buildQueryOptions = (req) => {
   const search = req.query.search || "";

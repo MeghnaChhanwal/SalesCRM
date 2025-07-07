@@ -48,12 +48,12 @@ const employeeSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt
+    timestamps: true, 
     toJSON: {
       virtuals: true,
       versionKey: false,
       transform: (_, ret) => {
-        delete ret._id; // Hide internal MongoDB ID
+        delete ret._id; 
         return ret;
       },
     },
@@ -63,7 +63,7 @@ const employeeSchema = new mongoose.Schema(
   }
 );
 
-// ✅ Virtual: Full Name
+
 employeeSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });

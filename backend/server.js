@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 
-// 🛣️ Route Imports
+//  Route Imports
 import employeeRoutes from "./routes/employeeRoutes.js";
 import leadRoutes from "./routes/leadRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
@@ -12,21 +12,19 @@ import timingRoutes from "./routes/timingRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import activityRoutes from "./routes/activityRoutes.js";
 
-// 🌍 Load environment variables
 dotenv.config();
 
-// ✅ Init Express App
 const app = express();
 
-// ✅ Connect MongoDB
+
 connectDB();
 
-// ✅ CORS Configuration
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
-  "https://sales-employee.vercel.app" // final production domain
+  "https://sales-employee.vercel.app" 
 ];
 
 const corsOptions = {
@@ -34,7 +32,7 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
       callback(null, true);
     } else {
-      console.warn("🚫 CORS blocked for origin:", origin);
+      console.warn("CORS blocked for origin:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
@@ -42,12 +40,12 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Preflight
+app.options("*", cors(corsOptions)); 
 
-// ✅ Middleware
-app.use(express.json()); // Parse JSON bodies
+//  Middleware
+app.use(express.json());
 
-// ✅ API Routes
+// API Routes
 app.use("/api/employees", employeeRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
@@ -56,13 +54,13 @@ app.use("/api/timing", timingRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/activity", activityRoutes);
 
-// 🛑 Catch-All for unknown routes
+
 app.use((req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
 
-// ✅ Start Server
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(` Server running on port ${PORT}`);
 });

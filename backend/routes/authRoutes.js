@@ -3,7 +3,7 @@ import { loginEmployee, logoutEmployee } from "../controllers/authController.js"
 
 const router = express.Router();
 
-router.post("/login", loginEmployee);           // POST /api/auth/login
-router.post("/logout/:id", logoutEmployee);     // POST /api/auth/logout/:id
+router.post("/login", loginEmployee);           
+router.post("/logout/:id", logoutEmployee);     
 
 export default router;

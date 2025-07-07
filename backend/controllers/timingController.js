@@ -2,7 +2,7 @@ import Timing from "../models/timing.js";
 import Employee from "../models/employee.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// ✅ GET: Today's timing by employee ID
+// today timing
 export const getTodayTiming = async (req, res) => {
   try {
     const { id } = req.params;
@@ -11,17 +11,17 @@ export const getTodayTiming = async (req, res) => {
     const timing = await Timing.find({ employee: id, date: today });
     res.status(200).json(timing);
   } catch (err) {
-    console.error("❌ Timing fetch error", err);
+    console.error("Timing fetch error", err);
     res.status(500).json({ error: "Failed to fetch today's timing" });
   }
 };
 
-// ✅ GET: Break history for employee
+// break history
 export const getBreakHistory = async (req, res) => {
   try {
     const { id } = req.params;
     const last7Days = new Date();
-    last7Days.setDate(last7Days.getDate() - 6); // include today
+    last7Days.setDate(last7Days.getDate() - 6); 
 
     const breaks = await Timing.find({
       employee: id,
@@ -42,12 +42,12 @@ export const getBreakHistory = async (req, res) => {
 
     res.status(200).json(formatted);
   } catch (err) {
-    console.error("❌ Break fetch error", err);
+    console.error(" Break fetch error", err);
     res.status(500).json({ error: "Failed to fetch break history" });
   }
 };
 
-// ✅ POST: Check In
+//  Check In
 export const checkIn = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -78,17 +78,17 @@ export const checkIn = async (req, res) => {
 
     await timing.save();
 
-    // ✅ Also update employee status
+    //  employee status
     await Employee.findByIdAndUpdate(employeeId, { status: "Active" });
 
     res.status(200).json({ message: "Check-in successful", timing });
   } catch (err) {
-    console.error("❌ Check-in error:", err);
+    console.error("Check-in error:", err);
     res.status(500).json({ error: "Failed to check in" });
   }
 };
 
-// ✅ POST: Check Out
+// Check Out
 export const checkOut = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -109,17 +109,17 @@ export const checkOut = async (req, res) => {
 
     await timing.save();
 
-    // ✅ Also update employee status
+ 
     await Employee.findByIdAndUpdate(employeeId, { status: "Inactive" });
 
     res.status(200).json({ message: "Check-out successful", timing });
   } catch (err) {
-    console.error("❌ Check-out error:", err);
+    console.error(" Check-out error:", err);
     res.status(500).json({ error: "Failed to check out" });
   }
 };
 
-// ✅ POST: Start Break
+//  Start Break
 export const startBreak = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -138,12 +138,12 @@ export const startBreak = async (req, res) => {
 
     res.status(200).json({ message: "Break started", timing });
   } catch (err) {
-    console.error("❌ Start break error:", err);
+    console.error(" Start break error:", err);
     res.status(500).json({ error: "Failed to start break" });
   }
 };
 
-// ✅ POST: End Break
+//  End Break
 export const endBreak = async (req, res) => {
   const { id: employeeId } = req.params;
   const date = todayIST();
@@ -165,7 +165,7 @@ export const endBreak = async (req, res) => {
 
     res.status(200).json({ message: "Break ended", timing });
   } catch (err) {
-    console.error("❌ End break error:", err);
+    console.error(" End break error:", err);
     res.status(500).json({ error: "Failed to end break" });
   }
 };

@@ -1,4 +1,4 @@
-// backend/models/admin.js
+
 import mongoose from "mongoose";
 
 const adminSchema = new mongoose.Schema({
