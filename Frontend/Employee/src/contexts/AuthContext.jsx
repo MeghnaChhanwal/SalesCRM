@@ -6,7 +6,6 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 1. Mark refresh tab before unload
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,7 +14,7 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // ✅ 2. Restore session on reload
+
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem("employee");
@@ -27,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 
       sessionStorage.removeItem("refreshing"); // Clear flag
     } catch (err) {
-      console.error("❌ Session restore error:", err);
+      console.error(" Session restore error:", err);
       sessionStorage.removeItem("employee");
     } finally {
       setLoading(false);
@@ -49,7 +48,7 @@ export const AuthProvider = ({ children }) => {
             );
           }
         } catch (e) {
-          console.error("❌ Logout beacon error:", e);
+          console.error(" Logout beacon error:", e);
         }
         sessionStorage.clear();
       }
@@ -83,7 +82,7 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // ✅ 5. Optional: Manual logout button support
+
   const logout = async () => {
     try {
       if (employee?._id) {

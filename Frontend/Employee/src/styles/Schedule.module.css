@@ -1,5 +1,5 @@
 .container {
-  padding: 80px 16px 80px; 
+  padding: 80px 16px 80px;
   background-color: #f9f9f9;
   min-height: 100vh;
   font-family: 'Segoe UI', sans-serif;
@@ -20,8 +20,23 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
   cursor: pointer;
+}
+
+/* 👇 Hover effect */
+.card:hover {
+  background-color: #1854f1;
+  color: white;
+}
+
+.card:hover .referralTitle,
+.card:hover .dateLabel,
+.card:hover .dateTime,
+.card:hover .phone,
+.card:hover .callLabel,
+.card:hover .leadName {
+  color: white;
 }
 
 .activeCard {
@@ -38,47 +53,45 @@
   color: white;
 }
 
+/* ===== Top Row Layout ===== */
 .cardTopRow {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 12px;
 }
 
 .leftContent {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 4px;
+  flex: 1;
 }
 
 .rightDate {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
 }
 
-.referralTitle {
-  font-weight: 600;
-  font-size: 14px;
-  color: #333;
-}
-
-.phone {
+/* ===== Text Styling ===== */
+.referralTitle,
+.phone,
+.dateLabel,
+.dateTime,
+.callLabel,
+.leadName {
   font-size: 14px;
   font-weight: 500;
   color: #111;
+  line-height: 1.4;
 }
 
-.dateLabel {
-  font-weight: 600;
-  font-size: 14px;
-  color: #111;
-}
-
-.dateTime {
-  font-size: 13px;
-  color: #444;
-}
-
+/* ===== Call Section ===== */
 .callDetails {
   display: flex;
   align-items: center;
@@ -91,12 +104,7 @@
   filter: grayscale(50%);
 }
 
-.callLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: #222;
-}
-
+/* ===== User Info ===== */
 .user {
   display: flex;
   align-items: center;
@@ -116,12 +124,6 @@
   justify-content: center;
 }
 
-.leadName {
-  font-size: 14px;
-  font-weight: 500;
-  color: #111;
-}
-
 .errorMsg {
   color: red;
   text-align: center;
@@ -129,7 +131,7 @@
   font-size: 14px;
 }
 
-/* 📱 Responsive */
+/* ✅ Mobile Responsive */
 @media (max-width: 400px) {
   .container {
     padding: 72px 12px 72px;
@@ -157,5 +159,15 @@
   .icon {
     width: 14px;
     height: 14px;
+  }
+
+  .cardTopRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .rightDate {
+    align-items: flex-start;
   }
 }

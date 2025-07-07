@@ -33,8 +33,9 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
   useEffect(() => {
     if (showSchedulePopup && scheduleIconRef.current) {
       const rect = scheduleIconRef.current.getBoundingClientRect();
-      const availableBelow = window.innerHeight - rect.bottom;
-      setPopupDirection(availableBelow < 200 ? "up" : "down");
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setPopupDirection(spaceBelow < 260 && spaceAbove > 260 ? "up" : "down");
     }
   }, [showSchedulePopup]);
 
@@ -112,7 +113,6 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
             />
           </div>
 
-          {/* Popups must be relative to actionsWrapper */}
           <div className={styles.popupWrapper}>
             {showTypePopup && (
               <div className={`${styles.popup} ${styles.popupType}`} ref={typeRef}>
@@ -142,13 +142,17 @@ const LeadCard = ({ lead, onTypeChange, onSchedule, onStatusChange }) => {
                 <input
                   type="date"
                   value={scheduleData.date}
-                  onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
+                  onChange={(e) =>
+                    setScheduleData({ ...scheduleData, date: e.target.value })
+                  }
                 />
                 <label>Time</label>
                 <input
                   type="time"
                   value={scheduleData.time}
-                  onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
+                  onChange={(e) =>
+                    setScheduleData({ ...scheduleData, time: e.target.value })
+                  }
                 />
                 <button onClick={handleScheduleSave}>Save</button>
               </div>

@@ -61,7 +61,7 @@ const Schedule = () => {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-    }).toLowerCase();
+    })
     const formattedDate = date.toLocaleDateString("en-GB"); // DD/MM/YYYY
     return `${time} ${formattedDate}`;
   };

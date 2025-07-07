@@ -1,58 +1,64 @@
+/* ====== Global container ====== */
 .container {
-  padding: 16px;
+  padding: 12px;               /* ⬅️ Reduced from 16px */
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;                   /* ⬅️ Reduced from 15px */
   font-family: 'Segoe UI', sans-serif;
 }
 
+/* ====== Section Headings ====== */
 .sectionTitle {
-  font-size: 22px;
+  font-size: 20px;             /* ⬅️ Slightly reduced */
   font-weight: 700;
   color: #2c3e50;
-  margin: 6px 0 2px 4px;
+  margin: 4px 0 2px 4px;
 }
 
+/* ====== Card Block ====== */
 .card {
   background-color: #fff;
-  border-radius: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;         /* ⬅️ Reduced from 14px */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
+/* ====== Card Header ====== */
 .blueHeader {
   background-color: #007bff;
-  padding: 14px 16px;
+  padding: 4px 6px;          /* ⬅️ Reduced padding */
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
-  border-radius: 14px 14px 0 0;
+  border-radius: 10px 10px 0 0;
   color: #fff;
   flex-wrap: wrap;
 }
 
+/* ====== Key Value Block ====== */
 .timingBlock {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0px;
   min-width: 100px;
 }
 
 .label {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 400;
   color: #e0e0e0;
 }
 
 .valueDark {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #fff;
 }
 
+/* ====== Status Indicator ====== */
 .indicator {
   position: absolute;
   top: 8px;
@@ -70,12 +76,13 @@
   background-color: #f44336;
 }
 
+/* ====== History Table ====== */
 .historyHeader,
 .historyRow {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  padding: 10px 16px;
-  font-size: 13px;
+  padding: 8px 12px;           /* ⬅️ Reduced padding */
+  font-size: 15px;
   color: #333;
 }
 
@@ -89,95 +96,160 @@
   color: #555;
 }
 
+/* ====== Scroll Boxes ====== */
 .scrollBox {
-  max-height: 160px;
+  max-height: 140px;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 6px 0;
 }
 
 .scrollBoxTall {
-  max-height: 320px;
+  max-height: 280px;
   overflow-y: auto;
-  padding: 12px 16px;
+  padding: 10px 12px;         /* ⬅️ Reduced padding */
 }
 
 .activityList {
-  padding-left: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   font-size: 15px;
   color: #444;
+  padding-left: 8px;
+  list-style: none;
+  padding-right: 8px;
+}
+
+.activityList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  font-size: 14px;
 }
 
 .timeAgo {
-  color: #aaa;
-  font-size: 11px;
+  font-size: 12px;
+  color: #999;
+  margin-left: 12px;
+  white-space: nowrap;
 }
 
 .empty {
-  font-size: 13px;
+  font-size: 12.5px;
   color: #aaa;
   text-align: center;
-  padding: 12px;
+  padding: 10px;
 }
 
 .loading {
   text-align: center;
-  padding: 24px;
-  font-size: 15px;
+  padding: 20px;
+  font-size: 14px;
   color: #666;
 }
-
 /* ✅ Mobile Optimization */
 @media (max-width: 600px) {
   .container {
-    padding: 14px;
-  }
-
-  .valueDark {
-    font-size: 15px;
-  }
-
-  .label {
-    font-size: 11px;
-  }
-
-  .historyRow,
-  .historyHeader {
-    font-size: 12px;
-    padding: 8px 12px;
+    padding: 10px;
+    gap: 10px;
   }
 
   .sectionTitle {
     font-size: 18px;
+    margin-left: 2px;
   }
 
-  .activityList {
-    font-size: 14px;
+  .card {
+    border-radius: 8px;
   }
 
-  .scrollBoxTall {
-    padding: 10px 12px;
+  .blueHeader {
+    padding: 6px 8px;
+    border-radius: 8px 8px 0 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
   }
-}
 
-@media (max-width: 400px) {
-  .sectionTitle {
-    font-size: 17px;
+  .timingBlock {
+    min-width: 90px;
+    gap: 2px;
+  }
+
+  .label {
+    font-size: 11.5px;
   }
 
   .valueDark {
     font-size: 14px;
   }
 
+  .historyHeader,
+  .historyRow {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .scrollBoxTall {
+    padding: 8px 10px;
+    max-height: 220px;
+  }
+
+  .activityList li {
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+
+  .timeAgo {
+    font-size: 11px;
+  }
+
+  .empty {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .loading {
+    font-size: 13px;
+    padding: 16px;
+  }
+}
+
+/* ✅ Extra Small Devices (≤400px) */
+@media (max-width: 400px) {
+  .sectionTitle {
+    font-size: 16px;
+  }
+
+  .valueDark {
+    font-size: 13px;
+  }
+
   .label {
+    font-size: 11px;
+  }
+
+  .activityList li {
+    font-size: 12.5px;
+    padding: 5px 6px;
+  }
+
+  .timeAgo {
     font-size: 10.5px;
   }
 
-  .historyRow,
-  .historyHeader {
-    font-size: 11px;
-    padding: 6px 10px;
+  .scrollBoxTall {
+    max-height: 180px;
+  }
+
+  .historyHeader,
+  .historyRow {
+    font-size: 12px;
+    padding: 5px 8px;
   }
 }
+
