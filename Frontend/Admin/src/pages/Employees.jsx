@@ -19,11 +19,26 @@ const Employee = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
 
+  // Fetch employees when filters change
   useEffect(() => {
     fetchEmployees();
   }, [searchTerm, currentPage, sortConfig]);
 
-  
+  // Auto-update employee statuses once on mount, then fetch employees again
+  useEffect(() => {
+    const updateEmployeeStatuses = async () => {
+      try {
+        await API.patch("/api/employees/auto/update-status");
+        fetchEmployees();
+      } catch (err) {
+        console.error("Failed to auto-update employee statuses", err);
+      }
+    };
+
+    updateEmployeeStatuses();
+  }, []);
+
+  // Close dropdown menus on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!e.target.closest(`.${styles.dropdown}`)) {
