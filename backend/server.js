@@ -1,5 +1,3 @@
-// server.js
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -14,32 +12,29 @@ import timingRoutes from "./routes/timingRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import activityRoutes from "./routes/activityRoutes.js";
 
-// 🌍 Load env variables
+// 🌍 Load environment variables
 dotenv.config();
 
-// Initialize app
+// ✅ Init Express App
 const app = express();
 
-// ✅ Connect to MongoDB
+// ✅ Connect MongoDB
 connectDB();
 
 // ✅ CORS Configuration
 const allowedOrigins = [
-  "http://localhost:5173", // Dev
-  "https://sales-employee.vercel.app", // Prod main domain
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+  "https://sales-employee.vercel.app" // final production domain
 ];
 
-// ✅ Allow all *.vercel.app for preview deployments
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (
-      !origin || // allow non-browser tools like Postman
-      allowedOrigins.includes(origin) ||
-      /\.vercel\.app$/.test(origin)
-    ) {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
       callback(null, true);
     } else {
-      console.warn(`🚫 CORS blocked for origin: ${origin}`);
+      console.warn("🚫 CORS blocked for origin:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
@@ -47,12 +42,10 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Preflight
 
-// ✅ Preflight requests support
-app.options("*", cors(corsOptions));
-
-// ✅ JSON Parser
-app.use(express.json());
+// ✅ Middleware
+app.use(express.json()); // Parse JSON bodies
 
 // ✅ API Routes
 app.use("/api/employees", employeeRoutes);
@@ -63,12 +56,12 @@ app.use("/api/timing", timingRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/activity", activityRoutes);
 
-// ❌ Catch-all 404 route
+// 🛑 Catch-All for unknown routes
 app.use((req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
 
-// ✅ Start server
+// ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
