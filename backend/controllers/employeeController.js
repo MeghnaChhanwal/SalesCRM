@@ -9,7 +9,6 @@ import { redistributeLeadsOfDeletedEmployee } from "../utils/assign.js";
 export const getEmployees = async (req, res) => {
   try {
     const { search, sortBy, order, page, limit, skip } = buildQueryOptions(req);
-
     const allowedSortFields = ["firstName", "lastName", "email", "employeeId", "createdAt"];
     const sortField = allowedSortFields.includes(sortBy) ? sortBy : "createdAt";
 
@@ -57,7 +56,7 @@ export const getEmployees = async (req, res) => {
           ...emp.toObject(),
           assignedLeads,
           closedLeads,
-          status,
+          status, // ✅ add status here
         };
       })
     );
@@ -142,7 +141,7 @@ export const updateEmployee = async (req, res) => {
   }
 };
 
-// 🔹 DELETE: Remove employee and reassign non-closed leads
+
 export const deleteEmployee = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
