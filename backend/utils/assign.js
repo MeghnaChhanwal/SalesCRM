@@ -76,9 +76,9 @@ export const assignEmployeeByConditions = async (lead, maxPerEmployee, employees
 };
 
 
-export const redistributeLeadsOfDeletedEmployee = async (employeeId) => {
+export const redistributeLeadsOfDeletedEmployee = async (employee) => {
   const pendingLeads = await Lead.find({
-    assignedEmployee: employeeId,
+    assignedEmployee: employee._id,
     status: { $ne: "Closed" },
   });
 
@@ -86,18 +86,34 @@ export const redistributeLeadsOfDeletedEmployee = async (employeeId) => {
 
   const { employees, maxPerEmployee, tempLeadMap } = await prepareLeadDistribution(pendingLeads.length);
 
+  // 🔹 Filter out the deleted employee from list
+  const filteredEmployees = employees.filter(
+    (emp) =>
+      emp._id.toString() !== employee._id.toString() &&
+      emp.language?.toLowerCase() === employee.language?.toLowerCase() &&
+      emp.location?.toLowerCase() === employee.location?.toLowerCase()
+  );
+
   for (const lead of pendingLeads) {
     const newEmployee = await assignEmployeeByConditions(
       lead,
       maxPerEmployee,
-      employees,
+      filteredEmployees,
       tempLeadMap
     );
+
+    // ✅ Optional: Log reassignment in terminal
+    const empDetails = employees.find(
+      (emp) => emp._id.toString() === newEmployee?.toString()
+    );
+    console.log(
+      `✅ Reassigned lead "${lead.name}" to employee ${empDetails?.firstName || "Unknown"}`
+    );
+
     lead.assignedEmployee = newEmployee;
     await lead.save();
   }
 };
-
 
 export const assignUnassignedLeads = async () => {
   const unassignedLeads = await Lead.find({ assignedEmployee: null });

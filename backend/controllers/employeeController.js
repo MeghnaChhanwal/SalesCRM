@@ -148,7 +148,8 @@ export const deleteEmployee = async (req, res) => {
     const employee = await Employee.findById(req.params.id);
     if (!employee) return res.status(404).json({ error: "Employee not found" });
 
-    await redistributeLeadsOfDeletedEmployee(employee._id);
+    await redistributeLeadsOfDeletedEmployee(employee); 
+
     await employee.deleteOne();
 
     res.status(200).json({ message: "Employee deleted and non-closed leads reassigned" });
