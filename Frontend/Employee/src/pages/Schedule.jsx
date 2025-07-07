@@ -34,6 +34,7 @@ const Schedule = () => {
     fetchLeads();
   }, [employee]);
 
+  // ✅ Get latest scheduled call for a lead (based on filter and search)
   const getLatestValidCall = (lead) => {
     const sorted = (lead.scheduledCalls || [])
       .filter((call) => call.callDate)
@@ -42,6 +43,7 @@ const Schedule = () => {
     const latestCall = sorted[0];
     if (!latestCall) return null;
 
+    // Filter: Today
     if (filterOption === "Today") {
       const callDate = new Date(latestCall.callDate).toDateString();
       const today = new Date().toDateString();
@@ -55,13 +57,14 @@ const Schedule = () => {
     return matchesSearch ? latestCall : null;
   };
 
+  // ✅ Format time + date
   const formatDateTime = (dateStr) => {
     const date = new Date(dateStr);
     const time = date.toLocaleTimeString("en-IN", {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-    })
+    });
     const formattedDate = date.toLocaleDateString("en-GB"); // DD/MM/YYYY
     return `${time} ${formattedDate}`;
   };
@@ -69,6 +72,7 @@ const Schedule = () => {
   return (
     <Layout>
       <div className={styles.container}>
+        {/* 🔍 Search & Filter */}
         <SearchFilter
           searchTerm={searchTerm}
           onSearch={setSearchTerm}
@@ -85,12 +89,21 @@ const Schedule = () => {
             const latestCall = getLatestValidCall(lead);
             if (!latestCall) return null;
 
+            // ✅ Hide CLOSED leads only after call time has passed
+            const isClosed = lead.status === "Closed";
+            const callTime = new Date(latestCall.callDate);
+            const now = new Date();
+            if (isClosed && callTime < now) return null;
+
             return (
               <div
                 key={lead._id}
-                className={`${styles.card} ${selectedCardId === lead._id ? styles.activeCard : ""}`}
+                className={`${styles.card} ${
+                  selectedCardId === lead._id ? styles.activeCard : ""
+                }`}
                 onClick={() => setSelectedCardId(lead._id)}
               >
+                {/* 🔝 Top Row */}
                 <div className={styles.cardTopRow}>
                   <div className={styles.leftContent}>
                     <div className={styles.referralTitle}>Referral</div>
@@ -105,11 +118,17 @@ const Schedule = () => {
                   </div>
                 </div>
 
+                {/* 📞 Call Details */}
                 <div className={styles.callDetails}>
-                  <img src="/images/location.png" alt="Call Icon" className={styles.icon} />
+                  <img
+                    src="/images/location.png"
+                    alt="Call Icon"
+                    className={styles.icon}
+                  />
                   <span className={styles.callLabel}>Call</span>
                 </div>
 
+                {/* 👤 Lead Name */}
                 <div className={styles.user}>
                   <div className={styles.avatar}>
                     {lead.name

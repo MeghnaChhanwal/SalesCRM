@@ -1,3 +1,13 @@
+/* ========= Global Base Reset ========= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ========= Card Wrapper ========= */
 .card {
   max-width: 420px;
   width: 100%;
@@ -5,30 +15,31 @@
   padding: 24px;
   background-color: #ffffff;
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   font-family: "Segoe UI", sans-serif;
-  box-sizing: border-box;
 }
 
+/* ========= Label Style ========= */
 label {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
-  color: #333333;
+  color: #2c2c2c;
   margin-bottom: 4px;
+  display: block;
 }
 
+/* ========= Input Style ========= */
 input {
+  width: 100%;
   padding: 11px 14px;
   font-size: 14px;
   border-radius: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #dcdcdc;
   background-color: #f9f9f9;
   transition: border-color 0.2s ease;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 input:focus {
@@ -37,6 +48,7 @@ input:focus {
   outline: none;
 }
 
+/* ========= Password Field Group ========= */
 .passwordWrapper {
   display: flex;
   align-items: center;
@@ -65,8 +77,10 @@ input:focus {
   cursor: pointer;
   user-select: none;
   padding-left: 10px;
+  white-space: nowrap;
 }
 
+/* ========= Button ========= */
 .saveButton {
   background-color: #0a57ff;
   color: #ffffff;
@@ -85,13 +99,12 @@ input:focus {
   background-color: #094add;
 }
 
-/* 📱 Mobile: 500px and below */
-@media (max-width: 500px) {
+/* ========= Mobile Responsive ========= */
+@media (max-width: 768px) {
   .card {
-    padding: 20px;
-    border-radius: 14px;
-    margin: 24px 16px;
-    gap: 14px;
+    margin: 32px 16px;
+    padding: 22px;
+    gap: 16px;
   }
 
   input,
@@ -101,7 +114,7 @@ input:focus {
   }
 
   .saveButton {
-    font-size: 14px;
+    font-size: 14.5px;
     padding: 11px;
   }
 
@@ -110,22 +123,21 @@ input:focus {
   }
 }
 
-/* 📱 Extra Small: 360px and below */
-@media (max-width: 360px) {
+@media (max-width: 480px) {
   .card {
-    padding: 18px;
-    gap: 12px;
-    margin: 20px 12px;
+    margin: 28px 12px;
+    padding: 20px;
+    gap: 14px;
   }
 
   input,
   .passwordWrapper input {
     font-size: 13px;
-    padding: 9px 10px;
+    padding: 9px 11px;
   }
 
   .saveButton {
-    font-size: 13.5px;
+    font-size: 14px;
     padding: 10px;
   }
 
@@ -134,12 +146,11 @@ input:focus {
   }
 }
 
-/* 📱 Ultra small / Foldables: 320px and below */
-@media (max-width: 320px) {
+@media (max-width: 360px) {
   .card {
-    padding: 16px;
-    gap: 10px;
-    margin: 16px 8px;
+    margin: 24px 10px;
+    padding: 18px;
+    gap: 12px;
   }
 
   input,
@@ -149,7 +160,7 @@ input:focus {
   }
 
   .saveButton {
-    font-size: 13px;
+    font-size: 13.5px;
     padding: 9px;
   }
 

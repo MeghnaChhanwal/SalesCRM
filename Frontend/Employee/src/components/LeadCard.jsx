@@ -1,112 +1,205 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styles from "../styles/LeadCard.module.css";
 
-const LeadCard = ({ lead, onTypeChange, onStatusChange, onSchedule }) => {
+const LeadCard = ({
+  lead,
+  onTypeChange,
+  onSchedule,
+  onStatusChange,
+  fromSchedulePage = false,
+}) => {
   const [showTypePopup, setShowTypePopup] = useState(false);
+  const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [showStatusPopup, setShowStatusPopup] = useState(false);
-  const [callDate, setCallDate] = useState("");
+  const [scheduleData, setScheduleData] = useState({ date: "", time: "" });
+  const [popupDirection, setPopupDirection] = useState("down");
 
-  const handleTypeSelect = (newType) => {
-    setShowTypePopup(false);
-    if (newType !== lead.type) {
-      onTypeChange(lead._id, newType);
-    }
+  const typeRef = useRef();
+  const scheduleRef = useRef();
+  const statusRef = useRef();
+  const scheduleIconRef = useRef();
+
+  // ✅ All useEffects must run before any conditional returns
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        (!typeRef.current || !typeRef.current.contains(e.target)) &&
+        (!scheduleRef.current || !scheduleRef.current.contains(e.target)) &&
+        (!statusRef.current || !statusRef.current.contains(e.target))
+      ) {
+        setShowTypePopup(false);
+        setShowSchedulePopup(false);
+        setShowStatusPopup(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!showSchedulePopup || !scheduleIconRef.current) return;
+
+    const rect = scheduleIconRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    setPopupDirection(spaceBelow < 260 && spaceAbove > 260 ? "up" : "down");
+  }, [showSchedulePopup]);
+
+  // ✅ Hide leadCard in Schedule page if it's closed & scheduled call is expired
+  if (fromSchedulePage && lead.status === "Closed") return null;
+
+  const getColor = () => {
+    if (lead.type === "Hot") return "#ff4d4f";
+    if (lead.type === "Warm") return "#fbbf24";
+    if (lead.type === "Cold") return "#22d3ee";
+    return "#ccc";
   };
 
-  const handleStatusSelect = (newStatus) => {
-    setShowStatusPopup(false);
-    if (newStatus !== lead.status) {
-      onStatusChange(lead._id, newStatus);
-    }
-  };
+  // ✅ Schedule handler with future time validation
+  const handleScheduleSave = () => {
+    if (scheduleData.date && scheduleData.time) {
+      const scheduledDateTime = new Date(`${scheduleData.date}T${scheduleData.time}`);
+      const now = new Date();
 
-  const handleSchedule = () => {
-    if (!callDate) return alert("Select date and time.");
-    onSchedule(lead._id, callDate);
-    setCallDate("");
+      if (scheduledDateTime <= now) {
+        alert("Please select a future date and time.");
+        return;
+      }
+
+      const isoString = scheduledDateTime.toISOString();
+      onSchedule(lead._id, isoString);
+      setShowSchedulePopup(false);
+    }
   };
 
   return (
     <div className={styles.card}>
-      <div className={styles.header}>
-        <h3>{lead.name}</h3>
-        <span className={styles.status}>{lead.status}</span>
-      </div>
+      <div className={styles.leftBar} style={{ backgroundColor: getColor() }} />
 
-      <p>
-        <strong>Phone:</strong> {lead.phone || "N/A"}
-      </p>
-      <p>
-        <strong>Email:</strong> {lead.email || "N/A"}
-      </p>
-      <p>
-        <strong>Location:</strong> {lead.location}
-      </p>
-      <p>
-        <strong>Language:</strong> {lead.language}
-      </p>
-      <p>
-        <strong>Type:</strong>{" "}
-        <span onClick={() => setShowTypePopup(!showTypePopup)} className={styles.clickable}>
-          {lead.type}
-        </span>
-        {showTypePopup && (
-          <div className={styles.popup}>
-            {["Hot", "Warm", "Cold"].map((type) => (
-              <div key={type} onClick={() => handleTypeSelect(type)}>
-                {type}
-              </div>
-            ))}
+      <div className={styles.mainContent}>
+        <div className={styles.topRow}>
+          <div className={styles.nameEmail}>
+            <h4 className={styles.name}>{lead.name}</h4>
+            <p className={styles.email}>{lead.email}</p>
           </div>
-        )}
-      </p>
-
-      <p>
-        <strong>Status:</strong>{" "}
-        <span onClick={() => setShowStatusPopup(!showStatusPopup)} className={styles.clickable}>
-          {lead.status}
-        </span>
-        {showStatusPopup && (
-          <div className={styles.popup}>
-            {["Ongoing", "Closed"].map((status) => (
-              <div key={status} onClick={() => handleStatusSelect(status)}>
-                {status}
-              </div>
-            ))}
+          <div className={styles.statusCircle} style={{ borderColor: getColor() }}>
+            {lead.status}
           </div>
-        )}
-      </p>
+        </div>
 
-      {lead.status !== "Closed" && (
-        <>
-          <div className={styles.scheduleBox}>
-            <input
-              type="datetime-local"
-              value={callDate}
-              onChange={(e) => setCallDate(e.target.value)}
+        <p className={styles.label}>Date</p>
+        <div className={styles.dateAndIconsRow}>
+          <div className={styles.dateRow}>
+            <img src="/images/schedule.png" alt="schedule" />
+            <span>
+              {new Date(lead.receivedDate).toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+
+          <div className={styles.actionsWrapper}>
+            <img
+              src="/images/type.png"
+              alt="Edit Type"
+              onClick={() => {
+                setShowTypePopup(!showTypePopup);
+                setShowSchedulePopup(false);
+                setShowStatusPopup(false);
+              }}
             />
-            <button onClick={handleSchedule} className={styles.scheduleBtn}>
-              Schedule Call
-            </button>
+
+            {lead.status !== "Closed" && (
+              <img
+                ref={scheduleIconRef}
+                src="/images/calendar.png"
+                alt="Schedule"
+                onClick={() => {
+                  setShowSchedulePopup(!showSchedulePopup);
+                  setShowTypePopup(false);
+                  setShowStatusPopup(false);
+                }}
+              />
+            )}
+
+            <img
+              src="/images/status.png"
+              alt="Status"
+              onClick={() => {
+                setShowStatusPopup(!showStatusPopup);
+                setShowTypePopup(false);
+                setShowSchedulePopup(false);
+              }}
+            />
           </div>
 
-          {lead.scheduledCalls?.length > 0 && (
-            <div className={styles.scheduledList}>
-              <h4>Scheduled Calls</h4>
-              {lead.scheduledCalls.map((call, index) => (
-                <div key={index} className={styles.callItem}>
-                  <p>
-                    <strong>Date:</strong> {new Date(call.callDate).toLocaleString()}
-                  </p>
-                  <p>
-                    <strong>Type:</strong> {call.callType}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+          <div className={styles.popupWrapper}>
+            {showTypePopup && (
+              <div className={`${styles.popup} ${styles.popupType}`} ref={typeRef}>
+                {["Hot", "Warm", "Cold"].map((type) => (
+                  <div
+                    key={type}
+                    className={`${styles.option} ${styles[type.toLowerCase()]}`}
+                    onClick={() => {
+                      onTypeChange(lead._id, type);
+                      setShowTypePopup(false);
+                    }}
+                  >
+                    {type}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {showSchedulePopup && lead.status !== "Closed" && (
+              <div
+                className={`${styles.popup} ${styles.popupSchedule} ${
+                  popupDirection === "up" ? styles.popupUp : ""
+                }`}
+                ref={scheduleRef}
+              >
+                <label>Date</label>
+                <input
+                  type="date"
+                  value={scheduleData.date}
+                  onChange={(e) =>
+                    setScheduleData({ ...scheduleData, date: e.target.value })
+                  }
+                />
+                <label>Time</label>
+                <input
+                  type="time"
+                  value={scheduleData.time}
+                  onChange={(e) =>
+                    setScheduleData({ ...scheduleData, time: e.target.value })
+                  }
+                />
+                <button onClick={handleScheduleSave}>Save</button>
+              </div>
+            )}
+
+            {showStatusPopup && (
+              <div className={`${styles.popup} ${styles.popupStatus}`} ref={statusRef}>
+                {["Ongoing", "Closed"].map((status) => (
+                  <div
+                    key={status}
+                    className={styles.option}
+                    onClick={() => {
+                      onStatusChange(lead._id, status);
+                      setShowStatusPopup(false);
+                    }}
+                  >
+                    {status}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

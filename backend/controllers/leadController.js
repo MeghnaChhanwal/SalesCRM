@@ -8,7 +8,7 @@ import {
 } from "../utils/assign.js";
 
 
-// ✅ GET: All leads (with search, filter, sort, pagination)
+// GET: All leads (with search, filter, sort, pagination)
 export const getLeads = async (req, res) => {
   try {
     const {
@@ -60,13 +60,21 @@ export const getLeads = async (req, res) => {
 };
 
 
-// ✅ POST: Manually add lead
+//  Manually add lead
 export const addLeadManually = async (req, res) => {
   try {
     const { name, email, phone, language, location, status, type } = req.body;
 
     if (!name || !language || !location) {
       return res.status(400).json({ error: "Name, language, and location are required" });
+    }
+
+    // Check for duplicate lead by email or phone
+    const existing = await Lead.findOne({
+      $or: [{ email }, { phone }],
+    });
+    if (existing) {
+      return res.status(400).json({ error: "Lead with same email or phone already exists" });
     }
 
     const { employees, maxPerEmployee, tempLeadMap } = await prepareLeadDistribution(1);
@@ -96,9 +104,7 @@ export const addLeadManually = async (req, res) => {
     res.status(500).json({ error: "Failed to add lead" });
   }
 };
-
-
-// ✅ POST: Upload leads via CSV
+// Upload leads via CSV
 export const uploadCSV = async (req, res) => {
   const filePath = req.file.path;
   const leads = [];
@@ -164,7 +170,7 @@ export const uploadCSV = async (req, res) => {
 };
 
 
-// ✅ PATCH: Update lead type
+//  Update lead type
 export const updateLeadType = async (req, res) => {
   try {
     const { id } = req.params;
@@ -185,7 +191,7 @@ export const updateLeadType = async (req, res) => {
 };
 
 
-// ✅ PATCH: Update lead status
+// Update lead status
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -227,7 +233,7 @@ export const updateLeadStatus = async (req, res) => {
 };
 
 
-// ✅ POST: Schedule a call
+//  Schedule a call
 export const scheduleCall = async (req, res) => {
   try {
     const { id } = req.params;
@@ -243,33 +249,28 @@ export const scheduleCall = async (req, res) => {
     const parsedDate = new Date(callDate);
     parsedDate.setSeconds(0, 0);
 
-    const existing = await Lead.findOne({
-      "scheduledCalls.callDate": parsedDate,
-    });
+    
+    const now = new Date();
+    const futureCallIndex = (lead.scheduledCalls || []).findIndex(
+      (call) => new Date(call.callDate) > now
+    );
 
-    if (existing) {
-      return res.status(400).json({ error: "Another call already scheduled at this time" });
+    
+    if (futureCallIndex !== -1) {
+      lead.scheduledCalls[futureCallIndex].callDate = parsedDate;
+    } else {
+      // else push new call
+      const autoCallType = lead.type === "Cold" ? "Cold Call" : "Referral";
+      lead.scheduledCalls.push({ callDate: parsedDate, callType: autoCallType });
     }
 
-    const autoCallType = lead.type === "Cold" ? "Cold Call" : "Referral";
-
-    lead.scheduledCalls = lead.scheduledCalls || [];
-    lead.scheduledCalls.push({
-      callDate: parsedDate,
-      callType: autoCallType,
-    });
-
     await lead.save();
-    res.status(200).json({ message: "Call scheduled", lead });
+    res.status(200).json({ message: "Call updated", lead });
   } catch (error) {
     console.error("Schedule Call Error:", error);
     res.status(500).json({ error: "Failed to schedule call" });
   }
 };
-
-
-// ✅ GET: Fetch scheduled calls (today or upcoming)
-// ✅ GET: Fetch scheduled calls (today or upcoming)
 export const getScheduledCalls = async (req, res) => {
   try {
     const { filter = "all" } = req.query;
@@ -282,7 +283,7 @@ export const getScheduledCalls = async (req, res) => {
       end.setHours(23, 59, 59, 999);
 
       leads = await Lead.find({
-        status: { $ne: "Closed" }, // 🔹 Exclude closed leads
+        status: { $ne: "Closed" }, 
         scheduledCalls: {
           $elemMatch: {
             callDate: { $gte: start, $lte: end },
@@ -291,7 +292,7 @@ export const getScheduledCalls = async (req, res) => {
       }).populate("assignedEmployee", "firstName lastName");
     } else {
       leads = await Lead.find({
-        status: { $ne: "Closed" }, // 🔹 Exclude closed leads
+        status: { $ne: "Closed" }, 
         scheduledCalls: {
           $elemMatch: {
             callDate: { $gte: new Date() },
