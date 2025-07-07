@@ -1,3 +1,12 @@
+/* Global Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 /* Container */
 .container {
   display: flex;
@@ -7,9 +16,10 @@
   width: 100%;
   gap: 12px;
   position: relative;
+  flex-wrap: wrap;
 }
 
-/* ===========Search bar wrapper============= */
+/* Search bar wrapper */
 .searchWrapper {
   flex: 1;
   display: flex;
@@ -19,14 +29,14 @@
   padding: 6px 12px;
 }
 
-/*========== Search icon=================== */
+/* Search icon */
 .searchIcon {
   width: 20px;
   height: 20px;
   margin-right: 8px;
 }
 
-/*========== Input=========== */
+/* Search input */
 .searchInput {
   border: none;
   background: transparent;
@@ -36,12 +46,13 @@
   color: #333;
 }
 
-/*========= Filter icon wrapper============ */
+/* Filter icon wrapper */
 .filterWrapper {
   position: relative;
+  z-index: 1;
 }
 
-/*====== Circle-style filter button===== */
+/* Circular filter button */
 .filterCircle {
   background-color: #e0e0e0;
   border-radius: 50%;
@@ -69,12 +80,13 @@
   z-index: 999;
   padding: 14px;
   width: 180px;
+  min-width: 140px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* Popup label text */
+/* Popup label */
 .popupLabel {
   font-size: 14px;
   color: #555;
@@ -89,9 +101,10 @@
   border: 1px solid #ccc;
   font-size: 14px;
   color: #333;
+  background-color: #f9f9f9;
 }
 
-/* ==== button inside popup=== */
+/* Save button */
 .saveBtn {
   background-color: #007bff;
   color: white;
@@ -108,6 +121,7 @@
   background-color: #0056b3;
 }
 
+/* ============== Media Queries ============== */
 
 @media (max-width: 768px) {
   .container {

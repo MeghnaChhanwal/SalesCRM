@@ -1,5 +1,5 @@
 .card {
-  max-width: 360px;
+  max-width: 420px;
   width: 100%;
   margin: 40px auto;
   padding: 24px;
@@ -10,6 +10,7 @@
   flex-direction: column;
   gap: 16px;
   font-family: "Segoe UI", sans-serif;
+  box-sizing: border-box;
 }
 
 label {
@@ -84,7 +85,7 @@ input:focus {
   background-color: #094add;
 }
 
-/* 🔄 Responsive Tweaks */
+/* 📱 Mobile: 500px and below */
 @media (max-width: 500px) {
   .card {
     padding: 20px;
@@ -109,19 +110,50 @@ input:focus {
   }
 }
 
+/* 📱 Extra Small: 360px and below */
 @media (max-width: 360px) {
   .card {
     padding: 18px;
     gap: 12px;
+    margin: 20px 12px;
   }
 
   input,
   .passwordWrapper input {
     font-size: 13px;
+    padding: 9px 10px;
   }
 
   .saveButton {
     font-size: 13.5px;
     padding: 10px;
+  }
+
+  .passwordWrapper span {
+    font-size: 11px;
+  }
+}
+
+/* 📱 Ultra small / Foldables: 320px and below */
+@media (max-width: 320px) {
+  .card {
+    padding: 16px;
+    gap: 10px;
+    margin: 16px 8px;
+  }
+
+  input,
+  .passwordWrapper input {
+    font-size: 12.5px;
+    padding: 8px 10px;
+  }
+
+  .saveButton {
+    font-size: 13px;
+    padding: 9px;
+  }
+
+  .passwordWrapper span {
+    font-size: 10.5px;
   }
 }
