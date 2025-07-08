@@ -1,5 +1,5 @@
 .container {
-  padding: 120px 16px 80px; /* 👈 padding-top increased for space below fixed search bar */
+  padding: 116px 16px 80px; /* 60px header + 56px searchBar */
   background-color: #f9f9f9;
   min-height: 100vh;
   font-family: 'Segoe UI', sans-serif;
@@ -7,20 +7,20 @@
 
 .searchBarContainer {
   position: fixed;
-  top: 80px;
+  top: 60px; /* directly below fixed header */
   left: 0;
   right: 0;
   z-index: 999;
   background-color: #f9f9f9;
-  padding: 8px 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-  margin-bottom: 0;
+  padding: 12px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .body {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* 👈 reduced gap between cards */
+  gap: 12px;
   margin-top: 0;
 }
 
@@ -138,8 +138,7 @@
   font-size: 14px;
 }
 
-
-/* 768px and below */
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .container {
     padding: 110px 14px 72px;
@@ -166,7 +165,6 @@
   }
 }
 
-/* 600px and below */
 @media (max-width: 600px) {
   .container {
     padding: 106px 12px 72px;
@@ -193,7 +191,6 @@
   }
 }
 
-/* 400px and below */
 @media (max-width: 400px) {
   .container {
     padding: 104px 10px 70px;
