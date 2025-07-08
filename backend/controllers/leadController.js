@@ -268,3 +268,39 @@ export const scheduleCall = async (req, res) => {
     res.status(500).json({ error: "Failed to schedule call" });
   }
 };
+export const getScheduledCalls = async (req, res) => {
+  try {
+    const { filter = "all" } = req.query;
+    let leads;
+
+    if (filter === "today") {
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date();
+      end.setHours(23, 59, 59, 999);
+
+      leads = await Lead.find({
+        status: { $ne: "Closed" },
+        scheduledCalls: {
+          $elemMatch: {
+            callDate: { $gte: start, $lte: end },
+          },
+        },
+      }).populate("assignedEmployee", "firstName lastName");
+    } else {
+      leads = await Lead.find({
+        status: { $ne: "Closed" },
+        scheduledCalls: {
+          $elemMatch: {
+            callDate: { $gte: new Date() },
+          },
+        },
+      }).populate("assignedEmployee", "firstName lastName");
+    }
+
+    res.status(200).json({ leads });
+  } catch (error) {
+    console.error("Get Scheduled Calls Error:", error);
+    res.status(500).json({ error: "Failed to fetch scheduled calls" });
+  }
+};
