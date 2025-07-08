@@ -8,14 +8,13 @@ const LeadCard = ({
   onStatusChange,
   fromSchedulePage = false,
 }) => {
-  // === Declare ALL hooks at the very top, no conditions around them ===
   const [showTypePopup, setShowTypePopup] = useState(false);
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [showStatusPopup, setShowStatusPopup] = useState(false);
   const [scheduleData, setScheduleData] = useState({
     date: "",
     time: "",
-    callType: "Cold Call",
+    callType: "Cold Call", // kept default callType here but no UI to change it
   });
   const [popupDirection, setPopupDirection] = useState("down");
 
@@ -50,11 +49,9 @@ const LeadCard = ({
     setPopupDirection(spaceBelow < 260 && spaceAbove > 260 ? "up" : "down");
   }, [showSchedulePopup]);
 
-  // === Now do early returns or conditional rendering safely ===
   if (!lead) return null;
   if (fromSchedulePage && lead.status === "Closed") return null;
 
-  // Helper function for color based on lead type
   const getColor = () => {
     const type = lead?.type;
     if (type === "Hot") return "#ff4d4f";
@@ -63,7 +60,6 @@ const LeadCard = ({
     return "#ccc";
   };
 
-  // Handle schedule save with validation
   const handleScheduleSave = () => {
     if (scheduleData.date && scheduleData.time) {
       const scheduledDateTime = new Date(
@@ -78,8 +74,11 @@ const LeadCard = ({
 
       const isoString = scheduledDateTime.toISOString();
 
+      // Pass callType from state (always "Cold Call" here)
       onSchedule(lead._id, isoString, scheduleData.callType);
       setShowSchedulePopup(false);
+    } else {
+      alert("Please select both date and time.");
     }
   };
 
@@ -190,17 +189,7 @@ const LeadCard = ({
                   }
                 />
 
-                <label>Call Type</label>
-                <select
-                  value={scheduleData.callType}
-                  onChange={(e) =>
-                    setScheduleData({ ...scheduleData, callType: e.target.value })
-                  }
-                >
-                  <option value="Cold Call">Cold Call</option>
-                  <option value="Follow-up">Follow-up</option>
-                  <option value="Referral">Referral</option>
-                </select>
+                {/* Call Type dropdown REMOVED */}
 
                 <button onClick={handleScheduleSave}>Save</button>
               </div>

@@ -7,16 +7,14 @@
 
 .searchBarContainer {
   position: fixed;
-  top: 60px; /* directly below fixed header */
+  top: 80px;
   left: 0;
   right: 0;
   z-index: 999;
   background-color: #f9f9f9;
-  padding: 12px 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  padding: 8px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
-
 .body {
   display: flex;
   flex-direction: column;

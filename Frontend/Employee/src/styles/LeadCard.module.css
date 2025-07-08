@@ -13,7 +13,236 @@
   width: 6px;
   height: 50px;
   border-radius: 8px;
-  margin-right: 12px;
+  margin-right: 12px;/* LeadCard.module.css */
+
+.card {
+  background-color: #f1f1f1;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.card:hover {
+  background-color: #1854f1;
+  color: white;
+}
+
+.leftBar {
+  width: 6px;
+  border-radius: 12px;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nameEmail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+  color: inherit;
+}
+
+.email {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.statusCircle {
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  min-width: 80px;
+  text-align: center;
+  color: inherit;
+}
+
+.label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #333;
+  margin: 0 0 6px 0;
+}
+
+.dateAndIconsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dateRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.actionsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.actionsWrapper img {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  filter: grayscale(70%);
+  transition: filter 0.2s ease;
+}
+
+.actionsWrapper img:hover {
+  filter: grayscale(0%);
+}
+
+.popupWrapper {
+  position: relative;
+  z-index: 10;
+}
+
+/* Popup base style */
+.popup {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  padding: 12px 16px;
+  min-width: 180px;
+  font-size: 0.9rem;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  user-select: none;
+}
+
+/* Popup appears above if needed */
+.popupUp {
+  top: auto;
+  bottom: 44px;
+}
+
+/* Type popup styling */
+.popupType {
+  width: 200px;
+}
+
+.popupType .option {
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.popupType .option:hover {
+  background-color: #e6f0ff;
+}
+
+/* Type-specific colors */
+.hot {
+  color: #ff4d4f;
+}
+
+.warm {
+  color: #fbbf24;
+}
+
+.cold {
+  color: #22d3ee;
+}
+
+/* Call type label inside type popup option */
+.popupType .option small {
+  font-size: 0.75rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Schedule popup */
+.popupSchedule label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.popupSchedule input,
+.popupSchedule select {
+  width: 100%;
+  padding: 6px 8px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.popupSchedule button {
+  background-color: #1854f1;
+  color: white;
+  padding: 8px 0;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.popupSchedule button:hover {
+  background-color: #0f3bbd;
+}
+
+/* Status popup */
+.popupStatus .option {
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.popupStatus .option:hover {
+  background-color: #e6f0ff;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .popup {
+    min-width: 160px;
+  }
+
+  .popupType {
+    width: 160px;
+  }
+}
+
   flex-shrink: 0;
 }
 
@@ -98,7 +327,297 @@
 }
 
 .actionsWrapper img {
+  width: 22px;/* ==== Layout Basics ==== */
+.card {
+  display: flex;
+  background-color: #f1f1f1;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card:hover {
+  background-color: #1854f1;
+  color: white;
+}
+
+.leftBar {
+  width: 6px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+/* ==== Main Content Layout ==== */
+.mainContent {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nameEmail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+  color: inherit;
+}
+
+.email {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.statusCircle {
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  min-width: 80px;
+  text-align: center;
+  color: inherit;
+}
+
+/* ==== Date Row & Actions ==== */
+.label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #333;
+  margin: 0 0 6px 0;
+}
+
+.dateAndIconsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.dateRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.dateRow img {
+  width: 20px;
+  height: 20px;
+}
+
+.actionsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.actionsWrapper img {
   width: 22px;
+  height: 22px;
+  cursor: pointer;
+  filter: grayscale(70%);
+  transition: filter 0.2s ease;
+}
+
+.actionsWrapper img:hover {
+  filter: grayscale(0%);
+}
+
+/* ==== Popups ==== */
+.popupWrapper {
+  position: relative;
+  z-index: 10;
+}
+
+.popup {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 0.8rem;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  width: 190px;
+  max-height: 240px;
+  overflow-y: auto;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.popupUp {
+  bottom: 100%;
+  top: auto;
+  margin-bottom: 8px;
+}
+
+.popup label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+.popup input {
+  width: 100%;
+  padding: 7px 8px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.popup button {
+  width: 100%;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.popup button:hover {
+  background-color: #1d4ed8;
+}
+
+/* ==== Type Popup ==== */
+.popupType {
+  width: 180px;
+}
+
+.popupType .option {
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.popupType .option:hover {
+  background-color: #e6f0ff;
+}
+
+/* ==== Status Popup ==== */
+.popupStatus .option {
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.popupStatus .option:hover {
+  background-color: #e6f0ff;
+}
+
+/* ==== Type-specific Colors ==== */
+.hot {
+  color: #ff4d4f;
+}
+.warm {
+  color: #fbbf24;
+}
+.cold {
+  color: #22d3ee;
+}
+
+/* ==== Responsive Styles ==== */
+@media screen and (max-width: 768px) {
+  .card {
+    padding: 0.9rem;
+  }
+
+  .name {
+    font-size: 1rem;
+  }
+
+  .email {
+    font-size: 0.85rem;
+  }
+
+  .statusCircle {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+  }
+
+  .actionsWrapper img,
+  .dateRow img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .popup {
+    width: 170px;
+    padding: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .card {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .topRow,
+  .dateAndIconsRow {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .statusCircle {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+
+  .popup {
+    width: 160px;
+    padding: 0.7rem;
+  }
+
+  .popup input {
+    font-size: 0.85rem;
+  }
+
+  .popup button {
+    padding: 7px 10px;
+    font-size: 0.85rem;
+  }
+
+  .popupType .option,
+  .popupStatus .option {
+    font-size: 0.85rem;
+  }
+}
+
   height: 22px;
   cursor: pointer;
   transition: transform 0.15s ease;

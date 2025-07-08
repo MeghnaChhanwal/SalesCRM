@@ -1,3 +1,11 @@
+
+.container {
+  padding: 116px 16px 80px; /* 60px header + 56px searchBar */
+  background-color: #f9f9f9;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
 .searchBarContainer {
   position: fixed;
   top: 80px;
@@ -8,227 +16,83 @@
   padding: 8px 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
-
 .body {
-  padding-top: 96px; /* 80 + 16 */
-  display: flex;
-  flex-direction: column;
-  gap: 8px; 
-}
-
-.card {
-  background-color: #f1f1f1;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  cursor: pointer;
-}
-.card:hover {
-  background-color: #1854f1;
-  color: white;
+  margin-top: 0;
 }
 
-.card:hover .referralTitle,
-.card:hover .dateLabel,
-.card:hover .dateTime,
-.card:hover .phone,
-.card:hover .callLabel,
-.card:hover .leadName {
-  color: white;
-}
-
-/* Active card state */
-.activeCard {
-  background-color: #1854f1;
-  color: white;
-}
-
-.activeCard .referralTitle,
-.activeCard .dateLabel,
-.activeCard .dateTime,
-.activeCard .phone,
-.activeCard .callLabel,
-.activeCard .leadName {
-  color: white;
-}
-
-/* Layouts inside card */
-.cardTopRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.leftContent {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  flex: 1;
-}
-
-.rightDate {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 4px;
-  white-space: nowrap;
-}
-
-/* Text inside card */
-.referralTitle,
-.phone,
-.dateLabel,
-.dateTime,
-.callLabel,
-.leadName {
-  font-size: 14px;
-  font-weight: 500;
-  color: #111;
-  line-height: 1.4;
-}
-
-.callDetails {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.icon {
-  width: 16px;
-  height: 16px;
-  filter: grayscale(50%);
-}
-
-.user {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.avatar {
-  background-color: #1854f1;
-  color: white;
-  font-weight: 600;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 .errorMsg {
   color: red;
   text-align: center;
-  margin-top: 12px;
   font-size: 14px;
+  margin-top: 10px;
 }
 
-/* Tablet */
-@media (max-width: 768px) {
+.emptyMsg {
+  text-align: center;
+  color: #888;
+  font-size: 15px;
+  margin-top: 20px;
+}
+
+
+@media screen and (max-width: 768px) {
   .container {
-    padding: 72px 14px 72px;
+    padding: 100px 14px 70px;
   }
 
-  .card {
-    padding: 15px;
+  .searchBarContainer {
+    top: 58px;
+    padding: 8px 14px;
   }
 
-  .referralTitle,
-  .phone,
-  .dateLabel,
-  .dateTime,
-  .callLabel,
-  .leadName {
-    font-size: 13.8px;
-  }
-
-  .avatar {
-    width: 27px;
-    height: 27px;
-    font-size: 12.5px;
-  }
-
-  .icon {
-    width: 15px;
-    height: 15px;
+  .body {
+    gap: 10px;
   }
 }
 
-/* Mobile */
-@media (max-width: 600px) {
+@media screen and (max-width: 600px) {
   .container {
-    padding: 70px 12px 70px;
+    padding: 96px 12px 70px;
   }
 
-  .referralTitle,
-  .phone,
-  .dateLabel,
-  .dateTime,
-  .callLabel,
-  .leadName {
+  .searchBarContainer {
+    top: 56px;
+    padding: 8px 12px;
+  }
+
+  .body {
+    gap: 10px;
+  }
+
+  .emptyMsg {
+    font-size: 14px;
+  }
+
+  .errorMsg {
     font-size: 13.5px;
   }
-
-  .avatar {
-    width: 26px;
-    height: 26px;
-    font-size: 12px;
-  }
-
-  .icon {
-    width: 14px;
-    height: 14px;
-  }
 }
 
-/* Compact mobile */
-@media (max-width: 400px) {
+@media screen and (max-width: 400px) {
   .container {
-    padding: 68px 10px 68px;
+    padding: 90px 10px 65px;
   }
 
-  .card {
-    padding: 13px;
+  .searchBarContainer {
+    top: 54px;
+    padding: 6px 10px;
   }
 
-  .referralTitle,
-  .phone,
-  .dateLabel,
-  .dateTime,
-  .callLabel,
-  .leadName {
+  .body {
+    gap: 8px;
+  }
+
+  .emptyMsg,
+  .errorMsg {
     font-size: 13px;
-  }
-
-  .avatar {
-    width: 24px;
-    height: 24px;
-    font-size: 11.5px;
-  }
-
-  .icon {
-    width: 13px;
-    height: 13px;
-  }
-
-  .cardTopRow {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-  }
-
-  .rightDate {
-    align-items: flex-end;
-    text-align: right;
-    white-space: nowrap;
   }
 }

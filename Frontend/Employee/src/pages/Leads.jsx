@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import LeadCard from "../components/LeadCard";
 import SearchFilter from "../components/SearchFilter";
 import Layout from "../components/Layout";
-import API from "../utils/axios"; // axios instance with baseURL
+import API from "../utils/axios";
 import { useAuth } from "../contexts/AuthContext";
 import styles from "../styles/Leads.module.css";
 
@@ -88,7 +88,7 @@ const Leads = () => {
 
   return (
     <Layout>
-      <div className={styles.container}>
+      <div className={styles.searchBarContainer}>
         <SearchFilter
           searchTerm={searchTerm}
           onSearch={setSearchTerm}
@@ -96,7 +96,9 @@ const Leads = () => {
           onFilterChange={setFilterOption}
           pageType="lead"
         />
+      </div>
 
+      <div className={styles.container}>
         <section className={styles.body}>
           {loading && <p>Loading leads...</p>}
           {error && <p className={styles.errorMsg}>{error}</p>}

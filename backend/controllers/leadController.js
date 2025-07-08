@@ -232,7 +232,7 @@ export const updateLeadStatus = async (req, res) => {
 };
 
 
-//  Schedule a call
+
 export const scheduleCall = async (req, res) => {
   try {
     const { id } = req.params;
