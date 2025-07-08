@@ -10,43 +10,45 @@ const Employee = () => {
   const [employees, setEmployees] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: "createdAt", direction: "desc" });
   const [currentPage, setCurrentPage] = useState(1);
-  const employeesPerPage = 6;
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState("add");
-  const [formData, setFormData] = useState({ firstName: "", lastName: "", email: "", location: "", language: "" });
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    location: "",
+    language: "",
+  });
   const [errorMessage, setErrorMessage] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
+  const employeesPerPage = 6;
 
-  // Fetch employees when filters change
   useEffect(() => {
     fetchEmployees();
   }, [searchTerm, currentPage, sortConfig]);
 
-  // Auto-update employee statuses once on mount, then fetch employees again
   useEffect(() => {
-    const updateEmployeeStatuses = async () => {
+    const updateStatuses = async () => {
       try {
         await API.patch("/api/employees/auto/update-status");
         fetchEmployees();
       } catch (err) {
-        console.error("Failed to auto-update employee statuses", err);
+        console.error("Status update failed:", err);
       }
     };
-
-    updateEmployeeStatuses();
+    updateStatuses();
   }, []);
 
-  // Close dropdown menus on outside click
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const closeMenuOnClickOutside = (e) => {
       if (!e.target.closest(`.${styles.dropdown}`)) {
         setOpenMenuId(null);
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", closeMenuOnClickOutside);
+    return () => document.removeEventListener("mousedown", closeMenuOnClickOutside);
   }, []);
 
   const fetchEmployees = async () => {
@@ -67,16 +69,19 @@ const Employee = () => {
   };
 
   const handleSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
+    const direction = sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc";
     setSortConfig({ key, direction });
   };
 
   const handleAddClick = () => {
     setFormMode("add");
-    setFormData({ firstName: "", lastName: "", email: "", location: "", language: "" });
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      location: "",
+      language: "",
+    });
     setErrorMessage("");
     setShowForm(true);
   };
@@ -84,13 +89,13 @@ const Employee = () => {
   const handleEditClick = (employee) => {
     setFormMode("edit");
     setFormData({ ...employee });
+    setErrorMessage("");
     setShowForm(true);
     setOpenMenuId(null);
   };
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this employee?");
-    if (!confirmDelete) return;
+    if (!window.confirm("Are you sure you want to delete this employee?")) return;
     try {
       await API.delete(`/api/employees/${id}`);
       fetchEmployees();
@@ -200,9 +205,7 @@ const Employee = () => {
                   <td>
                     <span
                       className={
-                        emp.status === "Active"
-                          ? styles.statusActive
-                          : styles.statusInactive
+                        emp.status === "Active" ? styles.statusActive : styles.statusInactive
                       }
                     >
                       {emp.status}
@@ -222,12 +225,7 @@ const Employee = () => {
                     {openMenuId === emp._id && (
                       <div className={styles.menuContent}>
                         <button onClick={() => handleEditClick(emp)}>
-                          <img
-                            src="/edit.png"
-                            alt="Edit"
-                            height={14}
-                            style={{ marginRight: 6 }}
-                          />
+                          <img src="/edit.png" alt="Edit" height={14} style={{ marginRight: 6 }} />
                           Edit
                         </button>
                         <button onClick={() => handleDelete(emp._id)}>
