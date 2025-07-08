@@ -9,7 +9,7 @@ export const getDashboardOverview = async (req, res) => {
     const unassignedLeads = await Lead.countDocuments({ assignedEmployee: null });
     const closedLeads = await Lead.countDocuments({ status: "Closed" });
 
-    // This week
+    // This week assigned
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
@@ -21,7 +21,7 @@ export const getDashboardOverview = async (req, res) => {
 
     const conversionRate = totalLeads > 0 ? Math.round((closedLeads / totalLeads) * 100) : 0;
 
-    // Active salespeople
+    // Active salespeople today
     const today = todayIST();
     const activeTimings = await Timing.find({
       date: today,
@@ -31,70 +31,54 @@ export const getDashboardOverview = async (req, res) => {
     }).distinct("employee");
     const activeSalespeople = activeTimings.length;
 
-    // Recent Activities — cleaned logic
+    // Recent Activities (only useful)
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
       .populate("assignedEmployee", "firstName lastName");
 
     const recentEmployees = await Employee.find()
-      .sort({ createdAt: -1 })
-      .limit(10);
+      .sort({ updatedAt: -1 })
+      .limit(30);
 
     const activityMap = new Map();
 
-    // Add employee activities
+    // Employee add/edit
     recentEmployees.forEach((emp) => {
-      const key = `employee-${emp._id}`;
-      activityMap.set(key, {
-        message: `Employee added: ${emp.firstName} ${emp.lastName}`,
-        time: emp.createdAt,
-      });
+      const created = new Date(emp.createdAt).getTime();
+      const updated = new Date(emp.updatedAt).getTime();
+
+      if (created === updated) {
+        activityMap.set(`emp-${emp._id}-add`, {
+          message: `Employee added: ${emp.firstName} ${emp.lastName}`,
+          time: emp.createdAt,
+        });
+      } else {
+        activityMap.set(`emp-${emp._id}-edit`, {
+          message: `Employee edited: ${emp.firstName} ${emp.lastName}`,
+          time: emp.updatedAt,
+        });
+      }
     });
 
-    // Add lead-related activities
+    // Lead add / assign / close
     recentLeads.forEach((lead) => {
       const assignedName = lead.assignedEmployee?.firstName || "Someone";
       const keyBase = `lead-${lead._id}`;
-      const now = new Date();
+      const createdAt = new Date(lead.createdAt).getTime();
+      const updatedAt = new Date(lead.updatedAt).getTime();
 
-      // ✅ Check for future call
-      const futureCall = lead.scheduledCalls
-        ?.filter((call) => new Date(call.callDate) > now)
-        .pop();
-
-      // 1. Closed
       if (lead.status === "Closed") {
         activityMap.set(`${keyBase}-closed`, {
           message: `${assignedName} closed lead: ${lead.name}`,
           time: lead.updatedAt,
         });
-        return;
-      }
-
-      // 2. Future scheduled call
-      if (futureCall && lead.assignedEmployee) {
-        activityMap.set(`${keyBase}-call`, {
-          message: `${assignedName} scheduled call for ${lead.name}`,
-          time: new Date(futureCall.callDate),
-        });
-        return;
-      }
-
-      // 3. Assigned lead (only if updatedAt changed from createdAt)
-      if (
-        lead.assignedEmployee &&
-        new Date(lead.createdAt).getTime() !== new Date(lead.updatedAt).getTime()
-      ) {
+      } else if (lead.assignedEmployee && createdAt !== updatedAt) {
         activityMap.set(`${keyBase}-assigned`, {
           message: `Lead assigned to ${assignedName}: ${lead.name}`,
           time: lead.updatedAt,
         });
-        return;
-      }
-
-      // 4. Just added
-      if (!lead.assignedEmployee) {
+      } else if (!lead.assignedEmployee) {
         activityMap.set(`${keyBase}-added`, {
           message: `Lead added: ${lead.name}`,
           time: lead.createdAt,
@@ -133,7 +117,7 @@ export const getDashboardOverview = async (req, res) => {
       });
     }
 
-    // Enriched Employees
+    // Employee Table Data with status
     const enrichedEmployees = await Promise.all(
       (await Employee.find()).map(async (emp) => {
         const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
