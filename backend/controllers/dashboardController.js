@@ -3,14 +3,13 @@ import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
-// Full dashboard overview
 export const getDashboardOverview = async (req, res) => {
   try {
     const totalLeads = await Lead.countDocuments();
     const unassignedLeads = await Lead.countDocuments({ assignedEmployee: null });
     const closedLeads = await Lead.countDocuments({ status: "Closed" });
 
-    // Assigned leads this week
+    // This week
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
@@ -20,10 +19,9 @@ export const getDashboardOverview = async (req, res) => {
       receivedDate: { $gte: startOfWeek },
     });
 
-    // Conversion Rate
     const conversionRate = totalLeads > 0 ? Math.round((closedLeads / totalLeads) * 100) : 0;
 
-    // ✅ Real-time active employees from Timing collection
+    // Active salespeople
     const today = todayIST();
     const activeTimings = await Timing.find({
       date: today,
@@ -31,10 +29,9 @@ export const getDashboardOverview = async (req, res) => {
       checkOut: null,
       status: { $ne: "Inactive" },
     }).distinct("employee");
-
     const activeSalespeople = activeTimings.length;
 
-    // Recent Activity
+    // Recent Activities — deduplicated, sorted
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
@@ -44,48 +41,48 @@ export const getDashboardOverview = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(10);
 
-    const activity = [];
+    const activityMap = new Map();
 
     recentEmployees.forEach((emp) => {
-      activity.push({
-        message: `Employee added: ${emp.firstName} ${emp.lastName}`,
-        time: emp.createdAt,
-      });
+      const key = `employee-${emp._id}`;
+      const message = `Employee added: ${emp.firstName} ${emp.lastName}`;
+      activityMap.set(key, { message, time: emp.createdAt });
     });
 
     recentLeads.forEach((lead) => {
-      if (!lead.assignedEmployee) {
-        activity.push({
-          message: `Lead added: ${lead.name}`,
-          time: lead.createdAt,
-        });
-      } else if (lead.status === "Closed") {
-        activity.push({
-          message: `${lead.assignedEmployee.firstName} closed lead: ${lead.name}`,
-          time: lead.updatedAt,
-        });
-      } else {
-        activity.push({
-          message: `Lead assigned to ${lead.assignedEmployee.firstName}: ${lead.name}`,
-          time: lead.updatedAt,
-        });
-      }
+      const assignedName = lead.assignedEmployee?.firstName || "Someone";
+      const keyBase = `lead-${lead._id}`;
+      const latestCall = lead.scheduledCalls?.[lead.scheduledCalls.length - 1];
+      const callDate = latestCall?.callDate ? new Date(latestCall.callDate) : null;
+      const now = new Date();
 
-      // 🔹 Call Scheduled
-      if (lead.scheduledCalls?.length > 0) {
-        const latestCall = lead.scheduledCalls[lead.scheduledCalls.length - 1];
-        activity.push({
-          message: `${lead.assignedEmployee?.firstName || "Someone"} scheduled call for ${lead.name}`,
-          time: latestCall.callDate,
-        });
+      let finalMessage = "";
+      let finalTime = new Date(lead.updatedAt);
+
+      if (lead.status === "Closed") {
+        finalMessage = `${assignedName} closed lead: ${lead.name}`;
+        finalTime = lead.updatedAt;
+        activityMap.set(`${keyBase}-closed`, { message: finalMessage, time: finalTime });
+      } else if (callDate && callDate >= now && lead.assignedEmployee) {
+        finalMessage = `${assignedName} scheduled call for ${lead.name}`;
+        finalTime = callDate;
+        activityMap.set(`${keyBase}-call`, { message: finalMessage, time: finalTime });
+      } else if (lead.assignedEmployee) {
+        finalMessage = `Lead assigned to ${assignedName}: ${lead.name}`;
+        finalTime = lead.updatedAt;
+        activityMap.set(`${keyBase}-assigned`, { message: finalMessage, time: finalTime });
+      } else {
+        finalMessage = `Lead added: ${lead.name}`;
+        finalTime = lead.createdAt;
+        activityMap.set(`${keyBase}-added`, { message: finalMessage, time: finalTime });
       }
     });
 
-    const recentActivities = activity
+    const recentActivities = Array.from(activityMap.values())
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
 
-    // Graph data for last 10 days
+    // Graph Data (last 10 days)
     const todayDate = new Date();
     const graphData = [];
 
@@ -112,7 +109,7 @@ export const getDashboardOverview = async (req, res) => {
       });
     }
 
-    // Enriched employees with assigned/closed leads + dynamic status
+    // Enriched Employees
     const enrichedEmployees = await Promise.all(
       (await Employee.find()).map(async (emp) => {
         const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
@@ -123,6 +120,7 @@ export const getDashboardOverview = async (req, res) => {
 
         const timing = await Timing.findOne({ employee: emp._id, date: today });
         let status = "Inactive";
+
         if (timing && timing.checkIn && !timing.checkOut && timing.status !== "Inactive") {
           status = "Active";
         }
@@ -136,7 +134,7 @@ export const getDashboardOverview = async (req, res) => {
       })
     );
 
-    // Send dashboard response
+    // Final Response
     res.status(200).json({
       unassignedLeads,
       assignedThisWeek,
@@ -149,46 +147,5 @@ export const getDashboardOverview = async (req, res) => {
   } catch (err) {
     console.error("Dashboard overview error:", err);
     res.status(500).json({ error: "Failed to fetch dashboard stats" });
-  }
-};
-
-
-// Chart data for custom number of days (7–14)
-export const getChartData = async (req, res) => {
-  try {
-    const { days = 10 } = req.query;
-    const numDays = Math.min(Math.max(Number(days), 7), 14);
-
-    const today = new Date();
-    const chartData = [];
-
-    for (let i = numDays - 1; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      date.setHours(0, 0, 0, 0);
-
-      const nextDate = new Date(date);
-      nextDate.setDate(date.getDate() + 1);
-
-      const leads = await Lead.find({
-        receivedDate: { $gte: date, $lt: nextDate },
-      });
-
-      const total = leads.length;
-      const closed = leads.filter((l) => l.status === "Closed").length;
-      const conversion = total > 0 ? Math.round((closed / total) * 100) : 0;
-
-      chartData.push({
-        date: date.toISOString().split("T")[0],
-        totalLeads: total,
-        closedLeads: closed,
-        conversionRate: conversion,
-      });
-    }
-
-    res.status(200).json(chartData);
-  } catch (err) {
-    console.error("Chart data error:", err);
-    res.status(500).json({ error: "Failed to fetch chart data" });
   }
 };

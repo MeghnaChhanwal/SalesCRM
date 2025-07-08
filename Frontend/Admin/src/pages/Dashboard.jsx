@@ -15,7 +15,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
 
-// Utility: time ago format
+// Utility to display time ago
 const getTimeAgo = (dateStr) => {
   const now = new Date();
   const past = new Date(dateStr);
@@ -130,7 +130,7 @@ const Dashboard = () => {
     <MainLayout showSearch={false}>
       <div className={styles.pageWrapper}>
         <div className={styles.dashboardContainer}>
-          {/* 🔹 Stats Overview */}
+          {/* 🔹 Top Stats */}
           <div className={styles.cardGrid}>
             <div className={styles.card}><h4>Unassigned Leads</h4><p>{stats.unassignedLeads}</p></div>
             <div className={styles.card}><h4>Assigned This Week</h4><p>{stats.assignedThisWeek}</p></div>
@@ -138,7 +138,7 @@ const Dashboard = () => {
             <div className={styles.card}><h4>Conversion Rate</h4><p>{stats.conversionRate}%</p></div>
           </div>
 
-          {/* 🔹 Analytics Chart & Recent Activity */}
+          {/* 🔹 Chart + Activity */}
           <div className={styles.analyticsRow}>
             <div className={styles.chartBox}>
               <h4>Sales Analytics</h4>
@@ -147,7 +147,7 @@ const Dashboard = () => {
               </div>
               {clickedDayInfo && (
                 <div className={styles.dayDetail}>
-                   <strong>{clickedDayInfo.day}</strong> — {clickedDayInfo.closedLeads} leads closed, Conversion Rate: {clickedDayInfo.conversion}%
+                  <strong>{clickedDayInfo.day}</strong> — {clickedDayInfo.closedLeads} leads closed, Conversion Rate: {clickedDayInfo.conversion}%
                 </div>
               )}
             </div>
@@ -160,7 +160,7 @@ const Dashboard = () => {
                 ) : (
                   stats.recentActivities.map((activity, index) => (
                     <li key={index}>
-                      • {activity.message || activity.text} — {getTimeAgo(activity.time || activity.timestamp)}
+                      • {activity.message} — {getTimeAgo(activity.time)}
                     </li>
                   ))
                 )}
@@ -168,7 +168,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* 🔹 Employee Table */}
+          {/* 🔹 Employees Table */}
           <div className={styles.tableWrapper}>
             <h4>Employee Overview</h4>
             <div className={styles.tableScroll}>
@@ -185,16 +185,17 @@ const Dashboard = () => {
                 </thead>
                 <tbody>
                   {employees.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" style={{ textAlign: "center" }}>No employees found</td>
-                    </tr>
+                    <tr><td colSpan="6" style={{ textAlign: "center" }}>No employees found</td></tr>
                   ) : (
                     employees.map((emp) => (
                       <tr key={emp._id}>
                         <td>{emp.firstName} {emp.lastName}</td>
                         <td>{emp.email}</td>
                         <td>{emp.employeeId}</td>
-                        <td style={{ color: emp.status === "Active" ? "#2ecc71" : "#e74c3c", fontWeight: "bold" }}>
+                        <td style={{
+                          color: emp.status === "Active" ? "#2ecc71" : "#e74c3c",
+                          fontWeight: "bold"
+                        }}>
                           {emp.status}
                         </td>
                         <td>{emp.assignedLeads}</td>
