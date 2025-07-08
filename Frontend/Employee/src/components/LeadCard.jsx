@@ -8,11 +8,15 @@ const LeadCard = ({
   onStatusChange,
   fromSchedulePage = false,
 }) => {
-  // 👉 Hooks must be called at top, unconditionally
+  // === Declare ALL hooks at the very top, no conditions around them ===
   const [showTypePopup, setShowTypePopup] = useState(false);
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [showStatusPopup, setShowStatusPopup] = useState(false);
-  const [scheduleData, setScheduleData] = useState({ date: "", time: "" });
+  const [scheduleData, setScheduleData] = useState({
+    date: "",
+    time: "",
+    callType: "Cold Call",
+  });
   const [popupDirection, setPopupDirection] = useState("down");
 
   const typeRef = useRef();
@@ -46,21 +50,25 @@ const LeadCard = ({
     setPopupDirection(spaceBelow < 260 && spaceAbove > 260 ? "up" : "down");
   }, [showSchedulePopup]);
 
-  // 👉 Conditional returns after hooks
+  // === Now do early returns or conditional rendering safely ===
   if (!lead) return null;
   if (fromSchedulePage && lead.status === "Closed") return null;
 
+  // Helper function for color based on lead type
   const getColor = () => {
-    if (!lead.type) return "#ccc";
-    if (lead.type === "Hot") return "#ff4d4f";
-    if (lead.type === "Warm") return "#fbbf24";
-    if (lead.type === "Cold") return "#22d3ee";
+    const type = lead?.type;
+    if (type === "Hot") return "#ff4d4f";
+    if (type === "Warm") return "#fbbf24";
+    if (type === "Cold") return "#22d3ee";
     return "#ccc";
   };
 
+  // Handle schedule save with validation
   const handleScheduleSave = () => {
     if (scheduleData.date && scheduleData.time) {
-      const scheduledDateTime = new Date(`${scheduleData.date}T${scheduleData.time}`);
+      const scheduledDateTime = new Date(
+        `${scheduleData.date}T${scheduleData.time}`
+      );
       const now = new Date();
 
       if (scheduledDateTime <= now) {
@@ -69,10 +77,19 @@ const LeadCard = ({
       }
 
       const isoString = scheduledDateTime.toISOString();
-      onSchedule(lead._id, isoString);
+
+      onSchedule(lead._id, isoString, scheduleData.callType);
       setShowSchedulePopup(false);
     }
   };
+
+  const formattedDate = lead.receivedDate
+    ? new Date(lead.receivedDate).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "No Date";
 
   return (
     <div className={styles.card}>
@@ -81,11 +98,11 @@ const LeadCard = ({
       <div className={styles.mainContent}>
         <div className={styles.topRow}>
           <div className={styles.nameEmail}>
-            <h4 className={styles.name}>{lead.name}</h4>
-            <p className={styles.email}>{lead.email}</p>
+            <h4 className={styles.name}>{lead.name || "Unnamed Lead"}</h4>
+            <p className={styles.email}>{lead.email || "No Email"}</p>
           </div>
           <div className={styles.statusCircle} style={{ borderColor: getColor() }}>
-            {lead.status}
+            {lead.status || "No Status"}
           </div>
         </div>
 
@@ -93,13 +110,7 @@ const LeadCard = ({
         <div className={styles.dateAndIconsRow}>
           <div className={styles.dateRow}>
             <img src="/images/schedule.png" alt="schedule" />
-            <span>
-              {new Date(lead.receivedDate).toLocaleDateString("en-IN", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
+            <span>{formattedDate}</span>
           </div>
 
           <div className={styles.actionsWrapper}>
@@ -166,14 +177,31 @@ const LeadCard = ({
                 <input
                   type="date"
                   value={scheduleData.date}
-                  onChange={(e) => setScheduleData({ ...scheduleData, date: e.target.value })}
+                  onChange={(e) =>
+                    setScheduleData({ ...scheduleData, date: e.target.value })
+                  }
                 />
                 <label>Time</label>
                 <input
                   type="time"
                   value={scheduleData.time}
-                  onChange={(e) => setScheduleData({ ...scheduleData, time: e.target.value })}
+                  onChange={(e) =>
+                    setScheduleData({ ...scheduleData, time: e.target.value })
+                  }
                 />
+
+                <label>Call Type</label>
+                <select
+                  value={scheduleData.callType}
+                  onChange={(e) =>
+                    setScheduleData({ ...scheduleData, callType: e.target.value })
+                  }
+                >
+                  <option value="Cold Call">Cold Call</option>
+                  <option value="Follow-up">Follow-up</option>
+                  <option value="Referral">Referral</option>
+                </select>
+
                 <button onClick={handleScheduleSave}>Save</button>
               </div>
             )}

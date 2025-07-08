@@ -13,7 +13,7 @@
   padding-top: 96px; /* 80 + 16 */
   display: flex;
   flex-direction: column;
-  gap: 8px;  /* 🟢 Reduced gap */
+  gap: 8px; 
 }
 
 .card {

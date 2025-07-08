@@ -6,21 +6,15 @@
   margin-bottom: 1rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   position: relative;
-  z-index: 0;
   overflow: visible;
 }
 
 .leftBar {
-  width: 4px;
-  height: 40px;
+  width: 6px;
+  height: 50px;
   border-radius: 8px;
   margin-right: 12px;
-}
-.card:last-child {
-  margin-bottom: 80px;
-}
-.container {
-  padding-bottom: 80px; 
+  flex-shrink: 0;
 }
 
 .mainContent {
@@ -32,6 +26,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .nameEmail {
@@ -40,43 +35,45 @@
 }
 
 .name {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
   color: #1a1a1a;
 }
 
 .email {
-  font-size: 0.85rem;
-  color: #888;
-  margin: 4px 0;
-}
-
-.label {
-  font-size: 0.75rem;
-  color: #aaa;
-  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
+  margin: 4px 0 0 0;
 }
 
 .statusCircle {
-  width: 90px;
-  height: 90px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  border: 5px solid orange;
+  border: 4px solid orange;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1rem;
   background-color: #dedede;
   color: #1a1a1a;
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: #aaa;
+  margin-top: 10px;
 }
 
 .dateAndIconsRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 10px;
   flex-wrap: wrap;
 }
 
@@ -89,51 +86,67 @@
 }
 
 .dateRow img {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .actionsWrapper {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-left: auto;
+  flex-wrap: nowrap;
 }
 
 .actionsWrapper img {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.actionsWrapper img:hover {
+  transform: scale(1.15);
 }
 
 .popup {
   position: absolute;
-  top: 40px;
+  top: 45px;
   right: 0;
   background-color: white;
   border: 1px solid #ddd;
-  padding: 0.75rem;
+  padding: 0.8rem;
   border-radius: 10px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  z-index: 999999;
-  width: 180px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  width: 190px;
   max-height: 240px;
   overflow-y: auto;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.popupUp {
+  bottom: 100%;
+  top: auto;
+  margin-bottom: 8px;
 }
 
 .popup label {
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   display: block;
   margin-bottom: 6px;
+  color: #444;
 }
 
-.popup input {
+.popup input,
+.popup select {
   width: 100%;
-  padding: 6px;
-  margin-bottom: 8px;
+  padding: 7px 8px;
+  margin-bottom: 10px;
   font-size: 0.9rem;
   border: 1px solid #ccc;
   border-radius: 6px;
+  box-sizing: border-box;
 }
 
 .popup button {
@@ -141,19 +154,33 @@
   background-color: #2563eb;
   color: white;
   border: none;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.popup button:hover {
+  background-color: #1d4ed8;
 }
 
 .option {
-  padding: 8px;
+  padding: 8px 0;
   border-radius: 6px;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   cursor: pointer;
   text-align: center;
-  font-weight: 500;
+  font-weight: 600;
   background-color: #f1f1f1;
+  color: #333;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.option:hover {
+  background-color: #ddd;
 }
 
 .hot {
@@ -171,24 +198,25 @@
   color: #0891b2;
 }
 
-/* 🟡 Max Width 768px - Tablets */
+/* Responsive Adjustments */
+
 @media screen and (max-width: 768px) {
   .card {
     padding: 0.9rem;
   }
 
   .name {
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
 
   .email {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
   }
 
   .statusCircle {
-    width: 80px;
-    height: 80px;
-    font-size: 0.95rem;
+    width: 70px;
+    height: 70px;
+    font-size: 0.9rem;
   }
 
   .dateRow img,
@@ -198,11 +226,10 @@
   }
 }
 
-
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 480px) {
   .card {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .topRow,
@@ -214,9 +241,9 @@
 
   .statusCircle {
     margin-left: auto;
-    width: 75px;
-    height: 75px;
-    font-size: 0.9rem;
+    width: 65px;
+    height: 65px;
+    font-size: 0.85rem;
   }
 
   .dateRow {
@@ -228,41 +255,22 @@
   }
 
   .actionsWrapper img {
-    width: 18px;
-    height: 18px;
-  }
-}
-
-@media screen and (max-width: 400px) {
-  .card {
-    padding: 0.8rem;
-  }
-
-  .name {
-    font-size: 0.9rem;
-  }
-
-  .email {
-    font-size: 0.75rem;
-  }
-
-  .statusCircle {
-    width: 70px;
-    height: 70px;
-    font-size: 0.85rem;
+    width: 16px;
+    height: 16px;
   }
 
   .popup {
     width: 160px;
-    padding: 0.6rem;
+    padding: 0.7rem;
   }
 
-  .popup input {
+  .popup input,
+  .popup select {
     font-size: 0.85rem;
   }
 
   .popup button {
-    padding: 6px 8px;
+    padding: 7px 10px;
     font-size: 0.85rem;
   }
 

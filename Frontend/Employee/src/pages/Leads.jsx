@@ -1,225 +1,123 @@
-import React, { useState, useRef, useEffect } from "react";
-import styles from "../styles/LeadCard.module.css";
+import React, { useState, useEffect } from "react";
+import LeadCard from "../components/LeadCard";
+import SearchFilter from "../components/SearchFilter";
+import Layout from "../components/Layout";
+import API from "../utils/axios"; // axios instance with baseURL
+import { useAuth } from "../contexts/AuthContext";
+import styles from "../styles/Leads.module.css";
 
-const LeadCard = ({
-  lead,
-  onTypeChange,
-  onSchedule,
-  onStatusChange,
-  fromSchedulePage = false,
-}) => {
-  const [showTypePopup, setShowTypePopup] = useState(false);
-  const [showSchedulePopup, setShowSchedulePopup] = useState(false);
-  const [showStatusPopup, setShowStatusPopup] = useState(false);
-  const [scheduleData, setScheduleData] = useState({
-    date: "",
-    time: "",
-    callType: "Cold Call",
-  });
-  const [popupDirection, setPopupDirection] = useState("down");
-
-  const typeRef = useRef();
-  const scheduleRef = useRef();
-  const statusRef = useRef();
-  const scheduleIconRef = useRef();
+const Leads = () => {
+  const { employee } = useAuth();
+  const [leads, setLeads] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterOption, setFilterOption] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        (!typeRef.current || !typeRef.current.contains(e.target)) &&
-        (!scheduleRef.current || !scheduleRef.current.contains(e.target)) &&
-        (!statusRef.current || !statusRef.current.contains(e.target))
-      ) {
-        setShowTypePopup(false);
-        setShowSchedulePopup(false);
-        setShowStatusPopup(false);
+    if (!employee?._id) {
+      setLeads([]);
+      return;
+    }
+
+    const fetchLeads = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await API.get("/api/leads", {
+          params: {
+            assignedEmployee: employee._id,
+            search: searchTerm.trim(),
+            filter: filterOption,
+            page: 1,
+            limit: 20,
+            sortBy: "receivedDate",
+            order: "desc",
+          },
+        });
+
+        setLeads(response.data.leads || []);
+      } catch (err) {
+        console.error("Error loading leads:", err);
+        setError("Failed to load leads.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    fetchLeads();
+  }, [searchTerm, filterOption, employee]);
 
-  useEffect(() => {
-    if (!showSchedulePopup || !scheduleIconRef.current) return;
-
-    const rect = scheduleIconRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    setPopupDirection(spaceBelow < 260 && spaceAbove > 260 ? "up" : "down");
-  }, [showSchedulePopup]);
-
-  if (fromSchedulePage && lead.status === "Closed") return null;
-
-  const getColor = () => {
-    if (lead.type === "Hot") return "#ff4d4f";
-    if (lead.type === "Warm") return "#fbbf24";
-    if (lead.type === "Cold") return "#22d3ee";
-    return "#ccc";
+  const handleTypeChange = async (id, newType) => {
+    try {
+      await API.patch(`/api/leads/${id}/type`, { type: newType });
+      setLeads((prev) =>
+        prev.map((lead) => (lead._id === id ? { ...lead, type: newType } : lead))
+      );
+    } catch {
+      alert("Failed to update lead type.");
+    }
   };
 
-  const handleScheduleSave = () => {
-    if (scheduleData.date && scheduleData.time) {
-      const scheduledDateTime = new Date(
-        `${scheduleData.date}T${scheduleData.time}`
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await API.patch(`/api/leads/${id}/status`, { status: newStatus });
+      setLeads((prev) =>
+        prev.map((lead) =>
+          lead._id === id ? { ...lead, status: newStatus } : lead
+        )
       );
-      const now = new Date();
+    } catch (err) {
+      alert(err?.response?.data?.error || "Failed to update status.");
+    }
+  };
 
-      if (scheduledDateTime <= now) {
-        alert("Please select a future date and time.");
-        return;
-      }
-
-      const isoString = scheduledDateTime.toISOString();
-
-      // 🔁 Call with selected callType
-      onSchedule(lead._id, isoString, scheduleData.callType);
-      setShowSchedulePopup(false);
+  const handleScheduleCall = async (leadId, callDate, callType) => {
+    try {
+      await API.post(`/api/leads/${leadId}/schedule`, {
+        callDate,
+        callType,
+      });
+      alert("Call scheduled!");
+    } catch (err) {
+      console.error("Schedule error:", err?.response?.data);
+      alert(err?.response?.data?.error || "Failed to schedule call.");
     }
   };
 
   return (
-    <div className={styles.card}>
-      <div className={styles.leftBar} style={{ backgroundColor: getColor() }} />
+    <Layout>
+      <div className={styles.container}>
+        <SearchFilter
+          searchTerm={searchTerm}
+          onSearch={setSearchTerm}
+          filterOption={filterOption}
+          onFilterChange={setFilterOption}
+          pageType="lead"
+        />
 
-      <div className={styles.mainContent}>
-        <div className={styles.topRow}>
-          <div className={styles.nameEmail}>
-            <h4 className={styles.name}>{lead.name}</h4>
-            <p className={styles.email}>{lead.email}</p>
-          </div>
-          <div className={styles.statusCircle} style={{ borderColor: getColor() }}>
-            {lead.status}
-          </div>
-        </div>
-
-        <p className={styles.label}>Date</p>
-        <div className={styles.dateAndIconsRow}>
-          <div className={styles.dateRow}>
-            <img src="/images/schedule.png" alt="schedule" />
-            <span>
-              {new Date(lead.receivedDate).toLocaleDateString("en-IN", {
-                day: "2-digit",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-          </div>
-
-          <div className={styles.actionsWrapper}>
-            <img
-              src="/images/type.png"
-              alt="Edit Type"
-              onClick={() => {
-                setShowTypePopup(!showTypePopup);
-                setShowSchedulePopup(false);
-                setShowStatusPopup(false);
-              }}
-            />
-
-            {lead.status !== "Closed" && (
-              <img
-                ref={scheduleIconRef}
-                src="/images/calendar.png"
-                alt="Schedule"
-                onClick={() => {
-                  setShowSchedulePopup(!showSchedulePopup);
-                  setShowTypePopup(false);
-                  setShowStatusPopup(false);
-                }}
+        <section className={styles.body}>
+          {loading && <p>Loading leads...</p>}
+          {error && <p className={styles.errorMsg}>{error}</p>}
+          {!loading && !error && leads.length === 0 && (
+            <p className={styles.emptyMsg}>No leads assigned.</p>
+          )}
+          {!loading &&
+            !error &&
+            leads.map((lead) => (
+              <LeadCard
+                key={lead._id}
+                lead={lead}
+                onTypeChange={handleTypeChange}
+                onStatusChange={handleStatusChange}
+                onSchedule={handleScheduleCall}
               />
-            )}
-
-            <img
-              src="/images/status.png"
-              alt="Status"
-              onClick={() => {
-                setShowStatusPopup(!showStatusPopup);
-                setShowTypePopup(false);
-                setShowSchedulePopup(false);
-              }}
-            />
-          </div>
-
-          <div className={styles.popupWrapper}>
-            {showTypePopup && (
-              <div className={`${styles.popup} ${styles.popupType}`} ref={typeRef}>
-                {["Hot", "Warm", "Cold"].map((type) => (
-                  <div
-                    key={type}
-                    className={`${styles.option} ${styles[type.toLowerCase()]}`}
-                    onClick={() => {
-                      onTypeChange(lead._id, type);
-                      setShowTypePopup(false);
-                    }}
-                  >
-                    {type}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {showSchedulePopup && lead.status !== "Closed" && (
-              <div
-                className={`${styles.popup} ${styles.popupSchedule} ${
-                  popupDirection === "up" ? styles.popupUp : ""
-                }`}
-                ref={scheduleRef}
-              >
-                <label>Date</label>
-                <input
-                  type="date"
-                  value={scheduleData.date}
-                  onChange={(e) =>
-                    setScheduleData({ ...scheduleData, date: e.target.value })
-                  }
-                />
-                <label>Time</label>
-                <input
-                  type="time"
-                  value={scheduleData.time}
-                  onChange={(e) =>
-                    setScheduleData({ ...scheduleData, time: e.target.value })
-                  }
-                />
-
-                <label>Call Type</label>
-                <select
-                  value={scheduleData.callType}
-                  onChange={(e) =>
-                    setScheduleData({ ...scheduleData, callType: e.target.value })
-                  }
-                >
-                  <option value="Cold Call">Cold Call</option>
-                  <option value="Follow-up">Follow-up</option>
-                  <option value="Referral">Referral</option>
-                </select>
-
-                <button onClick={handleScheduleSave}>Save</button>
-              </div>
-            )}
-
-            {showStatusPopup && (
-              <div className={`${styles.popup} ${styles.popupStatus}`} ref={statusRef}>
-                {["Ongoing", "Closed"].map((status) => (
-                  <div
-                    key={status}
-                    className={styles.option}
-                    onClick={() => {
-                      onStatusChange(lead._id, status);
-                      setShowStatusPopup(false);
-                    }}
-                  >
-                    {status}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+            ))}
+        </section>
       </div>
-    </div>
+    </Layout>
   );
 };
 
-export default LeadCard;
+export default Leads;
