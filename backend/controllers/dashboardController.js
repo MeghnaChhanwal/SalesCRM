@@ -31,7 +31,7 @@ export const getDashboardOverview = async (req, res) => {
     }).distinct("employee");
     const activeSalespeople = activeTimings.length;
 
-    // Recent Activities — deduplicated, sorted
+    // Recent Activities — cleaned logic
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
@@ -43,38 +43,62 @@ export const getDashboardOverview = async (req, res) => {
 
     const activityMap = new Map();
 
+    // Add employee activities
     recentEmployees.forEach((emp) => {
       const key = `employee-${emp._id}`;
-      const message = `Employee added: ${emp.firstName} ${emp.lastName}`;
-      activityMap.set(key, { message, time: emp.createdAt });
+      activityMap.set(key, {
+        message: `Employee added: ${emp.firstName} ${emp.lastName}`,
+        time: emp.createdAt,
+      });
     });
 
+    // Add lead-related activities
     recentLeads.forEach((lead) => {
       const assignedName = lead.assignedEmployee?.firstName || "Someone";
       const keyBase = `lead-${lead._id}`;
-      const latestCall = lead.scheduledCalls?.[lead.scheduledCalls.length - 1];
-      const callDate = latestCall?.callDate ? new Date(latestCall.callDate) : null;
       const now = new Date();
 
-      let finalMessage = "";
-      let finalTime = new Date(lead.updatedAt);
+      // ✅ Check for future call
+      const futureCall = lead.scheduledCalls
+        ?.filter((call) => new Date(call.callDate) > now)
+        .pop();
 
+      // 1. Closed
       if (lead.status === "Closed") {
-        finalMessage = `${assignedName} closed lead: ${lead.name}`;
-        finalTime = lead.updatedAt;
-        activityMap.set(`${keyBase}-closed`, { message: finalMessage, time: finalTime });
-      } else if (callDate && callDate >= now && lead.assignedEmployee) {
-        finalMessage = `${assignedName} scheduled call for ${lead.name}`;
-        finalTime = callDate;
-        activityMap.set(`${keyBase}-call`, { message: finalMessage, time: finalTime });
-      } else if (lead.assignedEmployee) {
-        finalMessage = `Lead assigned to ${assignedName}: ${lead.name}`;
-        finalTime = lead.updatedAt;
-        activityMap.set(`${keyBase}-assigned`, { message: finalMessage, time: finalTime });
-      } else {
-        finalMessage = `Lead added: ${lead.name}`;
-        finalTime = lead.createdAt;
-        activityMap.set(`${keyBase}-added`, { message: finalMessage, time: finalTime });
+        activityMap.set(`${keyBase}-closed`, {
+          message: `${assignedName} closed lead: ${lead.name}`,
+          time: lead.updatedAt,
+        });
+        return;
+      }
+
+      // 2. Future scheduled call
+      if (futureCall && lead.assignedEmployee) {
+        activityMap.set(`${keyBase}-call`, {
+          message: `${assignedName} scheduled call for ${lead.name}`,
+          time: new Date(futureCall.callDate),
+        });
+        return;
+      }
+
+      // 3. Assigned lead (only if updatedAt changed from createdAt)
+      if (
+        lead.assignedEmployee &&
+        new Date(lead.createdAt).getTime() !== new Date(lead.updatedAt).getTime()
+      ) {
+        activityMap.set(`${keyBase}-assigned`, {
+          message: `Lead assigned to ${assignedName}: ${lead.name}`,
+          time: lead.updatedAt,
+        });
+        return;
+      }
+
+      // 4. Just added
+      if (!lead.assignedEmployee) {
+        activityMap.set(`${keyBase}-added`, {
+          message: `Lead added: ${lead.name}`,
+          time: lead.createdAt,
+        });
       }
     });
 
