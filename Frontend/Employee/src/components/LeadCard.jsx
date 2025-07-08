@@ -11,7 +11,7 @@ const LeadCard = ({
   const [showTypePopup, setShowTypePopup] = useState(false);
   const [showSchedulePopup, setShowSchedulePopup] = useState(false);
   const [showStatusPopup, setShowStatusPopup] = useState(false);
-  const [scheduleData, setScheduleData] = useState({ date: "", time: "" });
+  const [scheduleData, setScheduleData] = useState({ date: "", time: "", callType: "Referral" });
   const [popupDirection, setPopupDirection] = useState("down");
 
   const typeRef = useRef();
@@ -19,7 +19,6 @@ const LeadCard = ({
   const statusRef = useRef();
   const scheduleIconRef = useRef();
 
-  // ✅ All useEffects must run before any conditional returns
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -46,7 +45,6 @@ const LeadCard = ({
     setPopupDirection(spaceBelow < 260 && spaceAbove > 260 ? "up" : "down");
   }, [showSchedulePopup]);
 
-  // ✅ Hide leadCard in Schedule page if it's closed & scheduled call is expired
   if (fromSchedulePage && lead.status === "Closed") return null;
 
   const getColor = () => {
@@ -56,7 +54,6 @@ const LeadCard = ({
     return "#ccc";
   };
 
-  // ✅ Schedule handler with future time validation
   const handleScheduleSave = () => {
     if (scheduleData.date && scheduleData.time) {
       const scheduledDateTime = new Date(`${scheduleData.date}T${scheduleData.time}`);
@@ -68,7 +65,7 @@ const LeadCard = ({
       }
 
       const isoString = scheduledDateTime.toISOString();
-      onSchedule(lead._id, isoString);
+      onSchedule(lead._id, isoString, scheduleData.callType); // send callType too
       setShowSchedulePopup(false);
     }
   };
@@ -118,6 +115,11 @@ const LeadCard = ({
                 src="/images/calendar.png"
                 alt="Schedule"
                 onClick={() => {
+                  let autoCallType = "Referral";
+                  if (lead.type === "Cold") autoCallType = "Cold Call";
+
+                  setScheduleData({ date: "", time: "", callType: autoCallType });
+
                   setShowSchedulePopup(!showSchedulePopup);
                   setShowTypePopup(false);
                   setShowStatusPopup(false);
@@ -169,6 +171,7 @@ const LeadCard = ({
                     setScheduleData({ ...scheduleData, date: e.target.value })
                   }
                 />
+
                 <label>Time</label>
                 <input
                   type="time"
@@ -177,6 +180,18 @@ const LeadCard = ({
                     setScheduleData({ ...scheduleData, time: e.target.value })
                   }
                 />
+
+                <label>Call Type</label>
+                <select
+                  value={scheduleData.callType}
+                  onChange={(e) =>
+                    setScheduleData({ ...scheduleData, callType: e.target.value })
+                  }
+                >
+                  <option value="Cold Call">Cold Call</option>
+                  <option value="Referral">Referral</option>
+                </select>
+
                 <button onClick={handleScheduleSave}>Save</button>
               </div>
             )}

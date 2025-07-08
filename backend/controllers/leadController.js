@@ -191,7 +191,6 @@ export const updateLeadType = async (req, res) => {
 };
 
 
-// Update lead status
 export const updateLeadStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -237,7 +236,7 @@ export const updateLeadStatus = async (req, res) => {
 export const scheduleCall = async (req, res) => {
   try {
     const { id } = req.params;
-    const { callDate } = req.body;
+    const { callDate, callType } = req.body; // include callType from frontend
 
     const lead = await Lead.findById(id);
     if (!lead) return res.status(404).json({ error: "Lead not found" });
@@ -250,21 +249,16 @@ export const scheduleCall = async (req, res) => {
     parsedDate.setSeconds(0, 0);
     const now = new Date();
 
-    // 🔁 Auto callType based on lead type
-    let autoCallType = "Referral";
-    if (lead.type === "Cold") autoCallType = "Cold Call";
-    else if (lead.type === "Warm") autoCallType = "Follow-up";
-    else if (lead.type === "Hot") autoCallType = "Urgent Follow-up";
-
+    
     const futureCallIndex = (lead.scheduledCalls || []).findIndex(
       (call) => new Date(call.callDate) > now
     );
 
     if (futureCallIndex !== -1) {
       lead.scheduledCalls[futureCallIndex].callDate = parsedDate;
-      lead.scheduledCalls[futureCallIndex].callType = autoCallType;
+      lead.scheduledCalls[futureCallIndex].callType = callType || "Referral"; // fallback
     } else {
-      lead.scheduledCalls.push({ callDate: parsedDate, callType: autoCallType });
+      lead.scheduledCalls.push({ callDate: parsedDate, callType: callType || "Referral" });
     }
 
     await lead.save();
@@ -272,42 +266,5 @@ export const scheduleCall = async (req, res) => {
   } catch (error) {
     console.error("Schedule Call Error:", error);
     res.status(500).json({ error: "Failed to schedule call" });
-  }
-};
-
-export const getScheduledCalls = async (req, res) => {
-  try {
-    const { filter = "all" } = req.query;
-    let leads;
-
-    if (filter === "today") {
-      const start = new Date();
-      start.setHours(0, 0, 0, 0);
-      const end = new Date();
-      end.setHours(23, 59, 59, 999);
-
-      leads = await Lead.find({
-        status: { $ne: "Closed" }, 
-        scheduledCalls: {
-          $elemMatch: {
-            callDate: { $gte: start, $lte: end },
-          },
-        },
-      }).populate("assignedEmployee", "firstName lastName");
-    } else {
-      leads = await Lead.find({
-        status: { $ne: "Closed" }, 
-        scheduledCalls: {
-          $elemMatch: {
-            callDate: { $gte: new Date() },
-          },
-        },
-      }).populate("assignedEmployee", "firstName lastName");
-    }
-
-    res.status(200).json({ leads });
-  } catch (error) {
-    console.error("Get Scheduled Calls Error:", error);
-    res.status(500).json({ error: "Failed to fetch scheduled calls" });
   }
 };
