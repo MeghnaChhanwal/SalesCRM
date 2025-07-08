@@ -5,7 +5,7 @@ import { buildQueryOptions } from "../utils/query.js";
 import { todayIST } from "../utils/time.js";
 import { redistributeLeadsOfDeletedEmployee } from "../utils/assign.js";
 
-// 🔹 GET: Paginated Employees with filters and counts
+//  Paginated Employees with filters and counts
 export const getEmployees = async (req, res) => {
   try {
     const { search, sortBy, order, page, limit, skip } = buildQueryOptions(req);
@@ -56,7 +56,7 @@ export const getEmployees = async (req, res) => {
           ...emp.toObject(),
           assignedLeads,
           closedLeads,
-          status, // ✅ add status here
+          status, //  add status here
         };
       })
     );
@@ -73,7 +73,7 @@ export const getEmployees = async (req, res) => {
   }
 };
 
-// 🔹 GET: All employees (for dropdowns, assignment lists)
+// All employees (for dropdowns, assignment lists)
 export const getAllEmployees = async (req, res) => {
   try {
     const employees = await Employee.find().sort({ createdAt: -1 });
@@ -109,7 +109,7 @@ export const getAllEmployees = async (req, res) => {
   }
 };
 
-// 🔹 POST: Create employee
+// Create employee
 export const createEmployee = async (req, res) => {
   try {
     const newEmp = new Employee(req.body);
@@ -124,7 +124,7 @@ export const createEmployee = async (req, res) => {
   }
 };
 
-// 🔹 PUT: Update employee
+//  Update employee
 export const updateEmployee = async (req, res) => {
   try {
     const updated = await Employee.findByIdAndUpdate(req.params.id, req.body, {
@@ -169,7 +169,7 @@ export const autoUpdateEmployeeStatuses = async (req, res) => {
       const timing = await Timing.findOne({ employee: emp._id, date: today });
 
       let computedStatus = "Inactive";
-      if (timing && timing.checkIn && !timing.checkOut && timing.status !== "Inactive") {
+      if (timing && timing.checkIn && timing.checkOut && timing.status !== "Inactive") {
         computedStatus = "Active";
       }
 
