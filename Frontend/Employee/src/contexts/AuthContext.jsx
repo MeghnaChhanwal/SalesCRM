@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-
+  // 3. Auto logout on tab close or refresh
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // 4. Manual login function (with checkIn call)
+  // 4. Manual login function (with check-in)
   const login = async (email, password) => {
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE}/api/auth/login`,
@@ -81,16 +81,17 @@ export const AuthProvider = ({ children }) => {
     setEmployee(data);
     sessionStorage.setItem("employee", JSON.stringify(data));
 
-    // ✅ Call checkIn API after login
+    // ✅ Call checkIn API after login (correct route)
     try {
       await fetch(
-        `${import.meta.env.VITE_API_BASE}/api/timing/checkin/${data._id}`,
+        `${import.meta.env.VITE_API_BASE}/api/timing/${data._id}/checkin`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
         }
       );
+      console.log("✅ Check-in successful");
     } catch (checkInError) {
       console.error("Check-in failed:", checkInError);
     }
