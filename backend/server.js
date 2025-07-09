@@ -24,7 +24,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
-  "https://sales-employee.vercel.app" 
+  "https://sales-employee.vercel.app", 
+   "https://salescrm-admin.vercel.app"
 ];
 
 const corsOptions = {
@@ -39,9 +40,8 @@ const corsOptions = {
   credentials: true,
 };
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); 
 
+app.use(cors(corsOptions));
 //  Middleware
 app.use(express.json());
 
