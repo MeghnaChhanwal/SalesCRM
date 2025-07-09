@@ -1,4 +1,4 @@
-// vite.config.js
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
 
-    // ✅ Dev server config
+ 
     server: {
       headers: isDev
         ? {
@@ -18,12 +18,11 @@ export default defineConfig(({ mode }) => {
         : {},
     },
 
-    // ✅ SPA routing fallback
     build: {
       outDir: 'dist',
     },
 
-    // ✅ Base path for relative imports, works with Vercel too
+   
     base: './',
   };
 });

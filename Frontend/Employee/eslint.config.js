@@ -6,7 +6,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 export default [
   { ignores: ['dist'] },
 
-  // ✅ Special config for Node-based files like vite.config.js
+  
   {
     files: ['vite.config.*', 'eslint.config.*', '*.cjs'],
     languageOptions: {
