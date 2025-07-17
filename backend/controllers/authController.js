@@ -75,7 +75,7 @@ export const logoutEmployee = async (req, res) => {
     const timing = await Timing.findOne({ employee: employeeId, date });
 
     if (timing) {
-      timing.checkOut = time;
+      timing.checkOut = null;
       timing.status = "Inactive";
       timing.breakStatus = "OnBreak";
 

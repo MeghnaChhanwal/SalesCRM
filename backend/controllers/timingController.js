@@ -101,7 +101,7 @@ export const checkOut = async (req, res) => {
       return res.status(400).json({ error: "Already checked out or not checked in" });
     }
 
-    timing.checkOut = time;
+    timing.checkOut = null;
     timing.status = "Inactive";
     timing.breakStatus = "OnBreak";
 
