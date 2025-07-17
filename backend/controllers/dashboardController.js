@@ -3,6 +3,12 @@ import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST } from "../utils/time.js";
 
+const isActiveTiming = (timing) =>
+  timing &&
+  timing.checkIn &&
+  (!timing.checkOut || timing.checkOut.trim() === "") &&
+  timing.status !== "Inactive";
+
 export const getDashboardOverview = async (req, res) => {
   try {
     const totalLeads = await Lead.countDocuments();
@@ -24,18 +30,32 @@ export const getDashboardOverview = async (req, res) => {
 
     const today = todayIST();
 
-    const activeTimings = await Timing.find({
-      date: today,
-      checkIn: { $ne: null },
-      $or: [
-        { checkOut: null },
-        { checkOut: "" }  // Fix for empty string case
-      ],
-      status: { $ne: "Inactive" },
-    }).distinct("employee");
+    const allEmployees = await Employee.find();
+    let activeSalespeople = 0;
 
-    const activeSalespeople = activeTimings.length;
+    const enrichedEmployees = await Promise.all(
+      allEmployees.map(async (emp) => {
+        const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
+        const closedLeads = await Lead.countDocuments({
+          assignedEmployee: emp._id,
+          status: "Closed",
+        });
 
+        const timing = await Timing.findOne({ employee: emp._id, date: today });
+        const status = isActiveTiming(timing) ? "Active" : "Inactive";
+
+        if (status === "Active") activeSalespeople++;
+
+        return {
+          ...emp.toObject(),
+          assignedLeads,
+          closedLeads,
+          status,
+        };
+      })
+    );
+
+    // 🔹 Recent Activity
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
@@ -87,7 +107,7 @@ export const getDashboardOverview = async (req, res) => {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
 
-    
+  
     const graphData = [];
     const todayDate = new Date();
 
@@ -114,36 +134,7 @@ export const getDashboardOverview = async (req, res) => {
       });
     }
 
-  
-    const allEmployees = await Employee.find();
-    const enrichedEmployees = await Promise.all(
-      allEmployees.map(async (emp) => {
-        const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
-        const closedLeads = await Lead.countDocuments({
-          assignedEmployee: emp._id,
-          status: "Closed",
-        });
-
-        const timing = await Timing.findOne({ employee: emp._id, date: today });
-
-        let status = "Inactive";
-        if (
-          timing &&
-          timing.checkIn &&
-          (!timing.checkOut || timing.checkOut.trim() === "")
-        ) {
-          status = "Active";
-        }
-
-        return {
-          ...emp.toObject(),
-          assignedLeads,
-          closedLeads,
-          status,
-        };
-      })
-    );
-
+ 
     res.status(200).json({
       unassignedLeads,
       assignedThisWeek,
