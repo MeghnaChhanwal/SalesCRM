@@ -61,12 +61,14 @@ export const checkIn = async (req, res) => {
         employee: employeeId,
         date,
         checkIn: time,
+        checkOut: null,
         status: "Active",
         breakStatus: "OffBreak",
         breaks: [],
       });
     } else {
       timing.checkIn = time;
+      timing.checkOut= null;
       timing.status = "Active";
       timing.breakStatus = "OffBreak";
 
@@ -101,7 +103,7 @@ export const checkOut = async (req, res) => {
       return res.status(400).json({ error: "Already checked out or not checked in" });
     }
 
-    timing.checkOut = null;
+    timing.checkOut = time;
     timing.status = "Inactive";
     timing.breakStatus = "OnBreak";
 

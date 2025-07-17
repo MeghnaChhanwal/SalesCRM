@@ -2,7 +2,7 @@ import Employee from "../models/employee.js";
 import Timing from "../models/timing.js";
 import { todayIST, timeIST } from "../utils/time.js";
 
-// 🔹 Login Employee (Check-in)
+
 export const loginEmployee = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
@@ -19,11 +19,11 @@ export const loginEmployee = async (req, res) => {
     const date = todayIST();
     const time = timeIST();
 
-    // ✅ Mark employee Active
+  
     employee.status = "Active";
     await employee.save();
 
-    // ✅ Create or update timing
+
     let timing = await Timing.findOne({ employee: employee._id, date });
 
     if (!timing) {
@@ -31,12 +31,14 @@ export const loginEmployee = async (req, res) => {
         employee: employee._id,
         date,
         checkIn: time,
+        checkOut: null,
         status: "Active",
         breakStatus: "OffBreak",
         breaks: [],
       });
     } else {
       timing.checkIn = time;
+      timing.checkOut = null;
       timing.status = "Active";
       timing.breakStatus = "OffBreak";
 
@@ -56,7 +58,7 @@ export const loginEmployee = async (req, res) => {
   }
 };
 
-// 🔹 Logout Employee (Check-out)
+
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
@@ -65,7 +67,7 @@ export const logoutEmployee = async (req, res) => {
     if (!employee)
       return res.status(404).json({ error: "Employee not found" });
 
-    // ✅ Mark Inactive
+    
     employee.status = "Inactive";
     await employee.save();
 
@@ -75,7 +77,7 @@ export const logoutEmployee = async (req, res) => {
     const timing = await Timing.findOne({ employee: employeeId, date });
 
     if (timing) {
-      timing.checkOut = null;
+      timing.checkOut = time;
       timing.status = "Inactive";
       timing.breakStatus = "OnBreak";
 
