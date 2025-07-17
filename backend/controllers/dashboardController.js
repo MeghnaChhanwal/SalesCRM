@@ -5,7 +5,6 @@ import { todayIST } from "../utils/time.js";
 
 export const getDashboardOverview = async (req, res) => {
   try {
-    
     const totalLeads = await Lead.countDocuments();
     const unassignedLeads = await Lead.countDocuments({ assignedEmployee: null });
     const closedLeads = await Lead.countDocuments({ status: "Closed" });
@@ -14,7 +13,6 @@ export const getDashboardOverview = async (req, res) => {
       ? Math.round((closedLeads / totalLeads) * 100)
       : 0;
 
- 
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
@@ -24,17 +22,20 @@ export const getDashboardOverview = async (req, res) => {
       receivedDate: { $gte: startOfWeek },
     });
 
-
     const today = todayIST();
+
     const activeTimings = await Timing.find({
       date: today,
       checkIn: { $ne: null },
-      checkOut: null,
+      $or: [
+        { checkOut: null },
+        { checkOut: "" }  // Fix for empty string case
+      ],
       status: { $ne: "Inactive" },
     }).distinct("employee");
+
     const activeSalespeople = activeTimings.length;
 
- 
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
@@ -45,7 +46,6 @@ export const getDashboardOverview = async (req, res) => {
       .limit(30);
 
     const activityMap = new Map();
-
 
     recentEmployees.forEach((emp) => {
       const created = new Date(emp.createdAt).getTime();
@@ -87,7 +87,7 @@ export const getDashboardOverview = async (req, res) => {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
 
-    // Last 10 Days Graph
+    
     const graphData = [];
     const todayDate = new Date();
 
@@ -114,6 +114,7 @@ export const getDashboardOverview = async (req, res) => {
       });
     }
 
+  
     const allEmployees = await Employee.find();
     const enrichedEmployees = await Promise.all(
       allEmployees.map(async (emp) => {
@@ -126,7 +127,11 @@ export const getDashboardOverview = async (req, res) => {
         const timing = await Timing.findOne({ employee: emp._id, date: today });
 
         let status = "Inactive";
-        if (timing && timing.checkIn && !timing.checkOut) {
+        if (
+          timing &&
+          timing.checkIn &&
+          (!timing.checkOut || timing.checkOut.trim() === "")
+        ) {
           status = "Active";
         }
 
@@ -139,7 +144,6 @@ export const getDashboardOverview = async (req, res) => {
       })
     );
 
-  
     res.status(200).json({
       unassignedLeads,
       assignedThisWeek,
