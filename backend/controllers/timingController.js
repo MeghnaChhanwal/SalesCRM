@@ -68,7 +68,7 @@ export const checkIn = async (req, res) => {
       });
     } else {
       timing.checkIn = time;
-      timing.checkOut= null;
+      timing.checkOut = null;
       timing.status = "Active";
       timing.breakStatus = "OffBreak";
 
@@ -80,16 +80,23 @@ export const checkIn = async (req, res) => {
 
     await timing.save();
 
-    //  employee status
-    await Employee.findByIdAndUpdate(employeeId, { status: "Active" });
+    
+    const updatedEmployee = await Employee.findByIdAndUpdate(
+      employeeId,
+      { status: "Active" },
+      { new: true }
+    );
 
-    res.status(200).json({ message: "Check-in successful", timing });
+    res.status(200).json({
+      message: "Check-in successful",
+      timing,
+      employee: updatedEmployee,
+    });
   } catch (err) {
     console.error("Check-in error:", err);
     res.status(500).json({ error: "Failed to check in" });
   }
 };
-
 // Check Out
 export const checkOut = async (req, res) => {
   const { id: employeeId } = req.params;
@@ -106,20 +113,28 @@ export const checkOut = async (req, res) => {
     timing.checkOut = time;
     timing.status = "Inactive";
     timing.breakStatus = "OnBreak";
-
     timing.breaks.push({ start: time });
 
     await timing.save();
 
- 
-    await Employee.findByIdAndUpdate(employeeId, { status: "Inactive" });
+    
+    const updatedEmployee = await Employee.findByIdAndUpdate(
+      employeeId,
+      { status: "Inactive" },
+      { new: true }
+    );
 
-    res.status(200).json({ message: "Check-out successful", timing });
+    res.status(200).json({
+      message: "Check-out successful",
+      timing,
+      employee: updatedEmployee,
+    });
   } catch (err) {
-    console.error(" Check-out error:", err);
+    console.error("Check-out error:", err);
     res.status(500).json({ error: "Failed to check out" });
   }
 };
+
 
 //  Start Break
 export const startBreak = async (req, res) => {
