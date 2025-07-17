@@ -168,9 +168,9 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* 🔹 Employees Table */}
+          {/* 🔹 Employees Table (Only Active) */}
           <div className={styles.tableWrapper}>
-            <h4>Employee Overview</h4>
+            <h4>Active Employees</h4>
             <div className={styles.tableScroll}>
               <table>
                 <thead>
@@ -184,24 +184,21 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {employees.length === 0 ? (
-                    <tr><td colSpan="6" style={{ textAlign: "center" }}>No employees found</td></tr>
+                  {employees.filter(emp => emp.status === "Active").length === 0 ? (
+                    <tr><td colSpan="6" style={{ textAlign: "center" }}>No active employees</td></tr>
                   ) : (
-                    employees.map((emp) => (
-                      <tr key={emp._id}>
-                        <td>{emp.firstName} {emp.lastName}</td>
-                        <td>{emp.email}</td>
-                        <td>{emp.employeeId}</td>
-                        <td style={{
-                          color: emp.status === "Active" ? "#2ecc71" : "#e74c3c",
-                          fontWeight: "bold"
-                        }}>
-                          {emp.status}
-                        </td>
-                        <td>{emp.assignedLeads}</td>
-                        <td>{emp.closedLeads}</td>
-                      </tr>
-                    ))
+                    employees
+                      .filter(emp => emp.status === "Active")
+                      .map((emp) => (
+                        <tr key={emp._id}>
+                          <td>{emp.firstName} {emp.lastName}</td>
+                          <td>{emp.email}</td>
+                          <td>{emp.employeeId}</td>
+                          <td style={{ color: "#2ecc71", fontWeight: "bold" }}>Active</td>
+                          <td>{emp.assignedLeads}</td>
+                          <td>{emp.closedLeads}</td>
+                        </tr>
+                      ))
                   )}
                 </tbody>
               </table>

@@ -1,14 +1,13 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import API from "../utils/axios";
 import MainLayout from "../components/Layout";
 import styles from "../styles/Settings.module.css";
 
 const Settings = () => {
   const [formData, setFormData] = useState({
-    firstName: "Meghna",
-    lastName: "Chhanwal",
-    email: "mjchhanwal@gmail.com",
+    firstName: "",
+    lastName: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
@@ -17,11 +16,33 @@ const Settings = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  
+  useEffect(() => {
+    const fetchAdmin = async () => {
+      try {
+        const res = await API.get("/api/admin/me");
+        const { firstName, lastName, email } = res.data;
+        setFormData((prev) => ({
+          ...prev,
+          firstName,
+          lastName,
+          email,
+        }));
+      } catch (err) {
+        console.error("Failed to fetch admin profile:", err);
+      }
+    };
+
+    fetchAdmin();
+  }, []);
+
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Submit profile update
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -41,7 +62,18 @@ const Settings = () => {
 
       const res = await API.put("/api/admin/update", payload);
       alert("Profile updated successfully!");
-      console.log("Server Response:", res.data);
+
+
+      if (res?.data?.admin) {
+        const { firstName, lastName, email } = res.data.admin;
+        setFormData({
+          firstName,
+          lastName,
+          email,
+          password: "",
+          confirmPassword: "",
+        });
+      }
     } catch (error) {
       console.error("Update failed:", error);
       alert("Failed to update profile.");
@@ -125,7 +157,9 @@ const Settings = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                onClick={() =>
+                  setShowConfirmPassword((prev) => !prev)
+                }
                 className={styles.eyeBtn}
               >
                 {showConfirmPassword ? "Hide" : "Show"}
