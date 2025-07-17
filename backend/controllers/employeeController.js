@@ -48,7 +48,7 @@ export const getEmployees = async (req, res) => {
 
         const timing = await Timing.findOne({ employee: emp._id, date: today });
         let status = "Inactive";
-        if (timing && timing.checkIn && !timing.checkOut && timing.status !== "Inactive") {
+        if (timing && timing.checkIn && !timing.checkOut) {
           status = "Active";
         }
 
@@ -73,41 +73,6 @@ export const getEmployees = async (req, res) => {
   }
 };
 
-// All employees (for dropdowns, assignment lists)
-export const getAllEmployees = async (req, res) => {
-  try {
-    const employees = await Employee.find().sort({ createdAt: -1 });
-    const today = todayIST();
-
-    const enriched = await Promise.all(
-      employees.map(async (emp) => {
-        const assignedLeads = await Lead.countDocuments({ assignedEmployee: emp._id });
-        const closedLeads = await Lead.countDocuments({
-          assignedEmployee: emp._id,
-          status: "Closed",
-        });
-
-        const timing = await Timing.findOne({ employee: emp._id, date: today });
-        let status = "Inactive";
-        if (timing && timing.checkIn && !timing.checkOut && timing.status !== "Inactive") {
-          status = "Active";
-        }
-
-        return {
-          ...emp.toObject(),
-          assignedLeads,
-          closedLeads,
-          status,
-        };
-      })
-    );
-
-    res.status(200).json(enriched);
-  } catch (err) {
-    console.error("Error fetching all employees:", err);
-    res.status(500).json({ error: "Failed to fetch all employees" });
-  }
-};
 
 // Create employee
 export const createEmployee = async (req, res) => {
@@ -169,7 +134,7 @@ export const autoUpdateEmployeeStatuses = async (req, res) => {
       const timing = await Timing.findOne({ employee: emp._id, date: today });
 
       let computedStatus = "Inactive";
-      if (timing && timing.checkIn && timing.checkOut && timing.status !== "Inactive") {
+      if (timing && timing.checkIn && !timing.checkOut) {
         computedStatus = "Active";
       }
 
