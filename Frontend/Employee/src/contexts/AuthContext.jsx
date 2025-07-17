@@ -6,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 1. Mark refreshing during page reload
+
   useEffect(() => {
     const markRefreshing = () => {
       sessionStorage.setItem("refreshing", "true");
@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", markRefreshing);
   }, []);
 
-  // 2. Restore session on refresh
+  
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem("employee");
@@ -25,7 +25,8 @@ export const AuthProvider = ({ children }) => {
         setEmployee(JSON.parse(stored));
       }
 
-      sessionStorage.removeItem("refreshing"); // Clear flag
+    
+      sessionStorage.removeItem("refreshing");
     } catch (err) {
       console.error("Session restore error:", err);
       sessionStorage.removeItem("employee");
@@ -34,13 +35,17 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // 3. Auto logout on tab close or refresh
+
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isRefreshing = sessionStorage.getItem("refreshing") === "true";
       const emp = sessionStorage.getItem("employee");
 
-      if (document.visibilityState === "hidden" && !isRefreshing && emp) {
+      if (
+        document.visibilityState === "hidden" &&
+        !isRefreshing &&
+        emp
+      ) {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
@@ -60,7 +65,7 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // 4. Manual login function (with check-in)
+
   const login = async (email, password) => {
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE}/api/auth/login`,
@@ -81,7 +86,7 @@ export const AuthProvider = ({ children }) => {
     setEmployee(data);
     sessionStorage.setItem("employee", JSON.stringify(data));
 
-    // ✅ Call checkIn API after login (correct route)
+    
     try {
       await fetch(
         `${import.meta.env.VITE_API_BASE}/api/timing/${data._id}/checkin`,
@@ -99,7 +104,7 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  // 5. Manual logout
+
   const logout = async () => {
     try {
       if (employee?._id) {
