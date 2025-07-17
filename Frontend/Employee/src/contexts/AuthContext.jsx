@@ -6,27 +6,13 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-
-  useEffect(() => {
-    const markRefreshing = () => {
-      sessionStorage.setItem("refreshing", "true");
-    };
-    window.addEventListener("beforeunload", markRefreshing);
-    return () => window.removeEventListener("beforeunload", markRefreshing);
-  }, []);
-
-  
+  // 1. Restore session on refresh
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem("employee");
-      const isRefreshing = sessionStorage.getItem("refreshing") === "true";
-
       if (stored && stored !== "undefined" && stored !== "null") {
         setEmployee(JSON.parse(stored));
       }
-
-    
-      sessionStorage.removeItem("refreshing");
     } catch (err) {
       console.error("Session restore error:", err);
       sessionStorage.removeItem("employee");
@@ -35,37 +21,41 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-
+ 
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      const isRefreshing = sessionStorage.getItem("refreshing") === "true";
+    const handleBeforeUnload = () => {
+      const navType =
+        window.performance.getEntriesByType("navigation")[0]?.type;
       const emp = sessionStorage.getItem("employee");
 
-      if (
-        document.visibilityState === "hidden" &&
-        !isRefreshing &&
-        emp
-      ) {
+      if (navType !== "reload" && emp) {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
+           
             navigator.sendBeacon(
               `${import.meta.env.VITE_API_BASE}/api/auth/logout/${_id}`
             );
+
+            
+            navigator.sendBeacon(
+              `${import.meta.env.VITE_API_BASE}/api/timing/${_id}/checkout`
+            );
           }
         } catch (e) {
-          console.error("Logout beacon error:", e);
+          console.error("Beacon error:", e);
         }
+
         sessionStorage.clear();
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("beforeunload", handleBeforeUnload);
     return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-
+  
   const login = async (email, password) => {
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE}/api/auth/login`,
@@ -86,7 +76,7 @@ export const AuthProvider = ({ children }) => {
     setEmployee(data);
     sessionStorage.setItem("employee", JSON.stringify(data));
 
-    
+ 
     try {
       await fetch(
         `${import.meta.env.VITE_API_BASE}/api/timing/${data._id}/checkin`,
@@ -97,34 +87,15 @@ export const AuthProvider = ({ children }) => {
         }
       );
       console.log("✅ Check-in successful");
-    } catch (checkInError) {
-      console.error("Check-in failed:", checkInError);
+    } catch (err) {
+      console.error("Check-in failed:", err);
     }
 
     return data;
   };
 
-
-  const logout = async () => {
-    try {
-      if (employee?._id) {
-        await fetch(
-          `${import.meta.env.VITE_API_BASE}/api/auth/logout/${employee._id}`,
-          {
-            method: "POST",
-            credentials: "include",
-          }
-        );
-      }
-    } catch (e) {
-      console.warn("Logout error", e);
-    }
-    sessionStorage.clear();
-    setEmployee(null);
-  };
-
   return (
-    <AuthContext.Provider value={{ employee, login, logout, loading }}>
+    <AuthContext.Provider value={{ employee, login, loading }}>
       {children}
     </AuthContext.Provider>
   );
