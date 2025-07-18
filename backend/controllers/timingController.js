@@ -187,21 +187,3 @@ export const endBreak = async (req, res) => {
   }
 };
 
-export const autoCheckout = async (req, res) => {
-  const { employeeId } = req.body;
-  const date = todayIST();
-  const time = timeIST();
-
-  const timing = await Timing.findOne({ employee: employeeId, date, checkOut: null });
-  if (timing) {
-    timing.checkOut = time;
-    timing.status = "Inactive";
-    timing.breakStatus = "OnBreak";
-    timing.breaks.push({ start: time });
-    await timing.save();
-
-    await Employee.findByIdAndUpdate(employeeId, { status: "Inactive" });
-  }
-
-  res.status(200).json({ message: "Auto-checkout done" });
-};

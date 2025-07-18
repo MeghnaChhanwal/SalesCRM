@@ -64,10 +64,8 @@ export const logoutEmployee = async (req, res) => {
 
   try {
     const employee = await Employee.findById(employeeId);
-    if (!employee)
-      return res.status(404).json({ error: "Employee not found" });
+    if (!employee) return res.status(200).end(); // silent fail
 
-    
     employee.status = "Inactive";
     await employee.save();
 
@@ -76,23 +74,22 @@ export const logoutEmployee = async (req, res) => {
 
     const timing = await Timing.findOne({ employee: employeeId, date });
 
-    if (timing) {
+    if (timing && !timing.checkOut) {
       timing.checkOut = time;
       timing.status = "Inactive";
-      timing.breakStatus = "OnBreak";
+      timing.breakStatus = "CheckedOut";
 
       const lastBreak = timing.breaks[timing.breaks.length - 1];
-      if (!lastBreak || (lastBreak && lastBreak.start !== time)) {
+      if (!lastBreak || (lastBreak && !lastBreak.end)) {
         timing.breaks.push({ start: time });
       }
 
       await timing.save();
-      res.status(200).json({ message: "Logged out", employeeId, date });
-    } else {
-      res.status(200).json({ message: "Logged out (no timing found)", employeeId });
     }
+
+    return res.status(200).end(); // ✅ beacon-safe: no JSON
   } catch (error) {
     console.error("Logout Error:", error);
-    res.status(500).json({ error: "Logout failed" });
+    return res.status(500).end(); // also safe for beacon
   }
 };
