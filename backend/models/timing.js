@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 const breakSchema = new mongoose.Schema(
   {
     start: {
-      type: String, // "HH:MM AM/PM"
+      type: String, 
       required: true,
     },
     end: {
-      type: String, // optional (for ongoing break)
+      type: String, 
     },
   },
   { _id: false }
@@ -41,8 +41,7 @@ const timingSchema = new mongoose.Schema(
     },
     breakStatus: {
       type: String,
-      enum: ["OnBreak", "OffBreak"],
-      default: "OffBreak",
+      enum: ["OnBreak", "OffBreak", "CheckedOut"], 
     },
     breaks: [breakSchema],
   },

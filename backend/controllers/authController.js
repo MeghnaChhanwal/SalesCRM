@@ -59,12 +59,16 @@ export const loginEmployee = async (req, res) => {
 };
 
 
+import Employee from "../models/employee.js";
+import Timing from "../models/timing.js";
+import { todayIST, timeIST } from "../utils/time.js";
+
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
   try {
     const employee = await Employee.findById(employeeId);
-    if (!employee) return res.status(200).end(); // silent fail
+    if (!employee) return res.status(200).end(); 
 
     employee.status = "Inactive";
     await employee.save();
@@ -77,7 +81,7 @@ export const logoutEmployee = async (req, res) => {
     if (timing && !timing.checkOut) {
       timing.checkOut = time;
       timing.status = "Inactive";
-      timing.breakStatus = "CheckedOut";
+      timing.breakStatus = "CheckedOut"; 
 
       const lastBreak = timing.breaks[timing.breaks.length - 1];
       if (!lastBreak || (lastBreak && !lastBreak.end)) {
@@ -85,11 +89,12 @@ export const logoutEmployee = async (req, res) => {
       }
 
       await timing.save();
+      console.log(" Logout timing updated:", timing);
     }
 
-    return res.status(200).end(); // ✅ beacon-safe: no JSON
+    return res.status(200).end(); 
   } catch (error) {
     console.error("Logout Error:", error);
-    return res.status(500).end(); // also safe for beacon
+    return res.status(500).end(); 
   }
 };
