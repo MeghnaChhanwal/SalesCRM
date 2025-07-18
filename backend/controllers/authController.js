@@ -57,12 +57,6 @@ export const loginEmployee = async (req, res) => {
     res.status(500).json({ error: "Login failed" });
   }
 };
-
-
-import Employee from "../models/employee.js";
-import Timing from "../models/timing.js";
-import { todayIST, timeIST } from "../utils/time.js";
-
 export const logoutEmployee = async (req, res) => {
   const { id: employeeId } = req.params;
 
