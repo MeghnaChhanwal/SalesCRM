@@ -6,7 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 1. Restore session safely on refresh / reload
+  // ✅ 1. Restore session on page load
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem("employee");
@@ -26,15 +26,18 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // ✅ 2. Handle ONLY tab close logout using Beacon
+  // ✅ 2. Logout + Checkout only on tab close (not refresh)
   useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      const entries = window.performance.getEntriesByType("navigation");
-      const navType = entries[0]?.type;
+    const handleBeforeUnload = () => {
       const emp = sessionStorage.getItem("employee");
 
-      // ✅ Avoid logout on reload/refresh
-      if (navType !== "reload" && emp) {
+      // Detect reload vs close using both legacy and modern APIs
+      const navEntry = performance.getEntriesByType("navigation")[0];
+      const isReload =
+        (performance.navigation && performance.navigation.type === 1) ||
+        navEntry?.type === "reload";
+
+      if (!isReload && emp) {
         try {
           const { _id } = JSON.parse(emp);
           if (_id) {
@@ -53,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // ✅ 3. Login and check-in
+  // ✅ 3. Login + Check-in logic
   const login = async (email, password) => {
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE}/api/auth/login`,
@@ -74,7 +77,7 @@ export const AuthProvider = ({ children }) => {
     setEmployee(data);
     sessionStorage.setItem("employee", JSON.stringify(data));
 
-    // Check-in
+    // Check-in call
     try {
       await fetch(`${import.meta.env.VITE_API_BASE}/api/timing/${data._id}/checkin`, {
         method: "POST",

@@ -44,10 +44,7 @@
     padding: 100px 14px 70px;
   }
 
-  .searchBarContainer {
-    top: 58px;
-    padding: 8px 14px;
-  }
+  
 
   .body {
     gap: 10px;
@@ -57,11 +54,6 @@
 @media screen and (max-width: 600px) {
   .container {
     padding: 96px 12px 70px;
-  }
-
-  .searchBarContainer {
-    top: 56px;
-    padding: 8px 12px;
   }
 
   .body {
@@ -82,10 +74,6 @@
     padding: 90px 10px 65px;
   }
 
-  .searchBarContainer {
-    top: 54px;
-    padding: 6px 10px;
-  }
 
   .body {
     gap: 8px;

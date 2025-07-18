@@ -11,14 +11,14 @@ import Schedule from "./pages/Schedule";
 import Profile from "./pages/Profile";
 
 const App = () => {
-  const { isLoggedIn, loading } = useAuth();
+  const { employee, loading } = useAuth();
 
   if (loading) return null;
 
   return (
     <Router>
       <Routes>
-        <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />} />
+        <Route path="/" element={employee ? <Navigate to="/dashboard" /> : <Login />} />
         <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
         <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
