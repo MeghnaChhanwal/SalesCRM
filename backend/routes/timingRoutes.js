@@ -6,6 +6,7 @@ import {
   checkOut,
   startBreak,
   endBreak,
+  autoCheckout,
 } from "../controllers/timingController.js";
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.post("/:id/checkin", checkIn);
 router.post("/:id/checkout", checkOut);
 router.post("/:id/break/start", startBreak);
 router.post("/:id/break/end", endBreak);
+router.post("/auto-checkout", autoCheckout);
 
 export default router;
