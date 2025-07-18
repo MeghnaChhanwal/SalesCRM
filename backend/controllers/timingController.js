@@ -188,41 +188,20 @@ export const endBreak = async (req, res) => {
 };
 
 export const autoCheckout = async (req, res) => {
-  try {
-    const { employeeId } = req.body;
-    const date = todayIST();
-    const time = timeIST();
+  const { employeeId } = req.body;
+  const date = todayIST();
+  const time = timeIST();
 
-    const timing = await Timing.findOne({
-      employee: employeeId,
-      date,
-      checkOut: null,
-    });
-
-    if (!timing) {
-      
-      return res.status(200).json({ message: "No active session found" });
-    }
-
+  const timing = await Timing.findOne({ employee: employeeId, date, checkOut: null });
+  if (timing) {
     timing.checkOut = time;
     timing.status = "Inactive";
-    timing.breakStatus = "OnBreak"; 
-
-    timing.breaks.push({ start: time }); 
-
+    timing.breakStatus = "OnBreak";
+    timing.breaks.push({ start: time });
     await timing.save();
 
-    await Employee.findByIdAndUpdate(
-      employeeId,
-      { status: "Inactive" },
-      { new: true }
-    );
-
-    console.log(`Auto-checkout completed for employee: ${employeeId}`);
-    res.status(200).json({ message: "Auto-checkout successful" });
-  } catch (err) {
-    console.error(" Auto-checkout error:", err);
-    res.status(500).json({ error: "Auto-checkout failed" });
+    await Employee.findByIdAndUpdate(employeeId, { status: "Inactive" });
   }
-};
 
+  res.status(200).json({ message: "Auto-checkout done" });
+};
