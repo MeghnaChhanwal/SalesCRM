@@ -13,7 +13,15 @@ import Profile from "./pages/Profile";
 const App = () => {
   const { employee, loading } = useAuth();
 
-  if (loading) return null;
+  
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>
+        Restoring session...
+      </div>
+    );
+  }
+
 
   return (
     <Router>
