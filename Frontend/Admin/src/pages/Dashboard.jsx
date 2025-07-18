@@ -8,23 +8,12 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
-  LineElement,
-  PointElement,
   Tooltip,
   Legend,
   Title,
 } from "chart.js";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-  Title
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
 
 // Utility to display time ago
 const getTimeAgo = (dateStr) => {
@@ -79,22 +68,13 @@ const Dashboard = () => {
     labels: dayLabels,
     datasets: [
       {
-        label: "Closed Leads",
-        data: stats.graphData.map((d) => d.closedLeads),
-        backgroundColor: "rgba(40, 167, 69, 0.7)", // green
-        yAxisID: "y1",
-        borderRadius: 6,
-        maxBarThickness: 40,
-      },
-      {
         label: "Conversion Rate (%)",
         data: stats.graphData.map((d) => d.conversion),
-        type: "line",
+        backgroundColor: "rgba(0, 123, 255, 0.7)",
         borderColor: "#007bff",
-        backgroundColor: "rgba(0, 123, 255, 0.3)",
-        yAxisID: "y2",
-        tension: 0.3,
-        fill: true,
+        borderWidth: 1,
+        borderRadius: 8,
+        maxBarThickness: 40,
       },
     ],
   };
@@ -102,23 +82,11 @@ const Dashboard = () => {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    interaction: {
-      mode: "index",
-      intersect: false,
-    },
     plugins: {
-      legend: {
-        position: "top",
-      },
+      legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (context) => {
-            const label = context.dataset.label || "";
-            const value = context.raw;
-            return label === "Conversion Rate (%)"
-              ? `${label}: ${value}%`
-              : `${label}: ${value}`;
-          },
+          label: (context) => `Conversion: ${context.raw}%`,
         },
       },
     },
@@ -137,22 +105,13 @@ const Dashboard = () => {
       });
     },
     scales: {
-      y1: {
-        type: "linear",
-        position: "left",
-        title: { display: true, text: "Closed Leads" },
-        beginAtZero: true,
-      },
-      y2: {
-        type: "linear",
-        position: "right",
-        title: { display: true, text: "Conversion Rate (%)" },
+      y: {
         beginAtZero: true,
         max: 100,
         ticks: {
-          callback: (value) => `${value}%`,
+          stepSize: 20,
+          callback: (val) => `${val}%`,
         },
-        grid: { drawOnChartArea: false },
       },
     },
   };
