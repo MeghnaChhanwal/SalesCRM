@@ -55,7 +55,7 @@ export const getDashboardOverview = async (req, res) => {
       })
     );
 
- 
+    // 🔹 Recent Activity
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
@@ -107,7 +107,7 @@ export const getDashboardOverview = async (req, res) => {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
 
-    
+  
     const graphData = [];
     const todayDate = new Date();
 
@@ -119,28 +119,22 @@ export const getDashboardOverview = async (req, res) => {
       const nextDate = new Date(date);
       nextDate.setDate(date.getDate() + 1);
 
-      const totalLeadsOnDate = await Lead.countDocuments({
+      const leads = await Lead.find({
         receivedDate: { $gte: date, $lt: nextDate },
       });
 
-    
-      const closedLeadsOnDate = await Lead.countDocuments({
-        status: "Closed",
-        updatedAt: { $gte: date, $lt: nextDate },
-      });
-
-      const conversion =
-        totalLeadsOnDate > 0
-          ? Math.round((closedLeadsOnDate / totalLeadsOnDate) * 100)
-          : 0;
+      const total = leads.length;
+      const closed = leads.filter((l) => l.status === "Closed").length;
+      const conversion = total > 0 ? Math.round((closed / total) * 100) : 0;
 
       graphData.push({
         date: date.toISOString().split("T")[0],
-        closedLeads: closedLeadsOnDate,
+        closedLeads: closed,
         conversion,
       });
     }
 
+ 
     res.status(200).json({
       unassignedLeads,
       assignedThisWeek,
