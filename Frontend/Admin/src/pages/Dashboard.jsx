@@ -15,7 +15,6 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
 
-// Utility to display time ago
 const getTimeAgo = (dateStr) => {
   const now = new Date();
   const past = new Date(dateStr);
@@ -68,10 +67,10 @@ const Dashboard = () => {
     labels: dayLabels,
     datasets: [
       {
-        label: "Conversion Rate (%)",
-        data: stats.graphData.map((d) => d.conversion),
-        backgroundColor: "rgba(0, 123, 255, 0.7)",
-        borderColor: "#007bff",
+        label: "Total Sales",
+        data: stats.graphData.map((d) => d.sales),
+        backgroundColor: "rgba(75, 192, 192, 0.7)",
+        borderColor: "#4bc0c0",
         borderWidth: 1,
         borderRadius: 8,
         maxBarThickness: 40,
@@ -86,7 +85,7 @@ const Dashboard = () => {
       legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (context) => `Conversion: ${context.raw}%`,
+          label: (context) => `Total Sales: ${context.raw}`,
         },
       },
     },
@@ -100,17 +99,18 @@ const Dashboard = () => {
 
       setClickedDayInfo({
         day: dayName,
-        closedLeads: selected.closedLeads,
-        conversion: selected.conversion,
+        closedLeads: selected.sales,
       });
     },
     scales: {
       y: {
         beginAtZero: true,
-        max: 100,
         ticks: {
-          stepSize: 20,
-          callback: (val) => `${val}%`,
+          stepSize: 1,
+        },
+        title: {
+          display: true,
+          text: "Sales Count",
         },
       },
     },
@@ -130,7 +130,6 @@ const Dashboard = () => {
     <MainLayout showSearch={false}>
       <div className={styles.pageWrapper}>
         <div className={styles.dashboardContainer}>
-          {/* 🔹 Top Stats */}
           <div className={styles.cardGrid}>
             <div className={styles.card}><h4>Unassigned Leads</h4><p>{stats.unassignedLeads}</p></div>
             <div className={styles.card}><h4>Assigned This Week</h4><p>{stats.assignedThisWeek}</p></div>
@@ -138,7 +137,6 @@ const Dashboard = () => {
             <div className={styles.card}><h4>Conversion Rate</h4><p>{stats.conversionRate}%</p></div>
           </div>
 
-          {/* 🔹 Chart + Activity */}
           <div className={styles.analyticsRow}>
             <div className={styles.chartBox}>
               <h4>Sales Analytics</h4>
@@ -147,7 +145,7 @@ const Dashboard = () => {
               </div>
               {clickedDayInfo && (
                 <div className={styles.dayDetail}>
-                  <strong>{clickedDayInfo.day}</strong> — {clickedDayInfo.closedLeads} leads closed, Conversion Rate: {clickedDayInfo.conversion}%
+                  <strong>{clickedDayInfo.day}</strong> — {clickedDayInfo.closedLeads} sales
                 </div>
               )}
             </div>
@@ -168,7 +166,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* 🔹 Employees Table (Only Active) */}
           <div className={styles.tableWrapper}>
             <h4>Active Employees</h4>
             <div className={styles.tableScroll}>

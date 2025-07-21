@@ -19,6 +19,7 @@ export const getDashboardOverview = async (req, res) => {
       ? Math.round((closedLeads / totalLeads) * 100)
       : 0;
 
+    // Start of current week
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
@@ -30,6 +31,7 @@ export const getDashboardOverview = async (req, res) => {
 
     const today = todayIST();
 
+    // Employee stats with status
     const allEmployees = await Employee.find();
     let activeSalespeople = 0;
 
@@ -55,29 +57,13 @@ export const getDashboardOverview = async (req, res) => {
       })
     );
 
-    // 🔹 Recent Activity
+    // Recent Activities (Lead added / assigned / closed)
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
       .populate("assignedEmployee", "firstName lastName");
 
-    const recentEmployees = await Employee.find()
-      .sort({ updatedAt: -1 })
-      .limit(30);
-
     const activityMap = new Map();
-
-    recentEmployees.forEach((emp) => {
-      const created = new Date(emp.createdAt).getTime();
-      const updated = new Date(emp.updatedAt).getTime();
-      const key = created === updated ? "add" : "edit";
-      const message = `Employee ${key === "add" ? "added" : "edited"}: ${emp.firstName} ${emp.lastName}`;
-
-      activityMap.set(`emp-${emp._id}-${key}`, {
-        message,
-        time: key === "add" ? emp.createdAt : emp.updatedAt,
-      });
-    });
 
     recentLeads.forEach((lead) => {
       const keyBase = `lead-${lead._id}`;
@@ -107,7 +93,7 @@ export const getDashboardOverview = async (req, res) => {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
 
-  
+    // Graph Data - last 10 days (closed leads per day)
     const graphData = [];
     const todayDate = new Date();
 
@@ -119,22 +105,24 @@ export const getDashboardOverview = async (req, res) => {
       const nextDate = new Date(date);
       nextDate.setDate(date.getDate() + 1);
 
-      const leads = await Lead.find({
-        receivedDate: { $gte: date, $lt: nextDate },
-      });
+      const now = new Date();
+      const upperLimit = (date.toDateString() === now.toDateString()) ? now : nextDate;
 
-      const total = leads.length;
-      const closed = leads.filter((l) => l.status === "Closed").length;
-      const conversion = total > 0 ? Math.round((closed / total) * 100) : 0;
+      const closedLeadsCount = await Lead.countDocuments({
+        status: "Closed",
+        receivedDate: {
+          $gte: date,
+          $lt: upperLimit,
+        },
+      });
 
       graphData.push({
         date: date.toISOString().split("T")[0],
-        closedLeads: closed,
-        conversion,
+        sales: closedLeadsCount,
       });
     }
 
- 
+    // Final response
     res.status(200).json({
       unassignedLeads,
       assignedThisWeek,
@@ -144,6 +132,7 @@ export const getDashboardOverview = async (req, res) => {
       graphData,
       employees: enrichedEmployees,
     });
+
   } catch (error) {
     console.error("Dashboard overview error:", error);
     res.status(500).json({ error: "Failed to fetch dashboard stats" });
