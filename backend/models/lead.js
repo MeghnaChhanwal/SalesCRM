@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-//scheduledschema
 const scheduledCallSchema = new mongoose.Schema(
   {
     callDate: {
@@ -16,7 +15,6 @@ const scheduledCallSchema = new mongoose.Schema(
   { _id: false }
 );
 
-//leadschema
 const leadSchema = new mongoose.Schema(
   {
     name: {
@@ -58,6 +56,10 @@ const leadSchema = new mongoose.Schema(
     assignedEmployee: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Employee",
+      default: null,
+    },
+    previousEmployeeName: {
+      type: String,
       default: null,
     },
     scheduledCalls: {

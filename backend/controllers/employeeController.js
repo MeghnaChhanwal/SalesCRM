@@ -112,11 +112,21 @@ export const deleteEmployee = async (req, res) => {
     const employee = await Employee.findById(req.params.id);
     if (!employee) return res.status(404).json({ error: "Employee not found" });
 
-    await redistributeLeadsOfDeletedEmployee(employee); 
+    await redistributeLeadsOfDeletedEmployee(employee);
+
+    await Lead.updateMany(
+      { assignedEmployee: employee._id, status: "Closed" },
+      {
+        $set: {
+          previousEmployeeName: `${employee.firstName} ${employee.lastName}`,
+          assignedEmployee: null
+        }
+      }
+    );
 
     await employee.deleteOne();
 
-    res.status(200).json({ message: "Employee deleted and non-closed leads reassigned" });
+    res.status(200).json({ message: "Employee deleted and leads updated" });
   } catch (err) {
     console.error("Delete employee error:", err);
     res.status(500).json({ error: "Failed to delete employee" });
