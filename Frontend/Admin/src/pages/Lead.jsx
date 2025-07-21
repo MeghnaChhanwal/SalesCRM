@@ -364,7 +364,7 @@ const Lead = () => {
                       <td>
                         {lead.assignedEmployee
                           ? `${lead.assignedEmployee.firstName} ${lead.assignedEmployee.lastName}`
-                          : lead.previousEmployeeName || "Unassigned"}
+                          : lead.previousEmployeeName }
                       </td>
                     </tr>
                   );
