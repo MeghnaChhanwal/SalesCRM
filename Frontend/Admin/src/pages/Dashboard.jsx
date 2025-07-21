@@ -30,7 +30,8 @@ const getTimeAgo = (dateStr) => {
   return "Just now";
 };
 
-const Dashboard = () => {
+
+const Dashboard = () => {                           //dashboard fuction 
   const [employees, setEmployees] = useState([]);
   const [stats, setStats] = useState({
     unassignedLeads: 0,
@@ -44,7 +45,7 @@ const Dashboard = () => {
   const [clickedDayInfo, setClickedDayInfo] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  useEffect(() => {                                    
     const fetchDashboardStats = async () => {
       try {
         const res = await API.get("/api/dashboard/overview");

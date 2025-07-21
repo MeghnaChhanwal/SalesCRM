@@ -57,7 +57,7 @@ export const getDashboardOverview = async (req, res) => {
       })
     );
 
-    // Recent Activities (Lead added / assigned / closed)
+    // Recent Activities Lead added / assigned / closed
     const recentLeads = await Lead.find()
       .sort({ updatedAt: -1 })
       .limit(30)
@@ -93,7 +93,7 @@ export const getDashboardOverview = async (req, res) => {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 10);
 
-    // Graph Data - last 10 days (closed leads per day)
+    // Graph Data last 10 days closedlead day
     const graphData = [];
     const todayDate = new Date();
 
