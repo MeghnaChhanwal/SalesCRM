@@ -69,8 +69,8 @@ const Dashboard = () => {
       {
         label: "Total Sales",
         data: stats.graphData.map((d) => d.sales),
-        backgroundColor: "rgba(75, 192, 192, 0.7)",
-        borderColor: "#4bc0c0",
+        backgroundColor: "rgba(102, 105, 105, 0.7)",
+        borderColor: "#717171ff",
         borderWidth: 1,
         borderRadius: 8,
         maxBarThickness: 40,
